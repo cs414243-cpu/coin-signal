@@ -1,4 +1,4 @@
-# 幣訊號 v7 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks + recommendation-change notice (PWA, personal use)
+# 幣訊號 v8 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks + recommendation-change notice + next-week outcomes after each recommendation (PWA, personal use)
 v4 puts one plain 「未來一週預測建議」 card on top (from the current champion model in an append-only forecast ledger), a 「預測成績單」 below it, and moves everything else into 「進階（可不看）」. v3 added 定期定額與再平衡計畫 (DCA + rebalancing planner). v2 added the decision layer (今天怎麼做 / 部位與風險 / 槓桿檢查 / 台幣買幣成本); v1 signals live under 訊號細節. See CHANGELOG.md.
 Research only, not investment advice. No keys, no accounts, no trading.
 
@@ -10,6 +10,7 @@ Research only, not investment advice. No keys, no accounts, no trading.
 - v2 decision data: `python3 backtest/fetch_max.py` (MAX public order-book snapshot + VIP fees) then `python3 backtest/decision.py` → `app/data/decision.json` (trend/VT backtests, bad-week z5 calibration, liquidation table, TWD weekly panel from research C#21, MAX premium stats from C#23).
 - v2 tests: `node --test tests/` (includes `decision.test.mjs`), `node tests/e2e_v2.mjs [url]` (iPhone viewport, writes `screenshots/v2-*.png`).
 - v7 recommendation-change stats: `python3 backtest/flip_stats.py [--end YYYY-MM-DD]` → `app/data/flips.json` (champion trend_vt@1 action history from closed Binance bars, 14-day reversal shares, IS<2023≤OOS). Tests: `node --test tests/` (`flips.test.mjs`, JS↔Python event parity) and `node tests/e2e_v7.mjs`.
+- v8 next-week outcomes per recommendation: `python3 backtest/action_outcomes.py [--end YYYY-MM-DD] [--rows]` → `app/data/outcomes.json` (next-7-day return after each champion action, full/IS/OOS, overlapping daily starts + non-overlapping weekly, follow-vs-hold after 0.15%/side + 0.27% TWD premium). Tests: `tests/outcomes.test.mjs` (JS↔Python parity, no-lookahead) and `node tests/e2e_v8.mjs`.
 - Deploy: copy `app/` to `/workspace/coin-signal-repo` (repo root) and push `main`.
 
 

@@ -4,6 +4,7 @@ import * as RL from './reliability.js';
 import * as DX from './decision.js';
 import { weekCard, eventsCard } from './events.js';
 import * as FL from './flips.js';
+import * as OC from './outcomes.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -144,7 +145,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v7';
+const VERSION = 'v8';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -561,7 +562,7 @@ function relOut() {
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
-let FLIPS = null, PENDING = {};
+let FLIPS = null, PENDING = {}, OUTC = null;
 const ZH = FL.ACTION_ZH;
 const p0 = e => `${Math.round((e ?? 0) * 100)}%`;
 function changeBanner() {
@@ -644,6 +645,7 @@ function coinBlock(c) {
       <p class="up">${esc(f.up_text)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；現在 ${usd(f.price_usd)}）</p>
       <p class="why">原因：${esc(f.reason)}</p>
+      ${OUTC ? `<p class="past small muted" data-coin="${c}">${esc(OC.homeLine(OUTC, c, f.action))}</p>` : ''}
       <div id="fc-money-${c}"></div>
     </div>`;
 }
@@ -706,6 +708,7 @@ async function render(force = false) {
   }
   try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
   try { EV = await fetch('data/events.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EV; } catch { EV = EV || null; }
+  try { OUTC = await fetch('data/outcomes.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || OUTC; } catch { OUTC = OUTC || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
   FL.setBadge(Object.keys(PENDING).length);
@@ -738,7 +741,8 @@ async function renderAdv(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      ${OC.outcomesCard(OUTC)}
       ${recentCard()}
       ${relCard()}
       ${decisionCard(coin)}
@@ -761,7 +765,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${recentCard()}${modelsCard()}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${OC.outcomesCard(OUTC)}${recentCard()}${modelsCard()}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }
