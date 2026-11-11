@@ -124,3 +124,6 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .stale{margin:8px 0;padding:8px 10px;border-radius:6px;font-size:14px;font-weight:700}
 .stale-yellow{background:#3b3216;color:var(--warn);border-left:3px solid var(--warn)}
 .stale-red{background:#3d1a1f;color:var(--dn);border-left:3px solid var(--dn)}
+/* v10: 回測資料日期 */
+.bt-asof{margin:2px 0 6px}
+.bt-stale{margin:2px 0 8px;padding:4px 8px;border-left:3px solid var(--warn);color:var(--warn);background:rgba(255,200,0,.06);border-radius:4px}

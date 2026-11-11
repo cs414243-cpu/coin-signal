@@ -6,6 +6,7 @@ import { weekCard, eventsCard } from './events.js';
 import * as FL from './flips.js';
 import * as OC from './outcomes.js';
 import * as TR from './trust.js';
+import * as FR from './fresh.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -146,7 +147,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v9';
+const VERSION = 'v10';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -749,21 +750,23 @@ async function renderAdv(force = false) {
     const a = analog(c.analog.history, FEATURES.map(f => r[f]));
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
+    const NOW = Date.now();
     el.innerHTML = `
       <nav class="jump"><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
-      ${OC.outcomesCard(OUTC)}
-      ${recentCard()}
+      ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
+      ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
       ${relCard()}
       ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
-      ${decisionCard(coin)}
-      ${riskCard()}
-      ${planCard()}
-      ${modelsCard()}
+      ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
+      ${FR.withAsof(riskCard(), FR.asofOf('weekly', DEC), NOW)}
+      ${FR.withAsof(planCard(), FR.asofOf('dca', DCA), NOW)}
+      ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
       ${eventsCard(EV)}
-      ${levCard(coin)}
+      ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
       ${costCard(coin)}
       ${researchCard()}
       <section class="card" id="signals"><details><summary>訊號細節：綜合預測與 7 個個別訊號</summary>
+        ${FR.asofLine(FR.asofOf('backtest', BT), NOW)}
         <p class="small">這些是 v1 的預測指標。保留在這裡是為了透明：它們在樣本外大多沒有預測力，不建議拿來決定買賣。</p>
         ${outlookCard(c, r, a, live)}
         ${ORDER.map(k => signalCard(k, c.signals[k], r, pos[k])).join('')}
@@ -775,7 +778,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${OC.outcomesCard(OUTC)}${recentCard()}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${modelsCard()}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }
