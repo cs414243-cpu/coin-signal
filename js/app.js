@@ -1,6 +1,7 @@
 import { buildRows, completedOnly, rulePositions, analog, STATE, FEATURES, DAY } from './signals.js';
 import { fetchCandles, fetchFunding, fetchFng, fetchSpot, fetchPrices } from './data.js';
 import * as DX from './decision.js';
+import { weekCard, eventsCard } from './events.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -138,7 +139,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v4';
+const VERSION = 'v5';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -483,7 +484,7 @@ function ctxFrom(live) {
 }
 
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
-let LIVE = null;
+let LIVE = null, EV = null;
 const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
 const ACT_HINT = { add: '比前一天建議多放一些', hold: '維持建議的比例', reduce: '比全部放進去少', out: '先不要放' };
 const STATUS_ZH = { champion: '冠軍（目前採用）', challenger: '挑戰者', reference: '基準（一直抱著）', retired: '退休' };
@@ -575,8 +576,9 @@ async function render(force = false) {
     el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p></section>`; return;
   }
   try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
+  try { EV = await fetch('data/events.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EV; } catch { EV = EV || null; }
   el.innerHTML = `
-    ${LIVE ? forecastCard() + trackCard() : '<section class="card"><p class="warn">⚠️ 預測資料暫時讀不到，請按右上角 ↻ 重試。</p></section>'}
+    ${LIVE ? forecastCard() + weekCard(EV) + trackCard() : '<section class="card"><p class="warn">⚠️ 預測資料暫時讀不到，請按右上角 ↻ 重試。</p></section>'}
     <details id="adv" class="card adv"${advOpen() ? ' open' : ''}><summary>進階（可不看）</summary>
       <p class="small muted">技術指標、回測和各種試算工具，給 cs 做決策時參考。</p>
       <nav class="tabs" role="tablist"><button role="tab" data-coin="BTC" aria-selected="${coin === 'BTC'}">BTC</button><button role="tab" data-coin="ETH" aria-selected="${coin === 'ETH'}">ETH</button></nav>
@@ -603,11 +605,12 @@ async function renderAdv(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${decisionCard(coin)}
       ${riskCard()}
       ${planCard()}
       ${modelsCard()}
+      ${eventsCard(EV)}
       ${levCard(coin)}
       ${costCard(coin)}
       ${researchCard()}
@@ -622,7 +625,7 @@ async function renderAdv(force = false) {
         ${live.errors?.length ? `<p>連線備註：${esc(live.errors.join('；'))}</p>` : ''}
       </section>`;
   } catch (e) {
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${modelsCard()}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${modelsCard()}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }

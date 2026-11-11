@@ -1,4 +1,4 @@
-# 幣訊號 v4 — BTC/ETH weekly forecast + self-improving model loop (PWA, personal use)
+# 幣訊號 v5 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log (PWA, personal use)
 v4 puts one plain 「未來一週預測建議」 card on top (from the current champion model in an append-only forecast ledger), a 「預測成績單」 below it, and moves everything else into 「進階（可不看）」. v3 added 定期定額與再平衡計畫 (DCA + rebalancing planner). v2 added the decision layer (今天怎麼做 / 部位與風險 / 槓桿檢查 / 台幣買幣成本); v1 signals live under 訊號細節. See CHANGELOG.md.
 Research only, not investment advice. No keys, no accounts, no trading.
 
@@ -65,3 +65,83 @@ Overfitting guards: no tuning on live data (models are frozen; they only fit on 
 - Weekly (Monday 09:00 Asia/Taipei): `bash /workspace/crypto-predictor/forecast/weekly.sh`
 - Tests: `cd forecast && python3 test_forecast.py`; `node --test tests/` (includes `live.test.mjs`); UI: `python3 -m http.server 8765 --directory app & node tests/e2e_v4.mjs` (writes `screenshots/v4-*.png`; v2/v3 e2e scripts are superseded because those cards now live inside the collapsed 進階 section).
 - Test mode (never touches the real ledger): set `FORECAST_LEDGER`, `FORECAST_REGISTRY`, `FORECAST_LIVE`, `FORECAST_REPORTS` to temp paths; only then is `run_daily.py --asof YYYY-MM-DD` allowed.
+
+## v5 — market-move causes & indicator tracking (`forecast/events/`)
+
+Idea: the loop also needs *information*. For every big move we record what was known before it (indicators), what was reported (causes, with publish time vs the move), and we test which pre-move indicators actually relate to moves, with multiple-testing correction. Post-hoc news explanations are mostly narrative; only things available **before** a move can become model inputs.
+
+```
+forecast/events/
+  sources.py         public keyless fetchers (source + url + fetched_at per series; cached in data/, history merged, stale-cache fallback)
+  calendar_build.py  FOMC (federalreserve.gov) + CPI/NFP (BLS schedules; past dates from Wayback copies of the BLS archive) → data/calendar.json
+  panel.py           daily panel per coin (UTC close) + macro aligned to what was known at that close
+  moves.py           big-move detector: |1d| > 2.5× trailing 30d σ  or |7d| > 10%; flags ≤3 days apart = one episode
+  eventlog.py        moves/<id>.json + .md (move, indicators before/after, causes w/ URL + publish time + before/during/after, category, confidence)
+  snapshot.py        indicators/YYYY-MM-DD.json (null + error when a source fails; never invented)
+  fill_causes.py     verify URLs (HTTP 200 or WebFetch-confirmed) and fill a stub; --list shows pending stubs
+  analysis.py        252 tests: condition at D-1 → outcome; circular-shift permutation p, BH q, Bonferroni; fixed-threshold abs95 robustness
+  publish.py         app/data/events.json (本週要注意 + 進階 cards)
+  events_daily.py    daily step (called by daily.sh)      events_weekly.py   weekly summary → reports/events-YYYY-MM-DD.md (called by weekly.sh)
+  backfill.py, verify_urls.py, data/backfill_causes.json   one-off historical backfill (2020/2021 →)
+  CAUSE_PROTOCOL.md  rules for filling causes      analysis.md   findings (2026-11-11)
+forecast/proposals/P-events-*.md   challenger ideas from this module (none registered)
+```
+
+**Sources:**
+- Working (2026-11-11):
+  - Binance / OKX candles and funding
+  - OKX OI, long/short ratio, liquidation orders (recent ~14 h only)
+  - alternative.me Fear & Greed
+  - CoinGecko /global for dominance
+  - DefiLlama stablecoins
+  - Farside BTC/ETH ETF flows
+  - Cboe S&P 500 and VIX
+  - Nasdaq API for NDX and GLD (gold proxy)
+  - US Treasury 10Y CSV
+  - Frankfurter / ECB rates, with DXY computed using the ICE formula
+  - open.er-api USD/TWD (current value only)
+  - Fed FOMC calendar
+  - BLS schedules (read via WebFetch or Wayback; bls.gov returns 403 to scripts)
+- Failing or not used: Stooq, FRED and Yahoo chart (blocked from the box); USD/TWD history (the ECB dropped TWD in 2020-10); no keyless liquidation history.
+
+**App (v5):**
+- Below the forecast card, a small 「本週要注意」 card lists CPI / FOMC / NFP in the next 7 days, in Taipei time from the official calendars. If nothing is scheduled, it shows the next event.
+- It says 「歷史上這類日子波動較大」 only if `vol_claim_supported` is true, i.e. BH q < 0.05 and ratio > 1 for both coins. That is currently false, so it shows dates only.
+- 進階 adds 「最近大漲大跌的原因」, which shows:
+  - the latest episodes with plain zh-TW causes and source links, each tagged 事前 / 當天 / 事後
+  - the 12 largest explained moves
+  - indicator findings with sample sizes and q values
+  - the macro-day volatility table
+
+### Routine steps
+**Daily** (after 08:00 Taipei; the routine agent runs these in order):
+1. `bash /workspace/crypto-predictor/forecast/daily.sh`. This runs the forecast and then `events/events_daily.py`, which:
+   - writes the indicator snapshot
+   - rebuilds the calendar
+   - detects new episodes and creates or refreshes stubs for the last 14 days
+   - writes `events/data/pending_causes.json` and `app/data/events.json`
+   - commits, then publishes `data/live.json` and `data/events.json`
+2. If `forecast/events/data/pending_causes.json` lists events, fill each one following `forecast/events/CAUSE_PROTOCOL.md` §3:
+   - Use WebSearch for reports on that UTC day, and open every URL.
+   - Write a SPEC.json and run `cd forecast/events && python3 fill_causes.py SPEC.json --by "daily routine YYYY-MM-DD"`.
+   - Sites that block curl: read the page with WebFetch, then `python3 fill_causes.py --webfetch URL PUBLISHED_AT "TITLE"`, then rerun the spec.
+   - Never invent a source. Leave the event as a stub if nothing verifiable is found.
+3. If anything was filled: `bash forecast/events/publish.sh` (rebuilds events.json, commits, publishes with the deploy lock).
+
+**Weekly** (Monday 09:00 Taipei): `bash /workspace/crypto-predictor/forecast/weekly.sh`. This:
+- runs `events/events_weekly.py`, which reruns `analysis.py` (all tests, BH) and writes `forecast/reports/events-YYYY-MM-DD.md` covering:
+  - the week's moves and causes
+  - pending stubs
+  - category and timing tallies
+  - relationships with q < 0.10, with their abs95 robustness
+  - macro-day volatility
+  - P-events-B re-test triggers
+- then runs `review_weekly.py`
+- then publishes both reports under `ledger/reports/`
+
+The reviewing agent reads the events report next to the review. If a relationship passes q < 0.05 **and** abs95 for both coins, it may write or refresh a proposal in `forecast/proposals/`. At most one challenger is registered per week via `register.py`. Nothing in the events module registers models.
+
+**Tests:**
+- `cd forecast/events && python3 test_events.py`
+- `node --test tests/` (includes `events.test.mjs`)
+- UI: `python3 -m http.server 8765 --directory app & node tests/e2e_v5.mjs` (writes `screenshots/v5-*.png`)
