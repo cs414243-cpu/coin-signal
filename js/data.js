@@ -114,3 +114,21 @@ export async function fetchSpot(sym) {
   const j = await fetchPrices();
   return j ? j[COIN[sym].gecko] ?? null : null;
 }
+
+// v13: one live price (ticker) per coin, for 「盤中離翻轉價多遠」. Tries the source the daily bars came from first
+// (so the flip prices and the live price are on the same market), then the usual fallback order. Never cached.
+const TICKERS = {
+  'Binance 現貨': async s => +(await getJSON(`https://data-api.binance.vision/api/v3/ticker/price?symbol=${COIN[s].binance}`)).price,
+  OKX: async s => +(await getJSON(`https://www.okx.com/api/v5/market/ticker?instId=${COIN[s].okx}`)).data[0].last,
+  Kraken: async s => { const j = await getJSON(`https://api.kraken.com/0/public/Ticker?pair=${COIN[s].kraken}`); if (j.error && j.error.length) throw new Error(j.error.join(',')); return +Object.values(j.result)[0].c[0]; },
+  Coinbase: async s => +(await getJSON(`https://api.exchange.coinbase.com/products/${COIN[s].coinbase}/ticker`)).price,
+};
+export async function fetchTicker(sym, prefer) {
+  const order = [prefer, ...CANDLE_ORDER.filter(n => n !== prefer)].filter(n => TICKERS[n]);
+  const errors = [];
+  for (const name of order) {
+    try { const p = await TICKERS[name](sym); if (p > 0 && Number.isFinite(p)) return { status: 'ok', source: name, price: p, at: Date.now(), errors }; errors.push(`${name}: 價格異常`); }
+    catch (e) { errors.push(`${name}: ${e.message || e}`); }
+  }
+  return { status: 'error', source: null, price: null, at: Date.now(), errors };
+}

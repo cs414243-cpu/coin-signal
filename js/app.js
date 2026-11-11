@@ -1,5 +1,5 @@
 import { buildRows, completedOnly, rulePositions, analog, STATE, FEATURES, DAY } from './signals.js';
-import { fetchCandles, fetchCheck, fetchFunding, fetchFng, fetchSpot, fetchPrices, CANDLE_ORDER, PAIR } from './data.js';
+import { fetchCandles, fetchCheck, fetchFunding, fetchFng, fetchSpot, fetchPrices, fetchTicker, CANDLE_ORDER, PAIR } from './data.js';
 import * as RL from './reliability.js';
 import * as DX from './decision.js';
 import { weekCard, eventsCard } from './events.js';
@@ -9,6 +9,7 @@ import * as TR from './trust.js';
 import * as FR from './fresh.js';
 import * as PU from './pup.js';
 import * as JR from './journal.js';
+import * as ID from './intraday.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -149,7 +150,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v12';
+const VERSION = 'v13';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -487,6 +488,9 @@ function updateOuts() {
   set('fc-rel-BTC', () => relLine('BTC'));
   set('fc-rel-ETH', () => relLine('ETH'));
   set('rel-out', relOut);
+  set('fc-live-BTC', () => liveLine('BTC'));
+  set('fc-live-ETH', () => liveLine('ETH'));
+  set('intra-out', intraOut);
 }
 
 function ctxFrom(live) {
@@ -563,6 +567,42 @@ function relOut() {
   return `${coins.map(block).join('')}
     <p class="small">門檻：台北 09:00 仍拿不到昨天的日K → 黃色「尚未更新」，12:00 → 紅色「過期」；兩個來源同一根K收盤差 ≤ 0.5% 綠色、0.5–2% 黃色、> 2% 或算出的趨勢狀態不同 → 紅色；離翻轉價 < 1% 顯示「接近翻轉」，< 0.25% 註明各交易所可能給不同答案；建議比例在 67% ± 2% 標示「持有／減碼分界」（不改預測規則）；USDT 偏離 1 美元超過 0.5% 黃色。</p>
     <p class="small muted">後備順序：${CANDLE_ORDER.map(n => `${esc(n)} ${PAIR[n]}`).join(' → ')}（與每日預測相同）。最近 200 根若有缺日、重複或不是 00:00 UTC 開盤，就改用下一個來源。翻轉價＝讓下次收盤剛好等於「含它自己的均線」的價格（50 日線＝最近 49 根收盤平均、200 日線＝最近 199 根平均）。依據：2023 年起換交易所只讓趨勢狀態不同 0–1 天／1,410 天，但把還沒收完的K當收盤、或晚一天沒更新，會讓 6–8% 的日子判斷錯（研究 CRYPTO-20261111-1403）。</p>`;
+}
+
+// ======================= v13: 盤中離翻轉價多遠 =======================
+let TICK = {}, INTRA = null;
+function liveInfo(c) {
+  const ctx = CTX[c], t = TICK[c]; if (!ctx || !t || t.status !== 'ok') return null;
+  const bars = RL.closedBars(ctx.live.candles, t.at), last = bars[bars.length - 1]; if (!last) return null;
+  return ID.liveCheck({ closes: bars.map(k => k.c), lastOpen: last.t, price: t.price, now: t.at });
+}
+function liveLine(c) {
+  const t = TICK[c];
+  if (t?.status === 'ok' && !CTX[c]) return ID.homeLine(c, ADV === 'error' ? { status: 'ok', price: t.price, at: t.at } : { status: 'loading' }, null, INTRA);
+  return ID.homeLine(c, t, liveInfo(c), INTRA);
+}
+async function loadTickers() {
+  TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
+  await Promise.all(['BTC', 'ETH'].map(async c => { TICK[c] = await fetchTicker(c, CTX[c]?.live?.candleSrc).catch(e => ({ status: 'error', errors: [String(e.message || e)], at: Date.now() })); }));
+  updateOuts();
+}
+function intraCard() {
+  return `<section class="card" id="intraday"><h2>盤中離翻轉價多遠</h2><div id="intra-out">${intraOut()}</div></section>`;
+}
+function intraOut() {
+  const rows = ['BTC', 'ETH'].map(c => {
+    const t = TICK[c];
+    const src = t?.status === 'ok' ? `${esc(t.source)}（${PAIR[t.source] || ''}）即時價 ${usd(t.price)}，抓取 ${fmtTime(t.at)}` : t?.status === 'loading' || !t ? '讀取中…' : `抓不到即時價${t.errors?.length ? '（' + esc(t.errors.join('；')) + '）' : ''}`;
+    return `<tr><th>${c} 即時價</th><td>${src}</td></tr>${ID.advRows(c, t, liveInfo(c))}`;
+  }).join('');
+  const kNow = ['BTC', 'ETH'].map(liveInfo).find(L => L && !L.stale)?.k ?? null;
+  const I = INTRA;
+  const hist = I ? `<h3 class="sub">過去紀錄：盤中穿過，收盤還在那一邊嗎？</h3>${ID.histTable(I, kNow)}
+    <p class="small">「已穿過→收盤仍穿過」：在那個整點，價格已經在翻轉價的另一邊（如果當下收盤，規則會變），當天早上 8 點收盤時仍在另一邊的比例。「差不到 ${Math.round(I.near * 100)}%→收盤穿過」：那個整點還沒穿過、但離翻轉價不到 ${Math.round(I.near * 100)}%，收盤時穿過的比例。越接近隔天早上 8 點越準；早上剛開盤時穿過，大約一半會在收盤前回來。</p>
+    <p class="small muted">算法：<code>backtest/intraday_cross.py</code> → <code>data/intraday.json</code>（${esc(I.source)}，${esc(I.periods.full.start)}～${esc(I.periods.full.end)}，產生於 ${fmtTime(Date.parse(I.generated_at))}）。翻轉價只用前一天以前的收盤（和首頁同一算法），整點價格＝那一小時K的收盤價，不偷看之後的價格。次數是 BTC＋ETH、50 日線＋200 日線合計，每個（幣、均線、日）在每個整點算一次；同一段行情會連續好幾天出現，所以次數不是獨立樣本，比例只當參考。少於 ${ID.MIN_N} 次不顯示比例。這是過去紀錄，不是預測，也不改變規則。</p>` : '<p class="small">過去紀錄暫時讀不到。</p>';
+  return `<div class="scroll"><table class="bt"><tbody>${rows}</tbody></table></div>
+    <p class="small">規則每天只在早上 8 點收盤時判斷一次；盤中價格穿過翻轉價<strong>不是訊號</strong>，要等收盤才算。首頁那一行就是用這裡的即時價和前一天收盤算出的翻轉價比較。</p>
+    ${hist}`;
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
@@ -645,6 +685,7 @@ function coinBlock(c) {
   return `<div class="fc" data-coin="${c}">
       <div class="fc-head"><span class="coin">${c}</span><span class="state-big ${ACT_CLS[f.action]}">${esc(f.action_zh)}</span><span class="muted small">${ACT_HINT[f.action]}</span></div>
       <div id="fc-rel-${c}" class="rel">${relLine(c)}</div>
+      <div id="fc-live-${c}" class="live">${liveLine(c)}</div>
       <p class="share">${share}</p>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；現在 ${usd(f.price_usd)}）</p>
@@ -748,6 +789,8 @@ async function render(force = false) {
   try { OUTC = await fetch('data/outcomes.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || OUTC; } catch { OUTC = OUTC || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
+  try { INTRA = await fetch('data/intraday.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || INTRA; } catch { INTRA = INTRA || null; }
+  TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
   FL.setBadge(Object.keys(PENDING).length);
   el.innerHTML = `
@@ -762,6 +805,7 @@ async function render(force = false) {
   $('#meta').textContent = `版本 ${VERSION}${LIVE ? `｜預測 ${LIVE.coins.BTC?.asof || ''}｜冠軍模型 ${LIVE.champion.key}` : ''}`;
   devCheck();
   await renderAdv(force);
+  await loadTickers();
 }
 // v9: re-verify the published ledger chain on this phone (once per render); refresh the top line and the 進階 card
 async function devCheck() {
@@ -789,10 +833,11 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
+      ${FR.withAsof(intraCard(), FR.asofOf('intraday', INTRA), NOW)}
       ${relCard()}
       ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
       ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}

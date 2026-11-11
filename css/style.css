@@ -134,3 +134,4 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .jr-save,.jr-del,.jr-clear{font:inherit;font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid #33415e;background:#1a2540;color:inherit}
 .jr-del{font-size:12px;padding:2px 6px}
 .ok-inline{color:var(--up)}
+.fc .live-line{font-size:12.5px;margin:2px 0 4px;line-height:1.5}
