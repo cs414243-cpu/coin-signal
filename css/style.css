@@ -110,3 +110,10 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .rel-badge{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:6px;margin-right:4px}
 .rel-green{background:#123d2c;color:var(--up)}.rel-yellow{background:#3b3216;color:var(--warn)}.rel-red{background:#3d1a1f;color:var(--dn)}
 .fc .flip{font-size:14px;margin:6px 0 2px;padding:6px 9px;border-left:3px solid var(--warn);background:#2d2412;border-radius:6px}
+/* v7: 建議變了 */
+.chg{position:relative;margin:-2px 0 10px;padding:8px 34px 8px 10px;border-radius:8px;background:#2d2412;border-left:3px solid var(--warn)}
+.chg-head{font-weight:700;font-size:14px;margin-bottom:2px}
+.chg-line{font-size:14px;margin:4px 0;line-height:1.45}
+.chg-sub{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+.chg-x{position:absolute;top:4px;right:4px;width:30px;height:30px;border:0;border-radius:6px;background:transparent;color:inherit;font-size:16px;cursor:pointer}
+.chg-x:active{background:#ffffff1a}

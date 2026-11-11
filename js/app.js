@@ -3,6 +3,7 @@ import { fetchCandles, fetchCheck, fetchFunding, fetchFng, fetchSpot, fetchPrice
 import * as RL from './reliability.js';
 import * as DX from './decision.js';
 import { weekCard, eventsCard } from './events.js';
+import * as FL from './flips.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -143,7 +144,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v6';
+const VERSION = 'v7';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -559,6 +560,56 @@ function relOut() {
     <p class="small muted">後備順序：${CANDLE_ORDER.map(n => `${esc(n)} ${PAIR[n]}`).join(' → ')}（與每日預測相同）。最近 200 根若有缺日、重複或不是 00:00 UTC 開盤，就改用下一個來源。翻轉價＝讓下次收盤剛好等於「含它自己的均線」的價格（50 日線＝最近 49 根收盤平均、200 日線＝最近 199 根平均）。依據：2023 年起換交易所只讓趨勢狀態不同 0–1 天／1,410 天，但把還沒收完的K當收盤、或晚一天沒更新，會讓 6–8% 的日子判斷錯（研究 CRYPTO-20261111-1403）。</p>`;
 }
 
+// ======================= v7: 建議變更提醒＋最近建議變化 =======================
+let FLIPS = null, PENDING = {};
+const ZH = FL.ACTION_ZH;
+const p0 = e => `${Math.round((e ?? 0) * 100)}%`;
+function changeBanner() {
+  const cs = Object.entries(PENDING); if (!cs.length) return '';
+  const lines = cs.map(([c, x]) => {
+    const st = FL.revStat(FLIPS, c, x.kind);
+    const hist = st ? `<span class="chg-sub">歷史上（${st.start.slice(0, 4)} 年起）${c} 這類變化有 ${pct0(st.full)} 在 14 天內又變回去${st.oos !== null ? `（2023 年起 ${pct0(st.oos)}）` : ''}。這是過去紀錄，不是預測。</span>` : '';
+    return `<p class="chg-line" data-coin="${c}">${c} 建議從『${ZH[x.from]} ${p0(x.e0)}』改為『${ZH[x.to]} ${p0(x.e1)}』（依 ${closeMD(x.asof1)} 收盤）。上次看到是 ${closeMD(x.asof0)}。${hist}</p>`;
+  }).join('');
+  return `<div class="chg" role="status"><button type="button" class="chg-x" aria-label="知道了，關閉提醒">✕</button><div class="chg-head">建議變了</div>${lines}</div>`;
+}
+function dismissChange() {
+  if (LIVE) FL.acknowledge(localStorage, Object.fromEntries(Object.keys(PENDING).map(c => [c, LIVE.coins[c]])));
+  PENDING = {}; FL.setBadge(0);
+  const el = document.getElementById('fc-change'); if (el) el.innerHTML = '';
+}
+function coinEvents(c) {
+  const ctx = CTX[c];
+  if (ctx) {
+    const bars = RL.closedBars(ctx.live.candles);
+    return { ev: FL.recoEvents(FL.recoRows(bars)), src: `手機抓到的已收完日K（${esc(ctx.live.candleSrc || '—')}，最新 ${ymd(bars[bars.length - 1].t)}）` };
+  }
+  const F = FLIPS?.coins?.[c]; if (!F) return { ev: [], src: '—' };
+  const ev = F.events.map(e => ({ date: e[0], kind: e[1], from: e[2], to: e[3], e0: e[4], e1: e[5], close: e[8], rev: e[9], revDays: e[10] }));
+  return { ev, src: `預先算好的歷史（最新 ${F.last_bar}）` };
+}
+function recentCard() {
+  if (!FLIPS) return '';
+  const block = c => {
+    const { ev, src } = coinEvents(c);
+    const last = ev.slice(-10).reverse();
+    const rv = e => e.rev === true ? `是（${e.revDays} 天後）` : e.rev === false ? '否' : '還不到 14 天';
+    const rows = last.map(e => `<tr><td class="nowrap">${closeMD(e.date)}<div class="muted small">${e.date.slice(0, 4)}</div></td><td>${ZH[e.from]} → <strong>${ZH[e.to]}</strong><div class="muted small">${p0(e.e0)} → ${p0(e.e1)}｜${e.kind === 'trend' ? '趨勢翻轉' : '波動變化'}</div></td><td>${usd(e.close)}</td><td>${rv(e)}</td></tr>`).join('');
+    const S = FLIPS.coins[c].stats;
+    const sr = (lab, k) => `<tr><th>${lab}</th>${['full', 'is', 'oos'].map(p => { const x = S[p][k]; return `<td>${x.rev14 === null ? '—' : pct0(x.rev14)}<div class="muted small">${x.n_rev}／${x.n_done} 次，每年 ${x.per_yr}</div></td>`; }).join('')}</tr>`;
+    return `<h3 class="sub">${c}</h3>
+      <div class="scroll"><table class="bt"><thead><tr><th>收盤日</th><th>變化</th><th>收盤價</th><th>14 天內翻回</th></tr></thead><tbody>${rows || '<tr><td colspan="4">沒有資料</td></tr>'}</tbody></table></div>
+      <p class="small muted">來源：${src}。</p>
+      <div class="scroll"><table class="bt"><thead><tr><th>14 天內翻回的比例</th><th>全期<div class="muted small">${S.full.start.slice(0, 7)}～</div></th><th>樣本內<div class="muted small">～2022</div></th><th>樣本外<div class="muted small">2023～</div></th></tr></thead>
+      <tbody>${sr('趨勢翻轉', 'trend')}${sr('波動變化', 'vol')}${sr('合計', 'all')}</tbody></table></div>`;
+  };
+  return `<section class="card" id="recent"><h2>最近建議變化</h2>
+    ${block('BTC')}${block('ETH')}
+    <p class="small">「趨勢翻轉」＝收盤價穿過 50 日或 200 日均線，建議在空手／減碼／持有之間移動；「波動變化」＝趨勢沒變，但 30 日波動讓建議比例跨過 67%（持有／減碼分界）。「翻回」＝之後 14 根日K內又回到原來的狀態。只用已收完的日K，每天收盤（台北早上 8 點）判斷一次，不偷看之後的價格；還沒滿 14 天的變化標「還不到 14 天」，不列入比例。</p>
+    <p class="small muted">算法：<code>backtest/flip_stats.py</code> → <code>data/flips.json</code>（${esc(FLIPS.source)}，產生於 ${fmtTime(Date.parse(FLIPS.generated_at))}），規則與首頁冠軍模型相同（trend_vt@1，${esc(FLIPS.model)}）。2023 年以前是樣本內、之後是樣本外。首頁的「加碼」只出現在變化當天，隔天會依比例顯示持有或減碼，所以這裡不把「加碼 → 持有／減碼」（比例沒變）算成新的變化；照每天顯示的字算，BTC 全期每年變 ${FLIPS.coins.BTC.stats.full.label_changes_per_yr} 次、ETH ${FLIPS.coins.ETH.stats.full.label_changes_per_yr} 次。這只是翻回頻率，不是報酬，所以不涉及成本。翻回很常見是趨勢規則降低大跌的代價：研究顯示加確認天數或緩衝帶雖然少響一半，樣本外跌幅反而更深，所以規則不改（研究 CRYPTO-20261111-1245）。</p>
+  </section>`;
+}
+
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
 let LIVE = null, EV = null;
 const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
@@ -601,6 +652,7 @@ function forecastCard() {
   const age = Date.now() - Date.parse(LIVE.generated_at);
   const stale = age > 36 * 3600 * 1000 ? `<p class="warn">⚠️ 預測已經 ${Math.floor(age / 86400000)} 天沒更新，下面是 ${closeMD(any.asof)} 的建議。</p>` : '';
   return `<section class="card forecast" id="forecast">
+    <div id="fc-change">${changeBanner()}</div>
     <h2>未來一週預測建議</h2>
     <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
     ${stale}
@@ -654,6 +706,9 @@ async function render(force = false) {
   }
   try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
   try { EV = await fetch('data/events.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EV; } catch { EV = EV || null; }
+  try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
+  PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
+  FL.setBadge(Object.keys(PENDING).length);
   el.innerHTML = `
     ${LIVE ? forecastCard() + weekCard(EV) + trackCard() : '<section class="card"><p class="warn">⚠️ 預測資料暫時讀不到，請按右上角 ↻ 重試。</p></section>'}
     <details id="adv" class="card adv"${advOpen() ? ' open' : ''}><summary>進階（可不看）</summary>
@@ -683,7 +738,8 @@ async function renderAdv(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#data">資料可靠度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      ${recentCard()}
       ${relCard()}
       ${decisionCard(coin)}
       ${riskCard()}
@@ -705,7 +761,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${modelsCard()}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${recentCard()}${modelsCard()}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }
@@ -718,6 +774,7 @@ const onInput = e => {
 $('#content').addEventListener('input', onInput);
 $('#content').addEventListener('change', onInput);
 $('#content').addEventListener('click', e => {
+  if (e.target.closest('.chg-x')) { dismissChange(); return; }
   const b = e.target.closest('#adv .tabs button'); if (!b) return;
   coin = b.dataset.coin; localStorage.setItem('coin', coin); renderAdv();
 });

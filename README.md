@@ -1,4 +1,4 @@
-# 幣訊號 v6 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks (PWA, personal use)
+# 幣訊號 v7 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks + recommendation-change notice (PWA, personal use)
 v4 puts one plain 「未來一週預測建議」 card on top (from the current champion model in an append-only forecast ledger), a 「預測成績單」 below it, and moves everything else into 「進階（可不看）」. v3 added 定期定額與再平衡計畫 (DCA + rebalancing planner). v2 added the decision layer (今天怎麼做 / 部位與風險 / 槓桿檢查 / 台幣買幣成本); v1 signals live under 訊號細節. See CHANGELOG.md.
 Research only, not investment advice. No keys, no accounts, no trading.
 
@@ -9,6 +9,7 @@ Research only, not investment advice. No keys, no accounts, no trading.
 - v3 DCA/rebalancing data: `python3 backtest/dca_rebalance.py` → `app/data/dca.json` (TWD daily, MAX cost model incl. C#23 premium, rebalancing rules / monthly contribution variants / DCA vs lump sum, IS<2023≤OOS, JS↔Python parity vectors). Tests: `node --test tests/` and `node tests/e2e_v3.mjs` with `python3 -m http.server 8765 --directory app`.
 - v2 decision data: `python3 backtest/fetch_max.py` (MAX public order-book snapshot + VIP fees) then `python3 backtest/decision.py` → `app/data/decision.json` (trend/VT backtests, bad-week z5 calibration, liquidation table, TWD weekly panel from research C#21, MAX premium stats from C#23).
 - v2 tests: `node --test tests/` (includes `decision.test.mjs`), `node tests/e2e_v2.mjs [url]` (iPhone viewport, writes `screenshots/v2-*.png`).
+- v7 recommendation-change stats: `python3 backtest/flip_stats.py [--end YYYY-MM-DD]` → `app/data/flips.json` (champion trend_vt@1 action history from closed Binance bars, 14-day reversal shares, IS<2023≤OOS). Tests: `node --test tests/` (`flips.test.mjs`, JS↔Python event parity) and `node tests/e2e_v7.mjs`.
 - Deploy: copy `app/` to `/workspace/coin-signal-repo` (repo root) and push `main`.
 
 
