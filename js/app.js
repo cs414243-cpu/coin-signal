@@ -5,6 +5,7 @@ import * as DX from './decision.js';
 import { weekCard, eventsCard } from './events.js';
 import * as FL from './flips.js';
 import * as OC from './outcomes.js';
+import * as TR from './trust.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -145,7 +146,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v8';
+const VERSION = 'v9';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -612,7 +613,7 @@ function recentCard() {
 }
 
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
-let LIVE = null, EV = null;
+let LIVE = null, EV = null, TRUST = null, DEV;
 const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
 const ACT_HINT = { add: '比前一天建議多放一些', hold: '維持建議的比例', reduce: '比全部放進去少', out: '先不要放' };
 const STATUS_ZH = { champion: '冠軍（目前採用）', challenger: '挑戰者', reference: '基準（一直抱著）', retired: '退休' };
@@ -651,13 +652,11 @@ function coinBlock(c) {
 }
 function forecastCard() {
   const any = LIVE.coins.BTC || LIVE.coins.ETH; if (!any) return '';
-  const age = Date.now() - Date.parse(LIVE.generated_at);
-  const stale = age > 36 * 3600 * 1000 ? `<p class="warn">⚠️ 預測已經 ${Math.floor(age / 86400000)} 天沒更新，下面是 ${closeMD(any.asof)} 的建議。</p>` : '';
   return `<section class="card forecast" id="forecast">
     <div id="fc-change">${changeBanner()}</div>
     <h2>未來一週預測建議</h2>
     <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
-    ${stale}
+    <div id="fc-stale-wrap">${TR.topLine(LIVE, TRUST, Date.now(), DEV)}</div>
     ${coinBlock('BTC')}${coinBlock('ETH')}
     ${holdingsSet() ? '' : '<p class="small muted">想直接看要買賣多少錢：打開下面「進階 → 我的部位」填總資產和持有數量，這裡就會換算成金額。</p>'}
     <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>
@@ -709,6 +708,7 @@ async function render(force = false) {
   try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
   try { EV = await fetch('data/events.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EV; } catch { EV = EV || null; }
   try { OUTC = await fetch('data/outcomes.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || OUTC; } catch { OUTC = OUTC || null; }
+  try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
   FL.setBadge(Object.keys(PENDING).length);
@@ -722,7 +722,16 @@ async function render(force = false) {
   $('#adv').addEventListener('toggle', e => localStorage.setItem('adv-open', e.target.open ? '1' : '0'));
   updateOuts();
   $('#meta').textContent = `版本 ${VERSION}${LIVE ? `｜預測 ${LIVE.coins.BTC?.asof || ''}｜冠軍模型 ${LIVE.champion.key}` : ''}`;
+  devCheck();
   await renderAdv(force);
+}
+// v9: re-verify the published ledger chain on this phone (once per render); refresh the top line and the 進階 card
+async function devCheck() {
+  DEV = undefined;
+  const r = await TR.verifyOnDevice().catch(e => ({ ok: null, why: e.message || String(e) }));
+  DEV = r;
+  const w = $('#fc-stale-wrap'); if (w && LIVE) w.innerHTML = TR.topLine(LIVE, TRUST, Date.now(), DEV);
+  const c = $('#trust'); if (c) c.outerHTML = TR.trustCard(TRUST, LIVE, Date.now(), DEV);
 }
 
 async function renderAdv(force = false) {
@@ -741,10 +750,11 @@ async function renderAdv(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${OC.outcomesCard(OUTC)}
       ${recentCard()}
       ${relCard()}
+      ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
       ${decisionCard(coin)}
       ${riskCard()}
       ${planCard()}
@@ -765,7 +775,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${OC.outcomesCard(OUTC)}${recentCard()}${modelsCard()}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${OC.outcomesCard(OUTC)}${recentCard()}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${modelsCard()}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }
