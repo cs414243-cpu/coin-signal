@@ -8,6 +8,7 @@ import * as OC from './outcomes.js';
 import * as TR from './trust.js';
 import * as FR from './fresh.js';
 import * as PU from './pup.js';
+import * as JR from './journal.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -148,7 +149,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v11';
+const VERSION = 'v12';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -660,6 +661,7 @@ function forecastCard() {
     <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
     <div id="fc-stale-wrap">${TR.topLine(LIVE, TRUST, Date.now(), DEV)}</div>
     ${coinBlock('BTC')}${coinBlock('ETH')}
+    <div id="jr-hint-wrap">${JR.homeHint(JR.load(localStorage), LIVE)}</div>
     ${holdingsSet() ? '' : '<p class="small muted">想直接看要買賣多少錢：打開下面「進階 → 我的部位」填總資產和持有數量，這裡就會換算成金額。</p>'}
     <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>
   </section>`;
@@ -699,6 +701,39 @@ function modelsCard() {
   </section>`;
 }
 const advOpen = () => localStorage.getItem('adv-open') === '1';
+
+// ======================= v12: 我的決策紀錄（只存在這支手機） =======================
+function journalHtml() {
+  const barsByCoin = {}, srcs = [];
+  for (const c of ['BTC', 'ETH']) if (CTX[c]) { barsByCoin[c] = RL.closedBars(CTX[c].live.candles); srcs.push(`${c} ${CTX[c].live.candleSrc || '—'}，最新 ${ymd(barsByCoin[c][barsByCoin[c].length - 1].t)}`); }
+  const budgets = {}, holdPct = {};
+  for (const c of ['BTC', 'ETH']) {
+    const B = coinBudget(c); budgets[c] = B && B > 0 ? B : null;
+    const q = num(S[c.toLowerCase()]), px = twdPrice(c);
+    if (budgets[c] && q !== null && px) holdPct[c] = String(Math.round(q * px / budgets[c] * 1000) / 10);
+  }
+  return JR.journalCard({ list: JR.load(localStorage), live: LIVE, barsByCoin, src: srcs.join('；'), budgets, holdPct, costs: OUTC?.costs || JR.DEFAULT_COSTS });
+}
+function refreshJournal() {
+  const c = document.getElementById('journal'); if (c) c.outerHTML = journalHtml();
+  const h = document.getElementById('jr-hint-wrap'); if (h && LIVE) h.innerHTML = JR.homeHint(JR.load(localStorage), LIVE);
+}
+function journalSave(c) {
+  const box = document.querySelector(`.jr-form[data-coin="${c}"]`); if (!box) return;
+  const choice = box.querySelector(`input[name="jr-choice-${c}"]:checked`)?.value;
+  const B = coinBudget(c);
+  const r = JR.makeEntry({ coin: c, f: LIVE?.coins?.[c], choice, pctText: box.querySelector('.jr-pct').value, amountText: box.querySelector('.jr-amt').value, budget: B && B > 0 ? B : null });
+  if (r.error) { const m = box.querySelector('.jr-msg'); if (m) { m.textContent = r.error; m.className = 'jr-msg small warn-inline'; } return; }
+  if (!JR.save(localStorage, JR.upsert(JR.load(localStorage), r.entry))) { const m = box.querySelector('.jr-msg'); if (m) m.textContent = '這支手機不能存資料（可能是私密瀏覽）。'; return; }
+  refreshJournal();
+  const m = document.querySelector(`.jr-msg[data-coin="${c}"]`); if (m) { m.textContent = '已記下。'; m.className = 'jr-msg small ok-inline'; }
+}
+async function goJournal() {
+  const adv = $('#adv'); if (!adv) return;
+  if (!adv.open) { adv.open = true; localStorage.setItem('adv-open', '1'); }
+  for (let i = 0; i < 100 && !document.getElementById('journal'); i++) await new Promise(r => setTimeout(r, 100));
+  document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 async function render(force = false) {
   const el = $('#content');
@@ -754,7 +789,8 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
       ${relCard()}
@@ -780,7 +816,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }
@@ -792,8 +828,18 @@ const onInput = e => {
 };
 $('#content').addEventListener('input', onInput);
 $('#content').addEventListener('change', onInput);
+// v12: choosing 照建議 fills in the recommended %
+$('#content').addEventListener('change', e => {
+  const m = e.target.name?.match(/^jr-choice-(BTC|ETH)$/); if (!m || e.target.value !== 'follow') return;
+  const f = LIVE?.coins?.[m[1]], box = e.target.closest('.jr-form');
+  if (f && box) box.querySelector('.jr-pct').value = String(Math.round(f.exposure * 1000) / 10);
+});
 $('#content').addEventListener('click', e => {
   if (e.target.closest('.chg-x')) { dismissChange(); return; }
+  if (e.target.closest('.jr-go')) { e.preventDefault(); goJournal(); return; }
+  const js = e.target.closest('.jr-save'); if (js) { journalSave(js.dataset.coin); return; }
+  const jd = e.target.closest('.jr-del'); if (jd) { JR.save(localStorage, JR.remove(JR.load(localStorage), jd.dataset.id)); refreshJournal(); return; }
+  if (e.target.closest('.jr-clear')) { if (confirm('確定清除這支手機上的全部決策紀錄？')) { JR.save(localStorage, []); refreshJournal(); } return; }
   const b = e.target.closest('#adv .tabs button'); if (!b) return;
   coin = b.dataset.coin; localStorage.setItem('coin', coin); renderAdv();
 });

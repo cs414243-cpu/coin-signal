@@ -127,3 +127,10 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 /* v10: 回測資料日期 */
 .bt-asof{margin:2px 0 6px}
 .bt-stale{margin:2px 0 8px;padding:4px 8px;border-left:3px solid var(--warn);color:var(--warn);background:rgba(255,200,0,.06);border-radius:4px}
+/* v12 我的決策紀錄 */
+.jr-hint{margin:6px 0 2px}.jr-hint a{color:var(--mut);text-decoration:underline}
+.jr-form{border-top:1px solid #243049;padding-top:8px;margin-top:8px}
+.jr-opts{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0 6px}.jr-opt{font-size:14px;white-space:nowrap}
+.jr-save,.jr-del,.jr-clear{font:inherit;font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid #33415e;background:#1a2540;color:inherit}
+.jr-del{font-size:12px;padding:2px 6px}
+.ok-inline{color:var(--up)}

@@ -1,6 +1,6 @@
 // App-shell cache. Market API calls are never cached here (always live; app keeps its own last-good copy).
-const VERSION = 'v11-2026-11-11';
-const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/signals.js', './js/data.js', './js/decision.js', './js/events.js', './js/reliability.js', './js/flips.js', './js/outcomes.js', './js/trust.js', './js/fresh.js', './js/pup.js',
+const VERSION = 'v12-2026-11-12';
+const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/signals.js', './js/data.js', './js/decision.js', './js/events.js', './js/reliability.js', './js/flips.js', './js/outcomes.js', './js/trust.js', './js/fresh.js', './js/pup.js', './js/journal.js',
   './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './data/backtest.json', './data/decision.json', './data/dca.json', './data/live.json', './data/events.json', './data/flips.json', './data/outcomes.json', './data/trust.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
