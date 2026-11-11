@@ -1,5 +1,6 @@
 import { buildRows, completedOnly, rulePositions, analog, STATE, FEATURES, DAY } from './signals.js';
-import { fetchCandles, fetchFunding, fetchFng, fetchSpot, fetchPrices } from './data.js';
+import { fetchCandles, fetchCheck, fetchFunding, fetchFng, fetchSpot, fetchPrices, CANDLE_ORDER, PAIR } from './data.js';
+import * as RL from './reliability.js';
 import * as DX from './decision.js';
 import { weekCard, eventsCard } from './events.js';
 
@@ -126,20 +127,23 @@ function chart(rows) {
 async function loadLive(sym, force) {
   const key = `live-${sym}`;
   const cached = JSON.parse(localStorage.getItem(key) || 'null');
-  if (!force && cached && Date.now() - cached.at < 10 * 60 * 1000) return { ...cached, fromCache: true };
-  const [cd, fd, gd, spot] = await Promise.all([fetchCandles(sym), fetchFunding(sym), fetchFng(), fetchSpot(sym)]);
+  if (!force && cached && 'check' in cached && Date.now() - cached.at < 10 * 60 * 1000) return { ...cached, fromCache: true };
+  // v6: primary candles, then a second source for the cross-check (in parallel with funding / F&G / spot)
+  const pc = fetchCandles(sym).then(async cd => [cd, cd.data ? await fetchCheck(sym, cd.source) : null]);
+  const [[cd, ck], fd, gd, spot] = await Promise.all([pc, fetchFunding(sym), fetchFng(), fetchSpot(sym)]);
   if (!cd.data) {
     if (cached) return { ...cached, fromCache: true, stale: true, errors: cd.errors };
     throw new Error('所有行情來源都連不上：' + cd.errors.join('；'));
   }
-  const live = { at: Date.now(), candles: cd.data, candleSrc: cd.source, funding: fd.data, fundingSrc: fd.source, fng: gd.data, fngSrc: gd.source, spot,
+  const live = { at: Date.now(), candles: cd.data, candleSrc: cd.source, candleAt: cd.fetchedAt,
+    check: ck && ck.data ? { source: ck.source, bars: ck.data, at: ck.fetchedAt } : null, checkErrors: ck ? ck.errors : [], funding: fd.data, fundingSrc: fd.source, fng: gd.data, fngSrc: gd.source, spot,
     errors: [...cd.errors, ...fd.errors, ...gd.errors] };
   try { localStorage.setItem(key, JSON.stringify(live)); } catch {}
   return live;
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v5';
+const VERSION = 'v6';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -474,6 +478,9 @@ function updateOuts() {
   set('cost-out', () => costOut(coin));
   set('fc-money-BTC', () => moneyLine('BTC'));
   set('fc-money-ETH', () => moneyLine('ETH'));
+  set('fc-rel-BTC', () => relLine('BTC'));
+  set('fc-rel-ETH', () => relLine('ETH'));
+  set('rel-out', relOut);
 }
 
 function ctxFrom(live) {
@@ -481,6 +488,75 @@ function ctxFrom(live) {
   live.rows = rows;
   const last = live.candles[live.candles.length - 1];
   return { live, rows, r: rows[rows.length - 1], priceUsd: live.spot?.usd ?? last.c };
+}
+
+// ======================= v6: 資料可靠度＋接近翻轉價 =======================
+let ADV = 'loading';
+const usd0 = x => Number.isFinite(x) ? x.toLocaleString('en-US', { maximumFractionDigits: x > 1000 ? 0 : 2 }) : '—';
+const ymd = t => new Date(t).toISOString().slice(0, 10);
+const TL = t => t === null || t === undefined ? '—' : DX.TREND_LABEL[t]?.[0] ?? '—';
+/** Everything shown about data quality for one coin, computed from the closed daily bars actually used. */
+function relInfo(c) {
+  const ctx = CTX[c]; if (!ctx) return null;
+  const live = ctx.live, now = Date.now();
+  const bars = RL.closedBars(live.candles, now), last = bars[bars.length - 1];
+  const chk = live.check ? RL.closedBars(live.check.bars, now) : null;
+  let cross = null, at = null, tA = null, tB = null, a = null, b = null;
+  if (chk && chk.length) {
+    const m = new Map(chk.map(k => [k.t, k]));
+    for (let i = bars.length - 1; i >= Math.max(0, bars.length - 5); i--) if (m.has(bars[i].t)) { at = i; break; }
+    if (at !== null) {
+      a = bars[at]; b = m.get(a.t);
+      const j = chk.indexOf(b);
+      tA = RL.trend3(bars.slice(0, at + 1).map(k => k.c)); tB = RL.trend3(chk.slice(0, j + 1).map(k => k.c));
+      cross = RL.crossCheck(a, b, tA, tB);
+    }
+  }
+  const usdt = PRICES?.tether?.usd ?? null;
+  const rel = RL.reliability({ lastOpen: last?.t ?? null, now, cross, usdt });
+  const closes = bars.map(k => k.c);
+  return { live, bars, last, chk, a, b, tA, tB, cross, usdt, rel, flips: RL.flipLevels(closes), near: RL.nearFlip(closes) };
+}
+function relLine(c) {
+  const I = relInfo(c);
+  if (!I) return `<p class="rel-line small muted">${ADV === 'error' ? '資料狀態：暫時無法檢查（行情連不上）' : '資料狀態：檢查中…'}</p>`;
+  const { rel, near, last } = I;
+  const why = rel.level === 'green' ? '' : ` <span class="small">${esc(rel.reasons.filter(r => !r.includes('更新中'))[0] || '')}</span>`;
+  let flip = '';
+  if (near) {
+    const nextClose = closeMD(addDays(ymd(last.t), 1));
+    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>，規則會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
+  }
+  const f = LIVE?.coins?.[c];
+  const edge = f && RL.nearActionEdge(f.exposure) ? `<p class="small">建議比例 ${Math.round(f.exposure * 100)}% 剛好在「持有／減碼」的分界附近，小小的波動就可能改變動作。</p>` : '';
+  return `<p class="rel-line"><span class="rel-badge rel-${rel.level === 'pending' ? 'green' : rel.level}">● ${esc(rel.label)}</span>${why}</p>${flip}${edge}`;
+}
+function relCard() {
+  return `<section class="card" id="data"><h2>資料可靠度（各交易所比對）</h2><div id="rel-out">${relOut()}</div></section>`;
+}
+function relOut() {
+  const coins = ['BTC', 'ETH'].filter(c => CTX[c]);
+  if (!coins.length) return '<p class="small">行情還沒載入。</p>';
+  const lv = { green: '綠（正常）', pending: '綠（今早收盤更新中）', yellow: '黃（注意）', red: '紅（先不要依此動作）' };
+  const block = c => {
+    const I = relInfo(c), L = I.live, F = I.flips;
+    const src = n => `${esc(n)}（${PAIR[n] || ''}）`;
+    const fl = F ? F.levels.map(l => `<tr><th>${l.ma} 日線翻轉價<div class="muted small">下次收盤${l.above ? '低於' : '高於'}此價，趨勢狀態${l.above ? '降' : '升'}一級</div></th><td>${usd(l.price)}（${pct(l.dist, 2)}）</td></tr>`).join('') : '';
+    return `<h3 class="sub">${c}：${lv[I.rel.level]}</h3>
+      <div class="scroll"><table class="bt"><tbody>
+        <tr><th>判斷原因</th><td>${I.rel.reasons.length ? I.rel.reasons.map(esc).join('；') : '收盤時間正確、兩個來源一致'}</td></tr>
+        <tr><th>採用來源</th><td>${src(L.candleSrc)}，抓取 ${fmtTime(L.candleAt || L.at)}</td></tr>
+        <tr><th>最新已收完日K</th><td>${ymd(I.last.t)}（收盤 ${fmtTime(I.last.t + DAY)}）：${usd(I.last.c)}<div class="muted small">只用已收完的日K；正在進行中的當日K不列入判斷</div></td></tr>
+        <tr><th>比對來源</th><td>${L.check ? `${src(L.check.source)}，抓取 ${fmtTime(L.check.at)}` : `抓不到${L.checkErrors?.length ? '（' + esc(L.checkErrors.join('；')) + '）' : ''}`}</td></tr>
+        ${I.cross ? `<tr><th>同一根K收盤（${ymd(I.a.t)}）</th><td>${usd(I.a.c)} vs ${usd(I.b.c)}，差 <strong>${I.cross.bps.toFixed(1)} bps</strong>（${pctS(I.cross.diff, 3)}）</td></tr>
+        <tr><th>趨勢狀態</th><td>${TL(I.tA)} vs ${TL(I.tB)}${I.cross.sameTrend === false ? ' ⚠️ 不一致' : '（一致）'}</td></tr>` : ''}
+        ${fl}
+        <tr><th>USDT</th><td>${I.usdt ?? '—'} 美元${I.usdt !== null && Math.abs(I.usdt - 1) > RL.USDT_DEPEG ? ' ⚠️ 偏離超過 0.5%' : ''}<div class="muted small">CoinGecko，只用於台幣換算</div></td></tr>
+      </tbody></table></div>`;
+  };
+  return `${coins.map(block).join('')}
+    <p class="small">門檻：台北 09:00 仍拿不到昨天的日K → 黃色「尚未更新」，12:00 → 紅色「過期」；兩個來源同一根K收盤差 ≤ 0.5% 綠色、0.5–2% 黃色、> 2% 或算出的趨勢狀態不同 → 紅色；離翻轉價 < 1% 顯示「接近翻轉」，< 0.25% 註明各交易所可能給不同答案；建議比例在 67% ± 2% 標示「持有／減碼分界」（不改預測規則）；USDT 偏離 1 美元超過 0.5% 黃色。</p>
+    <p class="small muted">後備順序：${CANDLE_ORDER.map(n => `${esc(n)} ${PAIR[n]}`).join(' → ')}（與每日預測相同）。最近 200 根若有缺日、重複或不是 00:00 UTC 開盤，就改用下一個來源。翻轉價＝讓下次收盤剛好等於「含它自己的均線」的價格（50 日線＝最近 49 根收盤平均、200 日線＝最近 199 根平均）。依據：2023 年起換交易所只讓趨勢狀態不同 0–1 天／1,410 天，但把還沒收完的K當收盤、或晚一天沒更新，會讓 6–8% 的日子判斷錯（研究 CRYPTO-20261111-1403）。</p>`;
 }
 
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
@@ -512,6 +588,7 @@ function coinBlock(c) {
   const share = e < 0.005 ? '建議：<strong>先不要放</strong>（0%）' : `建議：放你打算投入 ${c} 的錢的 <strong>${sharePct}%</strong>${e >= 0.95 ? '（差不多全部）' : (e >= 0.4 && e <= 0.6) ? '（大約一半）' : ''}`;
   return `<div class="fc" data-coin="${c}">
       <div class="fc-head"><span class="coin">${c}</span><span class="state-big ${ACT_CLS[f.action]}">${esc(f.action_zh)}</span><span class="muted small">${ACT_HINT[f.action]}</span></div>
+      <div id="fc-rel-${c}" class="rel">${relLine(c)}</div>
       <p class="share">${share}</p>
       <p class="up">${esc(f.up_text)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；現在 ${usd(f.price_usd)}）</p>
@@ -600,12 +677,14 @@ async function renderAdv(force = false) {
     if (cur.status !== 'fulfilled') throw cur.reason;
     CTX[coin] = ctxFrom(cur.value);
     if (oth.status === 'fulfilled') CTX[other] = ctxFrom(oth.value);
+    ADV = 'done';
     const c = BT.coins[coin], ctx = CTX[coin], live = ctx.live, r = ctx.r;
     const a = analog(c.analog.history, FEATURES.map(f => r[f]));
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#data">資料可靠度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      ${relCard()}
       ${decisionCard(coin)}
       ${riskCard()}
       ${planCard()}
@@ -625,6 +704,7 @@ async function renderAdv(force = false) {
         ${live.errors?.length ? `<p>連線備註：${esc(live.errors.join('；'))}</p>` : ''}
       </section>`;
   } catch (e) {
+    ADV = 'error';
     el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${modelsCard()}${eventsCard(EV)}</section>`;
   }
   updateOuts();

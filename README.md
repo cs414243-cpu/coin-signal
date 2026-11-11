@@ -1,8 +1,8 @@
-# 幣訊號 v5 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log (PWA, personal use)
+# 幣訊號 v6 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks (PWA, personal use)
 v4 puts one plain 「未來一週預測建議」 card on top (from the current champion model in an append-only forecast ledger), a 「預測成績單」 below it, and moves everything else into 「進階（可不看）」. v3 added 定期定額與再平衡計畫 (DCA + rebalancing planner). v2 added the decision layer (今天怎麼做 / 部位與風險 / 槓桿檢查 / 台幣買幣成本); v1 signals live under 訊號細節. See CHANGELOG.md.
 Research only, not investment advice. No keys, no accounts, no trading.
 
-- `app/` static PWA (deploy this folder only). Live data fetched from the phone: Binance data-api → Kraken → OKX → Coinbase (daily candles); OKX → Binance fapi → Bybit (funding); alternative.me (F&G); CoinGecko (spot USD/TWD).
+- `app/` static PWA (deploy this folder only). Live data fetched from the phone: Binance data-api USDT → OKX USDT → Kraken USDT → Coinbase USD (daily candles, closed bars only, last 200 checked for gaps/dupes/00:00 UTC; v6 cross-checks the same closed bar against the next source); OKX → Binance fapi → Bybit (funding); alternative.me (F&G); CoinGecko (spot USD/TWD).
 - `backtest/fetch_data.py` + `backtest/backtest.py` regenerate `app/data/backtest.json` (rules fixed a priori, 1-day lag, 0.15%/side cost, IS < 2023-01-01 ≤ OOS, kNN analog walk-forward from 2022-01-01, Newey-West + block bootstrap p-values).
 - Tests: `node --test tests/` (JS↔Python feature parity), `node tests/e2e.mjs` (headless load + screenshots; needs `python3 -m http.server 8765 --directory app`), `node tests/fallback.mjs` (blocked-source fallbacks + offline cache).
 - Refresh stats: `python3 backtest/fetch_data.py && python3 backtest/backtest.py`, then bump `VERSION` in `app/sw.js`.
@@ -65,6 +65,12 @@ Overfitting guards: no tuning on live data (models are frozen; they only fit on 
 - Weekly (Monday 09:00 Asia/Taipei): `bash /workspace/crypto-predictor/forecast/weekly.sh`
 - Tests: `cd forecast && python3 test_forecast.py`; `node --test tests/` (includes `live.test.mjs`); UI: `python3 -m http.server 8765 --directory app & node tests/e2e_v4.mjs` (writes `screenshots/v4-*.png`; v2/v3 e2e scripts are superseded because those cards now live inside the collapsed 進階 section).
 - Test mode (never touches the real ledger): set `FORECAST_LEDGER`, `FORECAST_REGISTRY`, `FORECAST_LIVE`, `FORECAST_REPORTS` to temp paths; only then is `run_daily.py --asof YYYY-MM-DD` allowed.
+
+## v6 — data reliability & near-flip prices (`app/js/reliability.js`)
+- Home (per coin, plain zh-TW): 綠「資料正常」／黃「資料尚未更新」(no yesterday bar at 09:00 Taipei), 「各交易所價格略有差異」(0.5–2%), USDT off-peg >0.5%／紅「資料過期」(12:00 Taipei) or 「各交易所資料不一致」(>2% or different trend3). 「接近翻轉」when the next-close flip price of MA50/MA200 is within 1% (flip = mean of last 49 / 199 closes).
+- 進階 → 資料可靠度: source + pair, fetch times, last closed bar, cross-source closes and bps, trend3 on both, flip prices, USDT, fallback order, thresholds.
+- Forecast cache fix (unfinished bar cached by `update_candles`) is **proposed only** (`forecast/proposals/P-data-closed-bars-cache-fix.md`) because `common.py` is hashed into every ledger row's `frame_sha256`.
+- Tests: `tests/reliability.test.mjs`, `tests/e2e_v6.mjs`.
 
 ## v5 — market-move causes & indicator tracking (`forecast/events/`)
 
@@ -144,4 +150,4 @@ The reviewing agent reads the events report next to the review. If a relationshi
 **Tests:**
 - `cd forecast/events && python3 test_events.py`
 - `node --test tests/` (includes `events.test.mjs`)
-- UI: `python3 -m http.server 8765 --directory app & node tests/e2e_v5.mjs` (writes `screenshots/v5-*.png`)
+- UI: `python3 -m http.server 8765 --directory app & node tests/e2e_v6.mjs` (writes `screenshots/v6-*.png`; older `e2e_v2`…`e2e_v5` still pass)
