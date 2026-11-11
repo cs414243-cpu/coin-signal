@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1420">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="幣訊號">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https://data-api.binance.vision https://api.kraken.com https://www.okx.com https://api.exchange.coinbase.com https://fapi.binance.com https://api.bybit.com https://api.alternative.me https://api.coingecko.com">
+<title>幣訊號：誠實的虛擬幣訊號儀表板</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="icons/icon-192.png" alt="" width="28" height="28"><h1>幣訊號</h1></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-coin="BTC" aria-selected="true">BTC</button>
+    <button role="tab" data-coin="ETH" aria-selected="false">ETH</button>
+  </nav>
+  <button id="refresh" class="icon-btn" aria-label="重新整理">↻</button>
+</header>
+<main id="main">
+  <section class="card intro">
+    <p><strong>這不是買賣訊號機。</strong>每個指標旁邊都附上它在歷史上的實際表現（扣掉手續費、分成樣本內與樣本外）。大多數指標在樣本外贏不了單純持有。</p>
+  </section>
+  <div id="content"><p class="loading">載入中…</p></div>
+</main>
+<footer class="foot">
+  <p><strong>僅供個人研究參考，不構成投資建議。</strong>過去的統計不代表未來，任何預測都可能完全失準。本工具不連接任何交易所帳戶、不下單、不需要金鑰，只讀取公開行情。</p>
+  <p id="meta" class="muted"></p>
+</footer>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
