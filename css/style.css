@@ -75,3 +75,26 @@ table.cost td{white-space:nowrap}
 div.warn p{margin:6px 0}
 #plan h4{margin:14px 0 4px;font-size:13.5px}
 #plan code{font-size:11px}
+/* ---- v4 forecast-first layout ---- */
+.forecast{border-color:#3b4d75}
+.forecast h2{font-size:19px;margin-bottom:2px}
+.fc{border-top:1px solid var(--line);padding:12px 0 4px;margin-top:10px}
+.fc:first-of-type{border-top:0}
+.fc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fc-head .coin{font-size:20px;font-weight:800;min-width:2.6em}
+.fc-head .state-big{font-size:24px;margin-top:0;padding:1px 12px}
+.fc .share{font-size:16px;margin:8px 0 2px}
+.fc .share strong{font-size:20px}
+.fc .up{font-size:15px;margin:2px 0}
+.fc .why{font-size:14px;margin:6px 0;color:#d5dbe6}
+.track h2{margin-bottom:6px}.track p{font-size:14px;margin:6px 0}
+.kpis.two{grid-template-columns:1fr 1fr}
+.kpis.two .label{min-height:auto}
+details.adv{padding:12px 14px}
+details.adv>summary{font-size:16px;color:var(--fg);list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.adv>summary::-webkit-details-marker{display:none}
+details.adv>summary::after{content:"展開 ▾";font-size:13px;color:var(--blue)}
+details.adv[open]>summary::after{content:"收起 ▴"}
+details.adv{margin-top:0;border-top:1px solid var(--line)}
+details.adv .tabs{display:inline-flex;margin:4px 0 10px}
+#adv-body .card{background:#131a28}

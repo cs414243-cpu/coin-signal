@@ -11,7 +11,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex, nofollow">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https://data-api.binance.vision https://api.kraken.com https://www.okx.com https://api.exchange.coinbase.com https://fapi.binance.com https://api.bybit.com https://api.alternative.me https://api.coingecko.com">
-<title>幣訊號：虛擬幣決策輔助</title>
+<title>幣訊號：未來一週預測建議</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -20,20 +20,13 @@
 <body>
 <header class="top">
   <div class="brand"><img src="icons/icon-192.png" alt="" width="28" height="28"><h1>幣訊號</h1></div>
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-coin="BTC" aria-selected="true">BTC</button>
-    <button role="tab" data-coin="ETH" aria-selected="false">ETH</button>
-  </nav>
   <button id="refresh" class="icon-btn" aria-label="重新整理">↻</button>
 </header>
 <main id="main">
-  <section class="card intro">
-    <p><strong>這是決策輔助，不是預測機。</strong>24 篇研究的結論：沒有指標能穩定預測漲跌；真正幫得上忙的是<strong>放多少</strong>（依波動調整部位）、<strong>何時少放</strong>（趨勢規則降低大跌）、<strong>不碰槓桿</strong>、<strong>壓低成本</strong>。每個數字都來自公開資料的回測。</p>
-  </section>
   <div id="content"><p class="loading">載入中…</p></div>
 </main>
 <footer class="foot">
-  <p><strong>僅供個人研究參考，不構成投資建議。</strong>過去的統計不代表未來，任何預測都可能完全失準。本工具不連接任何交易所帳戶、不下單、不需要金鑰，只讀取公開行情。</p>
+  <p><strong>僅供個人研究參考，不構成投資建議。</strong>目前還沒有證明這些建議能贏過一直抱著；過去的表現不代表未來。本工具不連接任何交易所帳戶、不下單，只讀公開行情。</p>
   <p id="meta" class="muted"></p>
 </footer>
 <script type="module" src="js/app.js"></script>

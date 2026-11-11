@@ -138,7 +138,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v3';
+const VERSION = 'v4';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -471,6 +471,8 @@ function updateOuts() {
   set('plan-out', planOut);
   set('lev-out', () => levOut(coin));
   set('cost-out', () => costOut(coin));
+  set('fc-money-BTC', () => moneyLine('BTC'));
+  set('fc-money-ETH', () => moneyLine('ETH'));
 }
 
 function ctxFrom(live) {
@@ -480,15 +482,119 @@ function ctxFrom(live) {
   return { live, rows, r: rows[rows.length - 1], priceUsd: live.spot?.usd ?? last.c };
 }
 
+// ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
+let LIVE = null;
+const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
+const ACT_HINT = { add: '比前一天建議多放一些', hold: '維持建議的比例', reduce: '比全部放進去少', out: '先不要放' };
+const STATUS_ZH = { champion: '冠軍（目前採用）', challenger: '挑戰者', reference: '基準（一直抱著）', retired: '退休' };
+// candle date D closes at D+1 08:00 Taipei
+const closeMD = s => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 1); return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; };
+const addDays = (s, n) => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+function coinBudget(c) {
+  const total = num(S.total); if (!total) return null;
+  const w = clamp((num(S.dcaW) ?? 5) / 100, 0, 1), sh = clamp((num(S.dcaBtc) ?? 100) / 100, 0, 1);
+  return total * w * (c === 'BTC' ? sh : 1 - sh);
+}
+const holdingsSet = () => !!num(S.total) && (num(S.btc) !== null || num(S.eth) !== null);
+function moneyLine(c) {
+  const f = LIVE?.coins?.[c]; if (!f || !holdingsSet()) return '';
+  const px = twdPrice(c) ?? (DEC ? f.price_usd * usdTwd().v : null), B = coinBudget(c);
+  if (!px || B === null) return '';
+  if (B <= 0) return `<p class="money small">你的計畫沒有配置 ${c}（到「進階 → 定期定額」可以調 BTC／ETH 比例）。</p>`;
+  const have = (num(S[c.toLowerCase()]) ?? 0) * px, tgt = f.exposure * B, diff = tgt - have;
+  const act = Math.abs(diff) < Math.max(1000, B * 0.02) ? '和建議差不多，<strong>不用動</strong>' : diff > 0 ? `可以<strong>買進約 ${ntd(diff)}</strong>` : `建議<strong>賣出約 ${ntd(-diff)}</strong>`;
+  return `<p class="money">你打算放在 ${c} 的錢 ${ntd(B)}（總資產 × ${esc(S.dcaW)}%${c === 'BTC' ? ` × ${esc(S.dcaBtc)}%` : ` × ${100 - (num(S.dcaBtc) ?? 100)}%`}），建議放 <strong>${ntd(tgt)}</strong>。你現在有 ${ntd(have)}，${act}。</p>`;
+}
+function coinBlock(c) {
+  const f = LIVE.coins[c]; if (!f) return '';
+  const e = f.exposure, sharePct = Math.round(e * 100);
+  const share = e < 0.005 ? '建議：<strong>先不要放</strong>（0%）' : `建議：放你打算投入 ${c} 的錢的 <strong>${sharePct}%</strong>${e >= 0.95 ? '（差不多全部）' : (e >= 0.4 && e <= 0.6) ? '（大約一半）' : ''}`;
+  return `<div class="fc" data-coin="${c}">
+      <div class="fc-head"><span class="coin">${c}</span><span class="state-big ${ACT_CLS[f.action]}">${esc(f.action_zh)}</span><span class="muted small">${ACT_HINT[f.action]}</span></div>
+      <p class="share">${share}</p>
+      <p class="up">${esc(f.up_text)}</p>
+      <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；現在 ${usd(f.price_usd)}）</p>
+      <p class="why">原因：${esc(f.reason)}</p>
+      <div id="fc-money-${c}"></div>
+    </div>`;
+}
+function forecastCard() {
+  const any = LIVE.coins.BTC || LIVE.coins.ETH; if (!any) return '';
+  const age = Date.now() - Date.parse(LIVE.generated_at);
+  const stale = age > 36 * 3600 * 1000 ? `<p class="warn">⚠️ 預測已經 ${Math.floor(age / 86400000)} 天沒更新，下面是 ${closeMD(any.asof)} 的建議。</p>` : '';
+  return `<section class="card forecast" id="forecast">
+    <h2>未來一週預測建議</h2>
+    <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
+    ${stale}
+    ${coinBlock('BTC')}${coinBlock('ETH')}
+    ${holdingsSet() ? '' : '<p class="small muted">想直接看要買賣多少錢：打開下面「進階 → 我的部位」填總資產和持有數量，這裡就會換算成金額。</p>'}
+    <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>
+  </section>`;
+}
+function trackCard() {
+  const T = LIVE.track, ch = T.champion, b = T.baseline;
+  const first = ch.first, ns = ch.scores?.n || 0;
+  const nDays = Math.ceil((ch.n_forecasts || 0) / 2);
+  const since = nDays < 14 ? `第 ${nDays} 天` : `${(nDays / 7).toFixed(0)} 週`;
+  const hit = ns ? `已經有 ${ns} 次到期可以對答案，猜對漲跌 <strong>${pct0(ch.scores.hit)}</strong>（一直猜「會漲」是 ${pct0(b?.scores?.hit)}）。` : `第一批預測要到 ${first ? closeMD(addDays(first, 7)) : '—'} 才能對答案。`;
+  const ret = x => x?.paper?.equity ? `${ntd(x.paper.equity)}<div class="muted small">${pct(x.paper.equity / T.paper_start_twd - 1, 2)}</div>` : '—';
+  const W = LIVE.walkforward?.models, wc = W?.[LIVE.champion.key], wb = W?.[LIVE.baseline];
+  const hist = wc && wb ? `<p class="small">回測（${wc.start.slice(0, 4)} 年起，每天只用當天以前的資料，BTC、ETH 各半）：照建議年化 ${pct(wc.cagr)}、最慘時虧 ${pctS(-wc.maxdd, 0)}；一直抱著年化 ${pct(wb.cagr)}、最慘時虧 ${pctS(-wb.maxdd, 0)}。猜漲跌的準確度 ${pct0(wc.hit)}，跟丟銅板差不多。</p>` : '';
+  return `<section class="card track" id="track">
+    <h2>預測成績單</h2>
+    <p>從 ${first ? closeMD(first) : '—'} 開始，每天記錄一次預測（目前 ${ch.n_forecasts} 筆，兩個幣合計），記錄後不能修改。${hit}</p>
+    <div class="kpis two">
+      <div><div class="label">虛擬投資：照建議</div><div class="num sm">${ret(ch)}</div></div>
+      <div><div class="label">虛擬投資：一直抱著</div><div class="num sm">${ret(b)}</div></div>
+    </div>
+    <p class="small muted">各用虛擬 NT$100 萬（BTC、ETH 各半）、每天照建議調整，已扣手續費和台幣買 USDT 的溢價。不是真的錢。</p>
+    ${hist}
+    <p class="warn">實際紀錄才剛開始（${since}）。至少要累積 8 週，系統才會開始比較不同的預測方法，表現更好的才會換上來；在那之前，請把建議當參考就好。</p>
+  </section>`;
+}
+function modelsCard() {
+  if (!LIVE) return '';
+  const W = LIVE.walkforward?.models || {};
+  const f = (x, d = 4) => x === null || x === undefined ? '—' : Number(x).toFixed(d);
+  const rows = LIVE.models.map(m => { const w = W[m.key] || {};
+    return `<tr${m.status === 'champion' ? ' class="hl"' : ''}><th>${esc(m.name)}<div class="muted small">${esc(m.key)}｜${STATUS_ZH[m.status] || m.status}</div></th><td>${m.n_forecasts}／${m.scores?.n || 0}</td><td>${f(m.scores?.brier)}</td><td>${m.paper?.equity ? ntd(m.paper.equity) : '—'}</td><td>${f(w.brier)}</td><td>${pct(w.cagr)}</td><td>${pct(w.maxdd, 0)}</td></tr>`; }).join('');
+  return `<section class="card" id="models"><h2>預測模型與自我改善機制</h2>
+    <p class="small">每天早上 8 點收盤後，所有登記的模型各自預測 BTC、ETH 未來 7 天（上漲機率、價格區間、建議部位），寫進只能新增、不能改的帳本（每筆都有雜湊鏈，並推到公開 GitHub）。7 天到期就自動評分，每個模型也各自跑一個虛擬 NT$100 萬的投資組合。每週檢討一次：挑戰者要實際累積 ≥ 8 週，而且「預測分數（Brier）」和「虛擬投資的風險調整報酬」都顯著比冠軍好、歷史回測不更差、最大跌幅不多跌 5 個百分點以上，才會取代冠軍。模型程式碼一登記就凍結；想改參數只能登記新版本、從零開始累積紀錄。</p>
+    <div class="scroll"><table class="bt"><thead><tr><th>模型</th><th>實盤預測／已評分</th><th>實盤 Brier</th><th>虛擬投資</th><th>回測 Brier</th><th>回測年化</th><th>回測最大跌幅</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="small muted">Brier：預測機率和實際結果的平方差，越低越好（永遠猜 50% = 0.25）。回測期間 ${esc(W[LIVE.champion.key]?.start || '—')}～${esc(W[LIVE.champion.key]?.end || '—')}，每天只用當天以前的資料。帳本：<a href="${esc(LIVE.ledger.repo)}" target="_blank" rel="noopener">GitHub coin-signal/ledger</a>（最後一筆雜湊 ${esc((LIVE.ledger.last_hash || '').slice(0, 12))}…）。預測產生於 ${fmtTime(Date.parse(LIVE.generated_at))}。</p>
+  </section>`;
+}
+const advOpen = () => localStorage.getItem('adv-open') === '1';
+
 async function render(force = false) {
   const el = $('#content');
-  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.coin === coin)));
-  el.innerHTML = '<p class="loading">載入行情中…</p>';
+  el.innerHTML = '<p class="loading">載入中…</p>';
   try {
     if (!BT || !DEC || !DCA) [BT, DEC, DCA] = await Promise.all(['backtest', 'decision', 'dca'].map(n => fetch(`data/${n}.json`).then(r => r.json())));
+  } catch (e) {
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p></section>`; return;
+  }
+  try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
+  el.innerHTML = `
+    ${LIVE ? forecastCard() + trackCard() : '<section class="card"><p class="warn">⚠️ 預測資料暫時讀不到，請按右上角 ↻ 重試。</p></section>'}
+    <details id="adv" class="card adv"${advOpen() ? ' open' : ''}><summary>進階（可不看）</summary>
+      <p class="small muted">技術指標、回測和各種試算工具，給 cs 做決策時參考。</p>
+      <nav class="tabs" role="tablist"><button role="tab" data-coin="BTC" aria-selected="${coin === 'BTC'}">BTC</button><button role="tab" data-coin="ETH" aria-selected="${coin === 'ETH'}">ETH</button></nav>
+      <div id="adv-body"><p class="loading">載入行情中…</p></div>
+    </details>`;
+  $('#adv').addEventListener('toggle', e => localStorage.setItem('adv-open', e.target.open ? '1' : '0'));
+  updateOuts();
+  $('#meta').textContent = `版本 ${VERSION}${LIVE ? `｜預測 ${LIVE.coins.BTC?.asof || ''}｜冠軍模型 ${LIVE.champion.key}` : ''}`;
+  await renderAdv(force);
+}
+
+async function renderAdv(force = false) {
+  const el = $('#adv-body'); if (!el) return;
+  document.querySelectorAll('#adv .tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.coin === coin)));
+  try {
     const other = coin === 'BTC' ? 'ETH' : 'BTC';
     const [pr, cur, oth] = await Promise.allSettled([fetchPrices(force), loadLive(coin, force), loadLive(other, force)]);
-    PRICES = pr.status === 'fulfilled' ? pr.value : null;
+    PRICES = pr.status === 'fulfilled' ? pr.value : PRICES;
     if (cur.status !== 'fulfilled') throw cur.reason;
     CTX[coin] = ctxFrom(cur.value);
     if (oth.status === 'fulfilled') CTX[other] = ctxFrom(oth.value);
@@ -497,10 +603,11 @@ async function render(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${decisionCard(coin)}
       ${riskCard()}
       ${planCard()}
+      ${modelsCard()}
       ${levCard(coin)}
       ${costCard(coin)}
       ${researchCard()}
@@ -514,11 +621,10 @@ async function render(force = false) {
         <p>決策數字：${esc(DEC.conventions.trend3)}。回測扣每次進出 0.15%，訊號在收盤後才用、隔天才持有。決策資料產生於 ${fmtTime(Date.parse(DEC.generated_at_utc.replace('Z', ':00Z')))}，訊號回測產生於 ${fmtTime(Date.parse(BT.generated_at_utc.replace('Z', ':00Z')))}。括號裡的 C#編號是對應的研究報告。</p>
         ${live.errors?.length ? `<p>連線備註：${esc(live.errors.join('；'))}</p>` : ''}
       </section>`;
-    updateOuts();
-    $('#meta').textContent = `回測快照 ${DEC.coins[coin].last_date}｜版本 ${VERSION}`;
   } catch (e) {
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p></section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${modelsCard()}</section>`;
   }
+  updateOuts();
 }
 
 const onInput = e => {
@@ -528,7 +634,10 @@ const onInput = e => {
 };
 $('#content').addEventListener('input', onInput);
 $('#content').addEventListener('change', onInput);
-document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { coin = b.dataset.coin; localStorage.setItem('coin', coin); render(); }));
+$('#content').addEventListener('click', e => {
+  const b = e.target.closest('#adv .tabs button'); if (!b) return;
+  coin = b.dataset.coin; localStorage.setItem('coin', coin); renderAdv();
+});
 $('#refresh').addEventListener('click', () => render(true));
 if ('serviceWorker' in navigator) {
   const hadController = !!navigator.serviceWorker.controller;

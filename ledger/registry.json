@@ -1,0 +1,147 @@
+{
+ "schema": 1,
+ "max_challengers": 3,
+ "models": [
+  {
+   "id": "baseline",
+   "version": 1,
+   "name": "基準：永遠猜平常的上漲率、一直全額持有",
+   "file": "baseline_v1.py",
+   "code_sha256": "228aa177b8c3540568e3f5757b4844de488d78070c20066d1d022142d8dd6af3",
+   "status": "reference",
+   "registered_at": "2026-11-11T04:33:28Z",
+   "live_since": "2026-11-10",
+   "spec": {
+    "id": "baseline",
+    "version": 1,
+    "name": "基準：永遠猜平常的上漲率、一直全額持有",
+    "inputs": [
+     "close"
+    ],
+    "horizon_days": 7,
+    "p_up": "expanding share of known 7d windows with return > 0",
+    "quantiles": "expanding empirical 10/50/90% of known 7d returns",
+    "exposure": "1.0 always"
+   },
+   "note": "不預測、一直全額持有的對照組（也可被升級）"
+  },
+  {
+   "id": "trend_vt",
+   "version": 1,
+   "name": "趨勢＋波動調整（v2/v3 的規則）",
+   "file": "trend_vt_v1.py",
+   "code_sha256": "5762fcde914e11fe47aeaeb8a2260cc545e3d15d1ab3797fb266c6b15815b78a",
+   "status": "champion",
+   "registered_at": "2026-11-11T04:33:28Z",
+   "live_since": "2026-11-10",
+   "spec": {
+    "id": "trend_vt",
+    "version": 1,
+    "name": "趨勢＋波動調整（v2/v3 的規則）",
+    "inputs": [
+     "close"
+    ],
+    "horizon_days": 7,
+    "exposure": "trend3 × min(1, 0.30 / vol30); trend3 = 0.5·[c>MA50] + 0.5·[c>MA200]",
+    "p_up": "expanding up-share of known 7d returns on days with the same trend3",
+    "quantiles": "median from same-trend3 days; 10/90% = weekly vol × expanding z-quantiles",
+    "source": "C#9 (vol target 30%), C#10 (trend rules)"
+   },
+   "note": "初始冠軍：v2/v3 App 的趨勢＋波動調整規則（C#9、C#10）"
+  },
+  {
+   "id": "knn",
+   "version": 1,
+   "name": "相似日子（kNN，v1 綜合預測）",
+   "file": "knn_v1.py",
+   "code_sha256": "b7c4af59ef00fbd5744bfcabb379570bb6b69c55f1eca236b0d50ccf86c61a2f",
+   "status": "challenger",
+   "registered_at": "2026-11-11T04:33:29Z",
+   "live_since": "2026-11-10",
+   "spec": {
+    "id": "knn",
+    "version": 1,
+    "name": "相似日子（kNN，v1 綜合預測）",
+    "inputs": [
+     "close",
+     "fng",
+     "funding"
+    ],
+    "horizon_days": 7,
+    "features": [
+     "d200",
+     "d50",
+     "mom30",
+     "volpct",
+     "rsi14",
+     "fng",
+     "fund7"
+    ],
+    "k": 150,
+    "min_history": 365,
+    "feature_start": "2020-01-08",
+    "exposure": "1 if p_up > 0.5 else 0",
+    "p_up": "share of 150 nearest known days that went up",
+    "quantiles": "neighbours 10/50/90%"
+   },
+   "note": "v1 相似日子模型"
+  },
+  {
+   "id": "tsmom",
+   "version": 1,
+   "name": "動能混合（30／90／180 天）",
+   "file": "tsmom_v1.py",
+   "code_sha256": "16b0438b59d78ad2a278ca782eb0a7b52857c18982bfe8fdb3f9b166d2787a4d",
+   "status": "challenger",
+   "registered_at": "2026-11-11T04:33:29Z",
+   "live_since": "2026-11-10",
+   "spec": {
+    "id": "tsmom",
+    "version": 1,
+    "name": "動能混合（30／90／180 天）",
+    "inputs": [
+     "close"
+    ],
+    "horizon_days": 7,
+    "lookbacks": [
+     30,
+     90,
+     180
+    ],
+    "exposure": "(#positive lookbacks / 3) × min(1, 0.30 / vol30)",
+    "p_up": "expanding up-share of known 7d returns on days with the same #positive lookbacks",
+    "source": "C#10"
+   },
+   "note": "C#10 時序動能混合"
+  },
+  {
+   "id": "logit",
+   "version": 1,
+   "name": "邏輯迴歸（均線距離、30 天動能、波動）",
+   "file": "logit_v1.py",
+   "code_sha256": "7f1c882b239b76e01d9b65fb6664d9ca5efa2f37db4ead2c7036a39e9827647d",
+   "status": "challenger",
+   "registered_at": "2026-11-11T04:33:30Z",
+   "live_since": "2026-11-10",
+   "spec": {
+    "id": "logit",
+    "version": 1,
+    "name": "邏輯迴歸（均線距離、30 天動能、波動）",
+    "inputs": [
+     "close"
+    ],
+    "horizon_days": 7,
+    "features": [
+     "d200",
+     "d50",
+     "mom30",
+     "log_vol30"
+    ],
+    "model": "sklearn LogisticRegression(C=1.0, lbfgs), expanding refit daily",
+    "min_history": 365,
+    "exposure": "clip((p_up - 0.45) / 0.15, 0, 1) × min(1, 0.30 / vol30)"
+   },
+   "note": "四特徵邏輯迴歸"
+  }
+ ]
+}
