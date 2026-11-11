@@ -123,3 +123,62 @@ export function buyCost({ twd, coin, route, fee, premium, maker }, books) {
 export function premiumFromQuote(quote, usdTwd, usdtUsd) {
   return quote > 0 && usdTwd > 0 && usdtUsd > 0 ? quote / (usdTwd * usdtUsd) - 1 : null;
 }
+
+/** Sell `qty` coins into bids; returns { quote, avg, mid, slip, filled }. bids descending [[price, size]]. */
+export function walkSell(book, qty) {
+  const mid = (book.asks[0][0] + book.bids[0][0]) / 2;
+  let left = qty, got = 0;
+  for (const [p, s] of book.bids) {
+    if (s >= left) { got += left * p; left = 0; break; }
+    got += s * p; left -= s;
+  }
+  const sold = qty - left;
+  const avg = sold > 0 ? got / sold : NaN;
+  return { quote: got, avg, mid, slip: 1 - avg / mid, filled: left <= 1e-12 };
+}
+
+/** Cost of selling coin worth `twd` (at mid) back to TWD. Premium not counted: if it is still there you get it back. */
+export function sellCost({ twd, coin, route, fee, maker }, books) {
+  const sym = coin.toLowerCase();
+  const mid = b => (b.asks[0][0] + b.bids[0][0]) / 2;
+  const legs = [];
+  if (route === 'usdt') {
+    const bk = books[sym + 'usdt'], ut = books.usdttwd;
+    const a = walkSell(bk, twd / mid(ut) / mid(bk));
+    const b = walkSell(ut, a.quote * (1 - fee));
+    legs.push({ name: `${coin}/USDT`, slip: maker ? 0 : a.slip, fee, filled: a.filled }, { name: 'USDT/TWD', slip: maker ? 0 : b.slip, fee, filled: b.filled });
+  } else {
+    const bk = books[sym + 'twd'];
+    const a = walkSell(bk, twd / mid(bk));
+    legs.push({ name: `${coin}/TWD`, slip: maker ? 0 : a.slip, fee, filled: a.filled });
+  }
+  const keep = legs.reduce((k, l) => k * (1 - l.slip) * (1 - l.fee), 1);
+  const slip = 1 - legs.reduce((k, l) => k * (1 - l.slip), 1);
+  const fees = 1 - legs.reduce((k, l) => k * (1 - l.fee), 1);
+  return { legs, slip, fees, total: 1 - keep, filled: legs.every(l => l.filled) };
+}
+
+// ---------- v3: 定期定額與再平衡計畫 (mirrors plan() in backtest/dca_rebalance.py) ----------
+/** Band around the target crypto weight. mode 'rel' = ±band × target (e.g. 25% of 5% → 3.75–6.25%); 'abs' = ±band (percentage points as a fraction). */
+export function bandLimits(target, band, mode) {
+  return mode === 'rel' ? [Math.max(0, target * (1 - band)), target * (1 + band)] : [Math.max(0, target - band), target + band];
+}
+/** This month's plan. total = all assets in TWD incl. crypto, before this month's money. Trades in TWD (+ buy, − sell).
+ *  Inside the band: put target × monthly into crypto (split by btcShare). Outside: trade each coin back to target × (total + monthly). */
+export function plan({ total, btc, eth, monthly, target, band, mode, btcShare }) {
+  const C = btc + eth, w = total > 0 ? C / total : 0;
+  const [lo, hi] = bandLimits(target, band, mode);
+  const status = w < lo ? 'below' : w > hi ? 'above' : 'inside';
+  const V = total + monthly, T = target * V;
+  let b, e, crypto;
+  if (status === 'inside') { crypto = target * monthly; b = crypto * btcShare; e = crypto - b; }
+  else { b = T * btcShare - btc; e = T * (1 - btcShare) - eth; crypto = b + e; }
+  return { w, lo, hi, status, target_twd: T, crypto, btc: b, eth: e, rest: monthly - crypto, w_after: V > 0 ? (C + crypto) / V : 0 };
+}
+/** Trend filter on the regular monthly buy only (option B, = backtest variant trend_buys): buys × trend state (1 / 0.5 / 0); the cut goes to other assets. */
+export function trendFiltered(p, trBtc, trEth) {
+  if (p.status !== 'inside') return { ...p };   // same as the backtest: band rebalances are not filtered
+  const f = (x, t) => x > 0 && t !== null && t !== undefined ? x * t : x;
+  const b = f(p.btc, trBtc), e = f(p.eth, trEth);
+  return { ...p, btc: b, eth: e, crypto: b + e, rest: p.rest + (p.btc - b) + (p.eth - e) };
+}

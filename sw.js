@@ -1,7 +1,7 @@
 // App-shell cache. Market API calls are never cached here (always live; app keeps its own last-good copy).
-const VERSION = 'v2-2026-11-11';
+const VERSION = 'v3-2026-11-11';
 const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/signals.js', './js/data.js', './js/decision.js',
-  './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './data/backtest.json', './data/decision.json'];
+  './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './data/backtest.json', './data/decision.json', './data/dca.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });

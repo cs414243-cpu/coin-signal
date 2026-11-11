@@ -138,15 +138,15 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v2';
+const VERSION = 'v3';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
-const DEFAULTS = { budget: 2, total: '', btc: '', eth: '', rest: '6040', lev: 3, levDays: 7, levSide: 'long', amt: 100000, route: 'usdt', vip: 0, maker: false, quote: '' };
+const DEFAULTS = { budget: 2, total: '', btc: '', eth: '', rest: '6040', lev: 3, levDays: 7, levSide: 'long', amt: 100000, route: 'usdt', vip: 0, maker: false, quote: '', dcaM: 10000, dcaW: 5, dcaBand: 25, dcaMode: 'rel', dcaBtc: 100 };
 let S = { ...DEFAULTS, ...(() => { try { return JSON.parse(localStorage.getItem(SKEY) || '{}'); } catch { return {}; } })() };
 const saveS = () => { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch {} };
 const num = v => { const x = parseFloat(String(v).replace(/,/g, '')); return Number.isFinite(x) ? x : null; };
-let DEC = null, PRICES = null;
+let DEC = null, PRICES = null, DCA = null;
 const CTX = {};
 const GECKO = { BTC: 'bitcoin', ETH: 'ethereum' };
 
@@ -254,6 +254,126 @@ function riskOut() {
     <p class="small muted">「占整體風險」是各資產對總波動的貢獻（共變異數拆解）。很糟的一週「依今天波動」用目前的 30 日波動加上歷史相關係數；「回放」直接拿過去每一週的真實漲跌套用你現在的比例。${esc(DEC.weekly.note)}。其他資產若選台股，匯率影響已含在內。</p>`;
 }
 
+// ---------- v3: 定期定額與再平衡計畫 ----------
+const RULE_NAME = { none: '不再平衡', A: '每年', Q: '每季', M: '每月', bandM: '±25% 區間（每月檢查）', bandD: '±25% 區間（每天檢查）' };
+const CONTRIB_NAME = {
+  fixed_none: '照比例買，永遠不賣', steer_none: '新錢補不足的那邊，永遠不賣', plan_band: '<strong>本卡計畫</strong>：區間內照比例買，超出才調回',
+  fixed_Q: '照比例買＋每季調回', trend_buys: '本卡計畫＋趨勢濾網（只減少新買）', trend_target: '目標比例 × 趨勢狀態（趨勢轉弱就賣）',
+};
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+function costParams() {
+  const v = DEC.max.vip.find(x => String(x.level) === String(S.vip)) ?? DEC.max.vip[0];
+  const fee = S.maker ? v.maker : v.taker;
+  const fx = usdTwd();
+  const live = num(S.quote) ? DX.premiumFromQuote(num(S.quote), PRICES?.bitcoin?.twd && fx.src === 'CoinGecko' ? fx.v : null, PRICES?.tether?.usd) : null;
+  return { fee, premium: live ?? DEC.premium.by_year['2026'].mean, route: S.route === 'twd' ? 'twd' : 'usdt', maker: !!S.maker, live: live !== null };
+}
+function planCard() {
+  const sel = (k, arr) => `<select data-k="${k}">${arr.map(([v, t]) => `<option value="${v}"${String(S[k]) === String(v) ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+  return `<section class="card" id="plan"><h2>定期定額與再平衡計畫</h2>
+    <p class="small muted">用上面「我的部位」的總資產與持有數量，加上你每月要投入的錢，算出這個月該買多少、是否超出區間要調回。存在這支手機。</p>
+    <div class="form">
+      <label>每月投入（新台幣，全部資產合計）<input type="text" inputmode="decimal" data-k="dcaM" value="${esc(S.dcaM)}" placeholder="例如 10000"></label>
+      <label>加密幣目標占總資產（%）<input type="text" inputmode="decimal" data-k="dcaW" value="${esc(S.dcaW)}" placeholder="例如 5"></label>
+      <label>再平衡區間 ±<input type="text" inputmode="decimal" data-k="dcaBand" value="${esc(S.dcaBand)}"></label>
+      <label>區間單位${sel('dcaMode', [['rel', '% 相對（25＝目標的 ±25%）'], ['abs', '百分點（2＝目標 ±2pp）']])}</label>
+      <label>BTC 占加密幣（%，其餘 ETH）<input type="text" inputmode="decimal" data-k="dcaBtc" value="${esc(S.dcaBtc)}"></label>
+    </div>
+    <div id="plan-out"></div></section>`;
+}
+function tradeTable(p, cp) {
+  const rows = [['BTC', p.btc], ['ETH', p.eth]].filter(([, x]) => Math.abs(x) >= 1);
+  if (!rows.length) return { html: '<p class="small">這個月不用買賣加密幣。</p>', cost: 0 };
+  let tot = 0, unfilled = false;
+  const tr = rows.map(([c, x]) => {
+    const k = x > 0 ? DX.buyCost({ twd: x, coin: c, route: cp.route, fee: cp.fee, premium: cp.premium, maker: cp.maker }, DEC.max.books)
+      : DX.sellCost({ twd: -x, coin: c, route: cp.route, fee: cp.fee, maker: cp.maker }, DEC.max.books);
+    tot += Math.abs(x) * k.total; unfilled ||= !k.filled;
+    return `<tr><th>${x > 0 ? '買' : '賣'} ${c}</th><td>${ntd(Math.abs(x))}</td><td>${pctS(k.total, 2)}</td><td>${ntd(Math.abs(x) * k.total)}</td></tr>`;
+  }).join('');
+  return { cost: tot, html: `<div class="scroll"><table class="bt cost"><thead><tr><th></th><th>金額</th><th>成本率</th><th>成本</th></tr></thead><tbody>${tr}
+    <tr class="hl"><th>合計</th><td></td><td></td><td>${ntd(tot)}</td></tr></tbody></table></div>
+    ${unfilled ? '<p class="warn">金額超過快照裡的掛單深度，實際滑價會更大，建議分批或改用掛單。</p>' : ''}` };
+}
+function planOut() {
+  const total = num(S.total), qb = num(S.btc) ?? 0, qe = num(S.eth) ?? 0, pb = twdPrice('BTC'), pe = twdPrice('ETH');
+  const monthly = Math.max(0, num(S.dcaM) ?? 0), target = clamp((num(S.dcaW) ?? 5) / 100, 0, 1);
+  const band = Math.max(0, (num(S.dcaBand) ?? 25) / 100), mode = S.dcaMode === 'abs' ? 'abs' : 'rel', share = clamp((num(S.dcaBtc) ?? 100) / 100, 0, 1);
+  const bt = planBacktest(target);
+  if (!total || !pb || !pe) return `<p class="small">到「我的部位」輸入總資產和持有數量，這裡會算出這個月的買賣金額和成本。</p>${bt}`;
+  const bT = qb * pb, eT = qe * pe;
+  if (bT + eT > total) return `<p class="warn">加密幣市值 ${ntd(bT + eT)} 已超過你填的總資產，請檢查數字。</p>${bt}`;
+  const p = DX.plan({ total, btc: bT, eth: eT, monthly, target, band, mode, btcShare: share });
+  const cp = costParams();
+  const tA = tradeTable(p, cp);
+  const stTxt = { inside: ['ok', '在區間內'], below: ['warn', '低於區間'], above: ['warn', '高於區間'] }[p.status];
+  const say = p.status === 'inside' ? `在區間內，不用調整。這個月照目標比例買：加密幣 ${ntd(p.crypto)}，其餘 <strong>${ntd(p.rest)}</strong> 放其他資產。`
+    : p.status === 'below' ? `低於區間下緣，調回目標 ${pctS(target, 1)} 要買進加密幣 <strong>${ntd(p.crypto)}</strong>${p.crypto > monthly ? `（比每月投入多 ${ntd(p.crypto - monthly)}，差額要從其他資產撥）` : `，其餘 ${ntd(p.rest)} 放其他資產`}。`
+    : `高於區間上緣，調回目標 ${pctS(target, 1)} 要賣出加密幣 <strong>${ntd(-p.crypto)}</strong>（換成其他資產），這個月的新錢也全部放其他資產。在台灣境內平台賣出可能產生財產交易所得（C#3）。`;
+  // risk budget check (v2 logic): bad week of the target crypto weight at today's vol, no diversification credit
+  const budget = (num(S.budget) ?? 2) / 100;
+  const bwB = CTX.BTC ? Math.abs(DX.badWeek(CTX.BTC.r.vol30, DEC.coins.BTC.bad_week.z5)) : NaN;
+  const bwE = CTX.ETH ? Math.abs(DX.badWeek(CTX.ETH.r.vol30, DEC.coins.ETH.bad_week.z5)) : NaN;
+  const lossT = target * (share * bwB + (1 - share) * bwE);
+  const riskTxt = Number.isFinite(lossT) ? `<p class="${lossT > budget ? 'warn' : 'small'}">${lossT > budget ? '⚠️ ' : ''}照目標 ${pctS(target, 1)}，依今天波動，加密幣在很糟的一週大約讓總資產少 ${pctS(lossT, 1)}（${ntd(lossT * (total + monthly))}，沒扣分散效果）${lossT > budget ? `，<strong>超過你的風險預算 ${pctS(budget, 1)}</strong>。目標比例可能太高。` : `，在風險預算 ${pctS(budget, 1)} 之內。`}</p>` : '';
+  // trend interaction: show both options, no single answer
+  const tb = DX.trendState(CTX.BTC?.r), te = DX.trendState(CTX.ETH?.r);
+  const weak = (share > 0 && tb !== null && tb < 1) || (share < 1 && te !== null && te < 1);
+  const lab = t => t === null ? '—' : DX.TREND_LABEL[t][0];
+  let trend = '';
+  if (weak) {
+    const pb2 = DX.trendFiltered(p, tb, te);
+    const tB = tradeTable(pb2, cp);
+    trend = `<div class="warn"><p>⚠️ 趨勢規則現在是 BTC <strong>${lab(tb)}</strong>、ETH <strong>${lab(te)}</strong>。定期定額和趨勢濾網會給出不同答案，兩個都列出來，<strong>沒有哪個被證明比較好</strong>：</p>
+      <p><strong>選項 A｜照計畫</strong>（定期定額不看趨勢）：如上表，成本 ${ntd(tA.cost)}。</p>
+      <p><strong>選項 B｜加趨勢濾網</strong>：${p.status === 'inside' ? `這個月的定期買進 × 趨勢狀態（持有 100%／減碼 50%／空手 0%），少買的 ${ntd(pb2.rest - p.rest)} 改放其他資產。` : '區間調回不受濾網影響（和回測一致），所以這個月和選項 A 相同。'}</p>
+      ${p.status === 'inside' ? tB.html : ''}
+      <p class="small">回測比較見下方「每月投入方式」表：兩者差距很小、在不同組合與期間互有勝負。濾網比較像「暫停加碼」，不是預測。</p></div>`;
+  } else trend = `<p class="small muted">趨勢規則目前 BTC ${lab(tb)}、ETH ${lab(te)}：趨勢濾網不會改變這個月的計畫。</p>`;
+  return `<div class="kpis">
+      <div><div class="label">加密幣目前占比</div><div class="num sm">${pctS(p.w, 1)}</div><div class="muted small">${ntd(bT + eT)}</div></div>
+      <div><div class="label">區間</div><div class="num sm">${pctS(p.lo, 1)}～${pctS(p.hi, 1)}</div><div class="muted small">目標 ${pctS(target, 1)}</div></div>
+      <div><div class="label">狀態</div><div class="num sm ${p.status === 'inside' ? '' : 'dn'}">${stTxt[1]}</div><div class="muted small">調整後 ${pctS(p.w_after, 1)}</div></div>
+    </div>
+    <p class="money">${say}</p>
+    ${tA.html}
+    <p class="small muted">成本用上面「台幣買幣成本」的設定（${cp.route === 'usdt' ? '經 USDT' : '直接台幣'}、${cp.maker ? '掛單' : '吃單'}、USDT 溢價 ${pctS(cp.premium, 2)}${cp.live ? '，你輸入的報價' : '，2026 年平均'}），依 MAX 掛單簿快照計算。賣出時溢價不算成本（若還在大致拿得回來）。BTC／ETH 依 ${Math.round(share * 100)}／${Math.round((1 - share) * 100)} 分配。</p>
+    ${riskTxt}
+    ${trend}
+    ${bt}`;
+}
+function planBacktest(target) {
+  if (!DCA) return '';
+  const wk = target <= 0.075 ? 5 : 10, rest = ['6040', 'tw50', 'cash'].includes(S.rest) ? S.rest : '6040', key = `${wk}_${rest}`;
+  const cv = DCA.conventions, F = DCA.rebal.full[key], O = DCA.rebal.oos[key], I = DCA.rebal.is[key], R = DCA.roll[key];
+  const base = DCA.rebal.full[`0_${rest}`].M, baseO = DCA.rebal.oos[`0_${rest}`].M;
+  const bp = x => x === null || x === undefined ? '—' : Math.abs(x) < 0.00005 ? '≈0' : `${(x * 1e4).toFixed(0)} bp`;
+  const rr = (n, f, o) => `<tr><th>${n}</th><td>${pct(f.cagr)}</td><td>${pct(o.cagr)}</td><td>${pct(f.maxdd, 0)}</td><td>${pct(o.maxdd, 0)}</td><td>${pct(f.p5_week, 1)}</td><td>${pctS(f.w_max, 0)}</td><td>${bp(f.cost_drag)}</td></tr>`;
+  const rules = ['none', 'A', 'Q', 'M', 'bandM', 'bandD'];
+  const best = (P) => rules.reduce((a, r) => P[r].cagr > P[a].cagr ? r : a, 'none');
+  const t1 = `<div class="scroll"><table class="bt"><thead><tr><th>${wk}% 加密＋${esc(DCA.rest_name[rest])}</th><th>年化<div class="muted small">全期</div></th><th>年化<div class="muted small">2023 起</div></th><th>最大跌幅<div class="muted small">全期</div></th><th>最大跌幅<div class="muted small">2023 起</div></th><th>很糟一週<div class="muted small">最差 5%</div></th><th>加密最高占比</th><th>成本拖累<div class="muted small">每年</div></th></tr></thead><tbody>
+    ${rules.map(r => rr(RULE_NAME[r], F[r], O[r])).join('')}
+    <tr class="muted"><th>不放加密幣（對照）</th><td>${pct(base.cagr)}</td><td>${pct(baseO.cagr)}</td><td>${pct(base.maxdd, 0)}</td><td>${pct(baseO.maxdd, 0)}</td><td>${pct(base.p5_week, 1)}</td><td>0%</td><td>—</td></tr></tbody></table></div>
+    <p class="small">樣本內（${I.Q.start.slice(0, 7)}～2022）報酬最高的是「${RULE_NAME[best(I)]}」，2023 年起變成「${RULE_NAME[best(O)]}」：<strong>各種再平衡規則之間的報酬差距不穩健，排名會換</strong>。3 年滾動視窗（${R ? `${R.n} 個，起點 ${R.first.slice(0, 7)}～${R.last.slice(0, 7)}` : '—'}）：不再平衡的最大跌幅比每季再平衡淺的只占 ${R ? pctS(R.rules.none.shallower_dd_than_q, 0) : '—'}；±25% 區間（每月檢查）年化贏過每季的占 ${R ? pctS(R.rules.bandM.beat_q_cagr, 0) : '—'}。比較站得住的只有一點：<strong>不再平衡，加密幣占比會一路漂到 ${pctS(F.none.w_max, 0)}</strong>，風險已經不是你原本設定的 ${wk}%。成本（含溢價、價差、手續費、證交稅）每年只拖累幾 bp，不是重點（與 C#21 一致）。</p>`;
+  const C = DCA.contrib.full[key], CO = DCA.contrib.oos[key];
+  const cr = n => `<tr${n === 'plan_band' ? ' class="hl"' : ''}><th>${CONTRIB_NAME[n]}</th><td>${pct(C[n].xirr)}</td><td>${pct(CO[n].xirr)}</td><td>${pct(C[n].maxdd, 0)}</td><td>${pct(C[n].p5_week, 1)}</td><td>${C[n].sells}</td><td>${pctS(C[n].w_end, 1)}</td></tr>`;
+  const t2 = `<div class="scroll"><table class="bt"><thead><tr><th>每月 NT$1 萬、目標 ${wk}%</th><th>資金加權年化<div class="muted small">全期</div></th><th>同左<div class="muted small">2023 起</div></th><th>最大跌幅</th><th>很糟一週</th><th>賣出次數</th><th>期末加密占比</th></tr></thead><tbody>
+    ${Object.keys(CONTRIB_NAME).map(cr).join('')}</tbody></table></div>
+    <p class="small">本卡計畫 vs 加趨勢濾網：資金加權年化 全期 ${pct(C.plan_band.xirr)} vs ${pct(C.trend_buys.xirr)}、2023 年起 ${pct(CO.plan_band.xirr)} vs ${pct(CO.trend_buys.xirr)}；最大跌幅 ${pct(C.plan_band.maxdd, 1)} vs ${pct(C.trend_buys.maxdd, 1)}。差距很小，換成其他比例或資產組合時方向也會變，這裡也沒做顯著性檢定，<strong>不能說加濾網比較好</strong>。「目標 × 趨勢」很糟一週 ${pct(C.trend_target.p5_week, 1)}（本卡 ${pct(C.plan_band.p5_week, 1)}），但賣出 ${C.trend_target.sells} 次（本卡 ${C.plan_band.sells} 次，每次賣出都可能要報稅）、年化 ${pct(C.trend_target.xirr)}：等於用 v2 的趨勢規則管整個部位，主要是少跌、不是多賺（C#10）。</p>`;
+  const cn = coin.toLowerCase(), L = k => DCA.dca_lump[`${cn}_${k}`];
+  const lr = (n, x) => `<tr><th>${n}</th><td>${pctS(x.full.ls_win, 0)}</td><td>${pctS(x.oos.ls_win, 0)}</td><td>${pct(x.full.ls_mean, 0)}／${pct(x.full.dca_mean, 0)}</td><td>${pct(x.full.ls_p5, 0)}／${pct(x.full.dca_p5, 0)}</td><td>${pctS(x.full.ls_loss, 0)}／${pctS(x.full.dca_loss, 0)}</td></tr>`;
+  const a = L('12_12');
+  const t3 = `<div class="scroll"><table class="bt"><thead><tr><th>${coin}，手上有一筆錢</th><th>一次買勝率<div class="muted small">全期</div></th><th>同左<div class="muted small">2023 起</div></th><th>平均報酬<div class="muted small">一次／分批</div></th><th>最差 5%<div class="muted small">一次／分批</div></th><th>虧損機率<div class="muted small">一次／分批</div></th></tr></thead><tbody>
+    ${lr('分 6 個月買，1 年後', L('6_12'))}${lr('分 12 個月買，1 年後', a)}${lr('分 12 個月買，2 年後', L('12_24'))}</tbody></table></div>
+    <p class="small">一次買進在 ${pctS(a.full.ls_win, 0)} 的起點贏（2023 年起 ${pctS(a.oos.ls_win, 0)}），因為加密幣這段期間大致上漲、分批的錢有一段時間沒在場上；分批的好處是結果比較集中（終值標準差 ${a.full.dca_sd.toFixed(2)} vs ${a.full.ls_sd.toFixed(2)}、最差 5% ${pct(a.full.dca_p5, 0)} vs ${pct(a.full.ls_p5, 0)}）。哪種起點會贏事前無法知道（C#12）。起點每天一個、彼此重疊，獨立樣本只有約 ${a.full.n_indep} 個年度（2023 年起約 ${a.oos.n_indep} 個），勝率數字的誤差很大。</p>`;
+  return `<details><summary>回測：再平衡規則、每月投入方式、分批 vs 一次（扣成本）</summary>
+    <h4>再平衡規則（${cv.start.slice(0, 7)} 一次投入，全期～${cv.end}）</h4>${t1}
+    <h4>每月投入方式（從 0 開始，每月 1 日投入）</h4>${t2}
+    <h4>定期定額 vs 一次投入（只看 ${coin}）</h4>${t3}
+    <p class="small muted">算法（<code>backtest/dca_rebalance.py</code> → <code>data/dca.json</code>）：每日新台幣價格（Binance 日收盤 × Yahoo TWD=X；0050、SPY、AGG 用 Yahoo 還原收盤價）。加密買進成本＝當天 MAX USDT 溢價（只算正的，C#23）＋手續費與價差 ${pctS(cv.c_buy, 2)}（MAX 快照、NT$${cv.ref_twd.toLocaleString('en-US')}、經 USDT、VIP 0 吃單）；賣出 ${pctS(cv.c_sell, 2)}；股票／ETF 手續費 ${pctS(cv.stock_fee, 4)}＋賣出證交稅 ${pctS(cv.etf_tax, 1)}（SPY／AGG 複委託假設相同費率，實際依券商、換匯成本未計）；現金利率 0%。區間檢查用前一天收盤、隔天執行，趨勢狀態也用前一天收盤（不偷看）。2023 年起是樣本外（與 v2 同一切點），各規則是事先固定的常見做法（C#12、C#21），沒有用資料調參數。沒有計入稅、交易所倒閉風險（C#4）、提領費用。</p>
+  </details>`;
+}
+
 // ---------- 槓桿檢查 ----------
 const CASCADE = [
   ['2020-03-12', '6.0 倍', '前 24 小時進場只剩 1.99 倍'],
@@ -348,6 +468,7 @@ function updateOuts() {
   const set = (id, f) => { const el = document.getElementById(id); if (el) { try { el.innerHTML = f(); } catch (e) { el.innerHTML = `<p class="warn">計算失敗：${esc(e.message || e)}</p>`; } } };
   set('dec-out', () => decOut(coin));
   set('risk-out', riskOut);
+  set('plan-out', planOut);
   set('lev-out', () => levOut(coin));
   set('cost-out', () => costOut(coin));
 }
@@ -364,7 +485,7 @@ async function render(force = false) {
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.coin === coin)));
   el.innerHTML = '<p class="loading">載入行情中…</p>';
   try {
-    if (!BT || !DEC) [BT, DEC] = await Promise.all([fetch('data/backtest.json').then(r => r.json()), fetch('data/decision.json').then(r => r.json())]);
+    if (!BT || !DEC || !DCA) [BT, DEC, DCA] = await Promise.all(['backtest', 'decision', 'dca'].map(n => fetch(`data/${n}.json`).then(r => r.json())));
     const other = coin === 'BTC' ? 'ETH' : 'BTC';
     const [pr, cur, oth] = await Promise.allSettled([fetchPrices(force), loadLive(coin, force), loadLive(other, force)]);
     PRICES = pr.status === 'fulfilled' ? pr.value : null;
@@ -376,9 +497,10 @@ async function render(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     el.innerHTML = `
-      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${decisionCard(coin)}
       ${riskCard()}
+      ${planCard()}
       ${levCard(coin)}
       ${costCard(coin)}
       ${researchCard()}
