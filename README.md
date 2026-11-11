@@ -69,7 +69,7 @@ Overfitting guards: no tuning on live data (models are frozen; they only fit on 
 ## v6 — data reliability & near-flip prices (`app/js/reliability.js`)
 - Home (per coin, plain zh-TW): 綠「資料正常」／黃「資料尚未更新」(no yesterday bar at 09:00 Taipei), 「各交易所價格略有差異」(0.5–2%), USDT off-peg >0.5%／紅「資料過期」(12:00 Taipei) or 「各交易所資料不一致」(>2% or different trend3). 「接近翻轉」when the next-close flip price of MA50/MA200 is within 1% (flip = mean of last 49 / 199 closes).
 - 進階 → 資料可靠度: source + pair, fetch times, last closed bar, cross-source closes and bps, trend3 on both, flip prices, USDT, fallback order, thresholds.
-- Forecast cache fix (unfinished bar cached by `update_candles`) is **proposed only** (`forecast/proposals/P-data-closed-bars-cache-fix.md`) because `common.py` is hashed into every ledger row's `frame_sha256`.
+- Forecast cache fix applied 2026-11-11 14:47 Taipei (`forecast/proposals/P-data-closed-bars-cache-fix.md`): `update_candles` caches and uses only fully closed 00:00 UTC daily bars; a fresher source may overwrite a stale (fetched-before-close) cached bar. Recorded in `events.jsonl` as `type=frame_change` (old `frame_sha256` `45860569…65d1` → `5fc66bc6…bf61`). Past ledger rows, model files and promotion rules were not changed.
 - Tests: `tests/reliability.test.mjs`, `tests/e2e_v6.mjs`.
 
 ## v5 — market-move causes & indicator tracking (`forecast/events/`)

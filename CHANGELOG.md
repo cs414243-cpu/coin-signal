@@ -22,9 +22,14 @@
 - ETH：綠「資料正常」；2,053.21 vs 2,053.17（0.2 bps），都是空手。200 日線翻轉價 2,152.89（+4.85%）、50 日線 2,452.46（+19.45%），不到接近翻轉的門檻。
 - USDT 0.999086 美元（CoinGecko）。Binance 被擋時改用 OKX、比對 Kraken USDT：BTC 差 0.5 bps、ETH 2.1 bps，結論相同。
 
-### 沒做的（刻意）
-- **每日預測的快取修正沒有直接改**：`forecast/common.py` 的 sha256 是每筆帳本預測 `frame_sha256` 的一部分（目前 `4586056…65d1`，重算相符），改它等於改帳本行為。已寫提案 `forecast/proposals/P-data-closed-bars-cache-fix.md`：`backtest/data/BTCUSDT_1d.json`、`ETHUSDT_1d.json` 最後一列現在就是 11-11 盤中價（73,792.11／2,068.08），若明天 Binance 失敗、改用 OKX，這列不會被正確收盤覆寫。
-- 沒做網頁推播（iOS 需要推播伺服器和金鑰）；帳本、凍結模型、升級規則都沒動，也沒有註冊模型。
+### 沒做的（刻意，v6 當下）
+- 沒做網頁推播（iOS 需要推播伺服器和金鑰）；v6 當下帳本、凍結模型、升級規則都沒動，也沒有註冊模型。
+
+### 2026-11-11 14:47 台北：套用每日預測快取修正（pipeline，不是新的 App 版本）
+- 先前因為 `common.py` 會進入每筆預測的 `frame_sha256` 而暫緩。這是資料管線正確性問題（未收完日K被快取後，隔日會被當成收盤），不是模型調整，所以仍套用。既有帳本列不改寫。
+- `update_candles()` 只快取並使用已收完的 00:00 UTC 日K；寫入時加 `fetched_at`；後備來源可以覆寫「寫入時還沒收完」的過期列，但不覆寫已收完的歷史。全部來源失敗時也會刪掉過期列。
+- `events.jsonl` 追加 `type=frame_change`（hash `158adf0d…a05f`，`at=2026-11-11T06:47:11Z`）：`common.py` `404a0027…75e3` → `0242f000…7745`，`frame_sha256` `45860569…65d1` → `5fc66bc6…bf61`。完整性檢查接受事件前的舊 hash、事件後的新 hash。
+- 模型檔和升級規則未改。詳見 `forecast/proposals/P-data-closed-bars-cache-fix.md`。
 
 ### 研究依據
 - `/workspace/trading/research/crypto/CRYPTO-20261111-1403-data-reliability-cross-source.md`（Drive 1R4umMzuoqc7BV1oEk-ZD-1Ks2zYebNsB）：2023 年起換交易所只讓 trend3 不同 0–1 天／1,410 天；把未收完的K當收盤或晚一天沒更新，6–8% 的日子會判斷錯。
@@ -33,6 +38,7 @@
 - `tests/reliability.test.mjs`（10 項）：只留已收完K、台北 09:00／12:00 黃紅門檻、跨來源 0.5%／2%／趨勢不同、缺日／重複／非 00:00 UTC、翻轉價數學（收在翻轉價＝剛好在均線上）、1%／0.25% 門檻、**真實 Binance 快取重算 BTC 200 日翻轉 73,168.62（−0.85%）、ETH +4.85%，與研究 §5c 一致**、後備順序與 `forecast/common.py` 一致、SW v6。
 - `tests/e2e_v6.mjs`：iPhone 尺寸，首頁兩個資料狀態徽章、接近翻轉句型、首頁沒有 bps／MA／交易所名稱等術語、進階預設收合、資料可靠度卡內容、**擋掉 Binance 時改用 OKX＋Kraken 比對**、沒有水平捲動和主控台錯誤；截圖 `screenshots/v6-*.png`。
 - 既有測試全過：decision、parity、dca、live、events（node）、`forecast/test_forecast.py`、`forecast/events/test_events.py`、`e2e`、`e2e_v2`～`e2e_v5`、`fallback`。`e2e_v2`／`e2e_v3` 自 v4 起工具收進「進階」後會等不到輸入框（在 v5 線上版也一樣失敗），這版讓它們先打開進階；`e2e_v5` 版本檢查改成接受 v5 以後。
+- 快取修正另加：`test_update_candles_rejects_unfinished_and_fallback_overwrites_stale`、`test_frame_change_event_allows_new_hash_keeps_old`。
 
 ## v5（2026-11-11）：本週要注意＋大漲大跌原因與指標紀錄
 
