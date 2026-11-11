@@ -41,3 +41,33 @@ summary{cursor:pointer;color:var(--blue);font-size:13.5px;font-weight:600}
 .foot{max-width:720px;margin:0 auto;padding:6px 16px calc(env(safe-area-inset-bottom) + 24px);font-size:12.5px;color:#c6cddb}
 .foot strong{color:var(--warn)}
 .nowrap{white-space:nowrap}
+/* ---- v2 decision layer ---- */
+section.card,[id]{scroll-margin-top:64px}
+.jump{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.jump::-webkit-scrollbar{display:none}
+.jump a{flex:none;color:var(--fg);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px}
+.decide{border-color:#33415e}
+.state-big{display:inline-block;font-size:30px;font-weight:800;padding:2px 14px;border-radius:12px;margin-top:4px}
+.st-hold{background:#123d2c;color:var(--up)}.st-reduce{background:#3b3216;color:var(--warn)}.st-out{background:#3d1a1f;color:var(--dn)}
+.num.sm{font-size:20px}.dn{color:var(--dn)}
+.why{font-size:14px;margin:10px 0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.kpis>div{background:#111827;border:1px solid var(--line);border-radius:10px;padding:8px}
+.kpis .label{min-height:2.6em}
+.money{font-size:14px;background:#13203a;border-radius:8px;padding:8px 10px}
+label.inline{display:block;font-size:14px;margin:10px 0}
+input,select{font:inherit;font-size:16px;color:var(--fg);background:#0f1522;border:1px solid #33415e;border-radius:8px;padding:7px 9px;max-width:100%}
+label.inline input{width:5em;text-align:center}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 12px}
+.form.three{grid-template-columns:1fr 1fr 1fr}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--mut)}
+.form label input,.form label select{width:100%}
+.form label.check{flex-direction:row;align-items:center;gap:8px;grid-column:1/-1;font-size:13.5px;color:var(--fg)}
+.form label.check input{width:auto;transform:scale(1.2)}
+tr.hl th,tr.hl td{color:var(--blue);font-weight:700}
+table.cost td{white-space:nowrap}
+.facts{margin:0;padding-left:18px}.facts li{margin-bottom:9px}
+.src{font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:0 4px;white-space:nowrap}
+#signals>details{border-top:0;margin-top:0;padding-top:0}
+#signals>details>summary{font-size:15px}
+@media (max-width:380px){.kpis{grid-template-columns:1fr 1fr}.form.three{grid-template-columns:1fr 1fr}}

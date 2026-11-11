@@ -73,7 +73,13 @@ export async function fetchFng() {
     return { source: 'alternative.me', data: j.data.map(x => ({ t: +x.timestamp * 1000, v: +x.value })).sort((a, b) => a.t - b.t), errors: [] };
   } catch (e) { return { source: null, data: null, errors: [`alternative.me: ${e.message || e}`] }; }
 }
+let pricesP = null;
+/** One CoinGecko call for BTC, ETH, USDT in USD and TWD (also gives the USD/TWD rate). Shared per page load. */
+export function fetchPrices(force = false) {
+  if (force || !pricesP) pricesP = getJSON('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd,twd').catch(() => { pricesP = null; return null; });
+  return pricesP;
+}
 export async function fetchSpot(sym) {
-  try { const j = await getJSON(`https://api.coingecko.com/api/v3/simple/price?ids=${COIN[sym].gecko}&vs_currencies=usd,twd`); return j[COIN[sym].gecko]; }
-  catch { return null; }
+  const j = await fetchPrices();
+  return j ? j[COIN[sym].gecko] ?? null : null;
 }
