@@ -13,6 +13,7 @@ import * as JR from './journal.js';
 import * as ID from './intraday.js';
 import * as TS from './tested.js';
 import * as TB from './tradeband.js';
+import * as RB from './robust.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -153,7 +154,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v20';
+const VERSION = 'v21';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -743,6 +744,7 @@ function modelsCard() {
     <p class="small">每天早上 8 點收盤後，所有登記的模型各自預測 BTC、ETH 未來 7 天（上漲機率、價格區間、建議部位），寫進只能新增、不能改的帳本（每筆都有雜湊鏈，並推到公開 GitHub）。7 天到期就自動評分，每個模型也各自跑一個虛擬 NT$100 萬的投資組合。每週檢討一次：挑戰者要實際累積 ≥ 8 週，而且「預測分數（Brier）」和「虛擬投資的風險調整報酬」都顯著比冠軍好、歷史回測不更差、最大跌幅不多跌 5 個百分點以上，才會取代冠軍。模型程式碼一登記就凍結；想改參數只能登記新版本、從零開始累積紀錄。</p>
     <div class="scroll"><table class="bt"><thead><tr><th>模型</th><th>實盤預測／已評分</th><th>實盤 Brier</th><th>虛擬投資</th><th>回測 Brier</th><th>回測年化</th><th>回測最大跌幅</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="small muted" id="pup-note">${esc(PU.advNote(LIVE))}</p>
+    ${RB.robustLine()}
     <p class="small muted">Brier：預測機率和實際結果的平方差，越低越好（永遠猜 50% = 0.25）。回測期間 ${esc(W[LIVE.champion.key]?.start || '—')}～${esc(W[LIVE.champion.key]?.end || '—')}，每天只用當天以前的資料。帳本：<a href="${esc(LIVE.ledger.repo)}" target="_blank" rel="noopener">GitHub coin-signal/ledger</a>（最後一筆雜湊 ${esc((LIVE.ledger.last_hash || '').slice(0, 12))}…）。預測產生於 ${fmtTime(Date.parse(LIVE.generated_at))}。</p>
   </section>`;
 }
