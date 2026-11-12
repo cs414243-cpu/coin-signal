@@ -135,3 +135,7 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .jr-del{font-size:12px;padding:2px 6px}
 .ok-inline{color:var(--up)}
 .fc .live-line{font-size:12.5px;margin:2px 0 4px;line-height:1.5}
+/* v14 試過但沒通過的訊號 */
+.ts-list{list-style:none;margin:0;padding:0}.ts-item{border-top:1px solid #2a3044;padding:8px 0}.ts-item:first-child{border-top:0}
+.ts-item p{margin:3px 0}.ts-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ts-sum{margin:8px 0}
+.ts-note{background:#1d2333;border-radius:10px;padding:2px 12px 6px;margin-top:12px}

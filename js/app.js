@@ -10,6 +10,7 @@ import * as FR from './fresh.js';
 import * as PU from './pup.js';
 import * as JR from './journal.js';
 import * as ID from './intraday.js';
+import * as TS from './tested.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -150,7 +151,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v13';
+const VERSION = 'v14';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -570,7 +571,7 @@ function relOut() {
 }
 
 // ======================= v13: 盤中離翻轉價多遠 =======================
-let TICK = {}, INTRA = null;
+let TICK = {}, INTRA = null, TESTED = null;
 function liveInfo(c) {
   const ctx = CTX[c], t = TICK[c]; if (!ctx || !t || t.status !== 'ok') return null;
   const bars = RL.closedBars(ctx.live.candles, t.at), last = bars[bars.length - 1]; if (!last) return null;
@@ -789,6 +790,7 @@ async function render(force = false) {
   try { OUTC = await fetch('data/outcomes.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || OUTC; } catch { OUTC = OUTC || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
+  try { TESTED = await fetch('data/tested_signals.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TESTED; } catch { TESTED = TESTED || null; }
   try { INTRA = await fetch('data/intraday.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || INTRA; } catch { INTRA = INTRA || null; }
   TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
@@ -833,7 +835,7 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
@@ -844,6 +846,7 @@ async function renderAdv(force = false) {
       ${FR.withAsof(riskCard(), FR.asofOf('weekly', DEC), NOW)}
       ${FR.withAsof(planCard(), FR.asofOf('dca', DCA), NOW)}
       ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
+      ${TS.testedCard(TESTED)}
       ${eventsCard(EV)}
       ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
       ${costCard(coin)}

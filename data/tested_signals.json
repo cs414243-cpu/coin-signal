@@ -1,0 +1,463 @@
+{
+ "generated_at": "2026-11-12T01:39:11+00:00",
+ "as_of": "2026-11-12",
+ "champion": "trend_vt@1",
+ "pass_p": 0.975,
+ "oos_period": "2024-01-01 起（選模時沒有看過的期間），BTC＋ETH 合計",
+ "source": "forecast/proposals/proto_*_results.json（backtest/tested_signals.py 只讀取）",
+ "count": 12,
+ "signals": [
+  {
+   "id": "stablecoin_liquidity",
+   "group": "news",
+   "name": "穩定幣供給增減（USDT＋USDC）",
+   "what": "常聽到「穩定幣變多＝新錢進場」：過去 30 天穩定幣總量縮水時，投入減半。",
+   "why": "2022–23 年看起來很好，2024 年後沒有延續；上漲機率小幅變準，其實只是把機率往 50% 收。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_stablecoin_liquidity_results.json",
+   "proposal": "forecast/proposals/P-stablecoin-liquidity.md",
+   "variant": "sc_g30_cut",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.815,
+    "cagr": 0.1472,
+    "maxdd": -0.1871,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.874,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.283,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.815（冠軍 0.850）、年化 14.7%（16.3%）、最大跌幅 −18.7%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "implied_vol",
+   "group": "news",
+   "name": "選擇權市場的恐慌指數（DVOL 隱含波動）",
+   "what": "用選擇權市場對未來 30 天波動的預期，取代過去 30 天的實際波動來決定放多少；或在它急升時減碼。",
+   "why": "選模期間（2022–23）就沒有任何版本贏冠軍。它預測波動確實比較準，但用它只是平均少放一點；急升後一週反而常反彈，急升就減碼是錯的方向。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_implied_vol_results.json",
+   "proposal": "forecast/proposals/P-implied-vol.md",
+   "variant": "iv_target",
+   "is_failed": true,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.791,
+    "cagr": 0.1294,
+    "maxdd": -0.1686,
+    "brier": 0.2523
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842,
+    "brier": 0.2523
+   },
+   "is_sharpe": 0.698,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.3695,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.791（冠軍 0.851）、年化 12.9%（16.3%）、最大跌幅 −16.9%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "onchain_valuation",
+   "group": "news",
+   "name": "鏈上估值 MVRV（價格 vs 持有人平均成本）",
+   "what": "價格低於全體持有人平均成本（MVRV 小於 1）時，至少保留一小部分部位；偏貴時減碼。",
+   "why": "事先選的版本在 2024 年後變差；唯一看起來好的版本不是事先選的、也不顯著。MVRV 是看好幾年的估值，對一週沒有預測力。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_onchain_valuation_results.json",
+   "proposal": "forecast/proposals/P-onchain-valuation.md",
+   "variant": "mv_floor",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.803,
+    "cagr": 0.1528,
+    "maxdd": -0.1958,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.761,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.2135,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.803（冠軍 0.850）、年化 15.3%（16.3%）、最大跌幅 −19.6%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "macro_calendar",
+   "group": "news",
+   "name": "美國總經公布日（FOMC 利率決議、CPI）",
+   "what": "公布當天把投入減半（事先選的版本：只在兩條均線意見分歧時才減）。",
+   "why": "減碼的那幾天少賺的比少虧的多，結果明顯比冠軍差。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_macro_calendar_results.json",
+   "proposal": "forecast/proposals/P-macro-calendar.md",
+   "variant": "cut50_D_mixed",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.776,
+    "cagr": 0.1447,
+    "maxdd": -0.1938,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.743,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.005,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.776（冠軍 0.850）、年化 14.5%（16.3%）、最大跌幅 −19.4%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "relative_strength",
+   "group": "news",
+   "name": "ETH／BTC 誰比較強",
+   "what": "把資金往最近比較強的那個幣傾斜（「強者恆強」）。",
+   "why": "選模期間（2022–23）就沒有任何版本贏冠軍；2024 年後也沒有比較好。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_relative_strength_results.json",
+   "proposal": "forecast/proposals/P-relative-strength.md",
+   "variant": "rs_ret3",
+   "is_failed": true,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.819,
+    "cagr": 0.1596,
+    "maxdd": -0.2106,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.692,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.3685,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.819（冠軍 0.850）、年化 16.0%（16.3%）、最大跌幅 −21.1%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "portfolio_risk",
+   "group": "news",
+   "name": "兩個幣合起來的風險（BTC、ETH 幾乎同漲同跌）",
+   "what": "兩個幣合起來的預期波動太高時，兩個一起縮小。",
+   "why": "少跌一點，但少賺更多；直接少放一點就有一樣甚至更好的效果。冠軍的合計風險本來就沒有超過預算。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_portfolio_risk_results.json",
+   "proposal": "forecast/proposals/P-portfolio-risk.md",
+   "variant": "pr_cap",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.769,
+    "cagr": 0.1228,
+    "maxdd": -0.1593,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.762,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.3455,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.769（冠軍 0.850）、年化 12.3%（16.3%）、最大跌幅 −15.9%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "vol_estimator",
+   "group": "tweak",
+   "name": "換一種算波動的方法",
+   "what": "用 60 天波動（或其他更準的估計）取代 30 天波動，來決定放多少。",
+   "why": "2022–23 年大勝，2024 年後只是打平；波動預測更準，不等於投資結果更好。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-11",
+   "file": "forecast/proposals/proto_vol_estimator_results.json",
+   "proposal": "forecast/proposals/P-vol-estimator.md",
+   "variant": "vol60",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.852,
+    "cagr": 0.1588,
+    "maxdd": -0.179,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.898,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.5145,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.852（冠軍 0.850）、年化 15.9%（16.3%）、最大跌幅 −17.9%（−18.4%）。",
+   "judge_text": "只比冠軍多一點點，比冠軍好的把握 51.4%（規則要約 97.5%），很可能只是運氣。"
+  },
+  {
+   "id": "trend_ensemble",
+   "group": "tweak",
+   "name": "多種速度的趨勢一起看",
+   "what": "把 20～360 天好幾條趨勢平均，希望少一點來回翻轉。",
+   "why": "翻轉確實少了，但跟上趨勢變慢，報酬明顯變少；選模期間就沒有版本過關。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-11",
+   "file": "forecast/proposals/proto_trend_ensemble_results.json",
+   "proposal": "forecast/proposals/P-trend-ensemble.md",
+   "variant": "donch7",
+   "is_failed": true,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.542,
+    "cagr": 0.077,
+    "maxdd": -0.1893,
+    "brier": 0.25472
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.418,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.0395,
+   "brier_dm_p": 0.09218,
+   "result_text": "2024 年起：夏普 0.542（冠軍 0.850）、年化 7.7%（16.3%）、最大跌幅 −18.9%（−18.4%）。上漲機率誤差 0.25472（冠軍 0.25232，越小越好）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "no_trade_band",
+   "group": "tweak",
+   "name": "差一點就不交易",
+   "what": "建議比例和現在持有的差不到 20 個百分點就不動，省手續費。",
+   "why": "確實省一點成本，但報酬只多一點點、不顯著；「等幾天確認再動」的版本明顯更差。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-11",
+   "file": "forecast/proposals/proto_no_trade_band_results.json",
+   "proposal": "forecast/proposals/P-no-trade-band.md",
+   "variant": "band20",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.869,
+    "cagr": 0.1704,
+    "maxdd": -0.1938,
+    "brier": 0.25232
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.745,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.644,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.869（冠軍 0.850）、年化 17.0%（16.3%）、最大跌幅 −19.4%（−18.4%）。",
+   "judge_text": "只比冠軍多一點點，比冠軍好的把握 64.4%（規則要約 97.5%），很可能只是運氣。"
+  },
+  {
+   "id": "pup_calibration",
+   "group": "tweak",
+   "name": "把上漲機率校正得更準",
+   "what": "把冠軍的一週上漲機率往 50% 拉近一半。",
+   "why": "誤差小一點但不顯著；所有「變準」的版本都只是更接近 50%，沒有任何版本勝過一律猜 50%。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-11",
+   "file": "forecast/proposals/proto_pup_calibration_results.json",
+   "proposal": "forecast/proposals/P-pup-calibration.md",
+   "variant": "shrink50",
+   "is_failed": false,
+   "kind": "prob",
+   "oos": {
+    "brier": 0.25119
+   },
+   "champ_oos": {
+    "brier": 0.25232
+   },
+   "const50_brier": 0.25,
+   "brier_dm_p": 0.25698,
+   "result_text": "2024 年起：上漲機率誤差 0.25119（冠軍 0.25232；一律猜 50% 是 0.25000，越小越好）。買賣建議不變，所以投資結果和冠軍一樣。",
+   "judge_text": "差距可能只是運氣（統計檢定 p＝0.26，要小於 0.05 才算數），而且還是輸給一律猜 50%。"
+  },
+  {
+   "id": "combo_calib_exec",
+   "group": "tweak",
+   "name": "機率校正＋投入調整一起用",
+   "what": "把上面「機率往 50% 收」和「60 天波動」兩個小改善合在一起。",
+   "why": "兩個沒被證實的小優勢加起來還是沒被證實；而且這些成分是看過 2024 年後結果才挑的，數字還偏樂觀。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_combo_calib_exec_results.json",
+   "proposal": "forecast/proposals/P-combo-calib-exec.md",
+   "variant": "s50_vol60",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.852,
+    "cagr": 0.1588,
+    "maxdd": -0.179,
+    "brier": 0.25119
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842,
+    "brier": 0.25232
+   },
+   "is_sharpe": 0.898,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.518,
+   "brier_dm_p": 0.25698,
+   "result_text": "2024 年起：夏普 0.852（冠軍 0.850）、年化 15.9%（16.3%）、最大跌幅 −17.9%（−18.4%）。上漲機率誤差 0.25119（冠軍 0.25232，越小越好）。",
+   "judge_text": "只比冠軍多一點點，比冠軍好的把握 51.8%（規則要約 97.5%），很可能只是運氣。"
+  },
+  {
+   "id": "calibrated_band",
+   "group": "tweak",
+   "name": "一週可能漲跌範圍的另一種算法",
+   "what": "用別的波動模型或滾動校正，重算「一週大概會漲跌多少」的範圍。",
+   "why": "事先選的版本沒有明顯變好；整體改善很小、也不穩定，不影響買賣建議。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-11",
+   "file": "forecast/proposals/proto_calibrated_band_results.json",
+   "proposal": "forecast/proposals/P-calibrated-band.md",
+   "variant": "HAR-range + rolling conformal per-tail (365d)",
+   "is_failed": false,
+   "kind": "band",
+   "oos": {
+    "qloss": 0.01973
+   },
+   "champ_oos": {
+    "qloss": 0.01997
+   },
+   "holm_p": 0.66186,
+   "result_text": "2024 年起：範圍誤差 0.01973（冠軍 0.01997，越小越好），差 1.2%。只影響範圍的顯示，不影響買賣建議。",
+   "judge_text": "小幅改善但不顯著（多重檢定後 p＝0.66），不值得換。"
+  }
+ ],
+ "hold_less": [
+  {
+   "id": "implied_vol",
+   "scale": 0.8498,
+   "oos": {
+    "sharpe": 0.855,
+    "cagr": 0.1403,
+    "maxdd": -0.1578
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842
+   },
+   "p_sharpe_better": 0.7675,
+   "file": "forecast/proposals/proto_implied_vol_results.json",
+   "text": "隱含波動（DVOL）那次測試：直接把冠軍的建議比例打 85 折：夏普 0.855（冠軍 0.851）、最大跌幅 −15.8%（−18.4%），但年化也從 16.3% 降到 14.0%。"
+  },
+  {
+   "id": "portfolio_risk",
+   "scale": 0.8303,
+   "oos": {
+    "sharpe": 0.855,
+    "cagr": 0.1372,
+    "maxdd": -0.1543
+   },
+   "champ_oos": {
+    "sharpe": 0.85,
+    "cagr": 0.1629,
+    "maxdd": -0.1842
+   },
+   "p_sharpe_better": null,
+   "file": "forecast/proposals/proto_portfolio_risk_diag_posthoc.json",
+   "text": "兩幣合計風險那次測試：直接把冠軍的建議比例打 83 折：夏普 0.855（冠軍 0.850）、最大跌幅 −15.4%（−18.4%），但年化也從 16.3% 降到 13.7%。"
+  }
+ ],
+ "prob50": {
+  "const50_brier": 0.25,
+  "champ_brier": 0.25232
+ },
+ "earlier_ideas": [
+  {
+   "idea": "「暴風雨前的寧靜」：波動很低之後會大漲或大跌",
+   "why": "是門檻跟著波動變的假象，固定門檻後就沒有"
+  },
+  {
+   "idea": "穩定幣縮水就會跌",
+   "why": "只是 2022 年那段行情，修正後沒有方向"
+  },
+  {
+   "idea": "「CPI／FOMC 那天波動比較大」",
+   "why": "多重檢定後不顯著（App 只列日期）"
+  },
+  {
+   "idea": "恐懼貪婪指數反向操作（極度恐懼買、極度貪婪賣）",
+   "why": "沒有優勢"
+  },
+  {
+   "idea": "永續合約資金費率偏高就會跌",
+   "why": "沒有優勢"
+  },
+  {
+   "idea": "看新聞、看敘事",
+   "why": "幾乎所有原因都是行情發生中或之後才出現，事前拿不到"
+  },
+  {
+   "idea": "壓力日（美股大跌等）先減碼",
+   "why": "冠軍的波動控制已經做到了"
+  }
+ ],
+ "earlier_source": "forecast/proposals/P-events-C-rejected.md",
+ "missing": [],
+ "unlisted": []
+}
