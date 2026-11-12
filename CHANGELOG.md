@@ -1,5 +1,24 @@
 # 幣訊號 更新紀錄
 
+## v21（2026-11-13）：換個設定、換個幣還靈嗎（冠軍穩健度檢查）＋提案 P-trend-robustness
+
+### 為什麼
+- 2026-11-13 01:40 台北開始（研究筆記 Drive 1l_Ec2GjT_8z4__Zdx02xHN1EXhc7gahb；coin-signal commit 2cb6c52）。首頁建議全靠冠軍 trend_vt@1（50/200 日平均線＋30% 波動目標＋30 天波動），但從沒檢查過它是不是「剛好調到」的尖峰，也沒在沒看過的幣上試過。
+
+### 研究（可重現，扣成本，事先登記，2022–23 / 2024 年起）
+- `forecast/proposals/proto_trend_robustness.py`：(1) 參數格點 快線 30–70 × 慢線 150–250 × 目標波動 25–35% × 波動天數 20–60＝300 組（BTC+ETH 各半，同 paper_sim）；(2) 凍結規則原封不動用在 BNB、XRP、ADA、LTC、DOGE、SOL、LINK、TRX（Binance 公開免金鑰日K，`data_oou/`），對照一直抱著與固定 85%。
+- 高原：冠軍 IS 0.723／OOS 0.851；8 個一步鄰居中位差 −0.018／−0.020；冠軍 IS 排第 71 百分位（不是尖峰）；在冠軍 −0.10 以內 IS 56.5%、OOS 44.8% → 判定「中等」（離 50/200 太遠才明顯變差：快線 30/70、慢線 ≥225）。IS 最佳 50/175/30%/60 → OOS 0.900（P 0.68，不顯著）→ 不改參數。300 組中 95.7% 夏普勝兩幣一直抱著（0.485）、100% 最大跌幅較淺。
+- 換幣：最大跌幅 8/8 變淺（−23%～−34% vs 抱著 −51%～−88%），夏普只 4/8 勝抱著，等權籃子 夏普 0.691 vs 0.560（P 0.69）、年化 10.1% vs 16.9% → 判定「混合」：少跌可推廣、多賺不可推廣。倖存者偏誤：只測今天還在的大幣。截斷檢查差 0；快速模擬＝paper_sim（差 0）。詳見 `forecast/proposals/P-trend-robustness.md`。
+
+### 新增／修改
+- **進階「預測模型與自我改善機制」卡內一行「換個設定、換個幣還靈嗎」**（首頁不變）：數字是 `app/js/robust.js` 的常數 `ROBUST`，抄自 `proto_trend_robustness_results.json`（測試逐一比對），結論「它可靠的用處是大跌時少虧，不是多賺」，固定附倖存者偏誤說明。
+- `backtest/tested_signals.py` 新增白話列 `trend_robustness`（tweak）；並修正潛在錯誤：結果檔沒有 Brier 時（如 execution_timing）不再輸出 `brier: null`（否則 11/16 重產後 tested.test 會失敗）。`tested_signals.json` 由 11/16 weekly.sh 重產。
+- App 版本 v21、service worker 快取 `v21-2026-11-13`（新增 `./js/robust.js`）。帳本、凍結模型、登記表、升級規則都沒動（27 個核心檔 sha256 前後相同），沒有註冊模型。頁尾警語不變。
+
+### 測試
+- 新增 `tests/robust.test.mjs` 4 項（數字＝結果檔、自我檢查、白話無術語與誠實標示、只在進階卡＋版本）與 `tests/e2e_v21.mjs`（iPhone 390×844，首頁不含、進階卡內文字＝函式輸出、SW v21；本機與線上都過）；`exec_timing.test.mjs`、`e2e_v20.mjs` 版本比對放寬到 v2x。
+- node 131／131；`test_forecast.py` 10／10；`test_events.py` 5／5；`test_verify_live.py` 11／11（部署後）；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v21`、`fallback` 全過；`verify_live.py` LIVE CHECK OK（47 檔）。
+
 ## v20（2026-11-13）：幾點動手（同一天做完就好，拖到隔天明顯變差）＋提案 P-execution-timing
 
 ### 為什麼
