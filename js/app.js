@@ -14,6 +14,7 @@ import * as ID from './intraday.js';
 import * as TS from './tested.js';
 import * as TB from './tradeband.js';
 import * as RB from './robust.js';
+import * as GD from './guard.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -154,7 +155,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v21';
+const VERSION = 'v22';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -606,6 +607,7 @@ function intraOut() {
     <p class="small muted">算法：<code>backtest/intraday_cross.py</code> → <code>data/intraday.json</code>（${esc(I.source)}，${esc(I.periods.full.start)}～${esc(I.periods.full.end)}，產生於 ${fmtTime(Date.parse(I.generated_at))}）。翻轉價只用前一天以前的收盤（和首頁同一算法），整點價格＝那一小時K的收盤價，不偷看之後的價格。次數是 BTC＋ETH、50 日線＋200 日線合計，每個（幣、均線、日）在每個整點算一次；同一段行情會連續好幾天出現，所以次數不是獨立樣本，比例只當參考。少於 ${ID.MIN_N} 次不顯示比例。這是過去紀錄，不是預測，也不改變規則。</p>` : '<p class="small">過去紀錄暫時讀不到。</p>';
   return `<div class="scroll"><table class="bt"><tbody>${rows}</tbody></table></div>
     <p class="small">規則每天只在早上 8 點收盤時判斷一次；盤中價格穿過翻轉價<strong>不是訊號</strong>，要等收盤才算。首頁那一行就是用這裡的即時價和前一天收盤算出的翻轉價比較。</p>
+    ${GD.guardLine()}
     ${hist}`;
 }
 
