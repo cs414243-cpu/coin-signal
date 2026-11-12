@@ -21,7 +21,7 @@
 - 測試結果：
   - node 139／139；`test_forecast.py` 10／10；`test_events.py` 5／5。
   - `e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v23`、`fallback` 本機全過。
-  - 部署後檢查：DEPLOY_PENDING
+  - 部署後檢查：coin-signal 13e3062 已推送；`test_verify_live.py` 11／11；`verify_live.py` LIVE CHECK OK（49 檔）；`e2e_v23` 線上也過。
 
 ## v22（2026-11-13）：盤中急跌要不要先賣（盤中急跌保護）＋提案 P-intraday-guard → rejected
 
