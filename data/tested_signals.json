@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-12T07:33:44+00:00",
+ "generated_at": "2026-11-12T11:41:45+00:00",
  "as_of": "2026-11-12",
  "champion": "trend_vt@1",
  "pass_p": 0.975,
  "oos_period": "2024-01-01 起（選模時沒有看過的期間），BTC＋ETH 合計",
  "source": "forecast/proposals/proto_*_results.json（backtest/tested_signals.py 只讀取）",
- "count": 15,
+ "count": 17,
  "signals": [
   {
    "id": "stablecoin_liquidity",
@@ -460,6 +460,72 @@
    "brier_dm_p": null,
    "result_text": "2024 年起：夏普 0.789（冠軍 0.851）、年化 14.9%（16.3%）、最大跌幅 −19.7%（−18.4%）。",
    "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "perp_positioning",
+   "group": "news",
+   "name": "永續合約資金費率、期貨比現貨貴多少（做多的人擠不擠）",
+   "what": "常聽到「資金費率太高＝做多的人太擠，很快會多殺多」：在做多的人付費偏高、偏高持續一個月、或季度期貨比現貨貴太多時，把投入減半；趨勢向上但做空的人在付費時加碼；也試了依資金費率高低調整上漲機率。",
+   "why": "選模期間（2022–23）就沒有任何版本贏冠軍。資金費率偏高通常出現在行情正強的時候，之後一週平均反而續漲，所以「偏高就減碼」是錯的方向，2024 年後明顯比冠軍差；「趨勢向上但做空的人付費就加碼」不常發生，2024 年後只和冠軍打平、2022–23 年還較差；依資金費率調整上漲機率在 2022–23 年變不準，2024 年後小幅變準但不顯著，也還是輸給一律猜 50%。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_perp_positioning_results.json",
+   "proposal": "forecast/proposals/P-perp-positioning.md",
+   "variant": "fund_hi_cut",
+   "is_failed": true,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.603,
+    "cagr": 0.0952,
+    "maxdd": -0.1839,
+    "brier": 0.2523
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842,
+    "brier": 0.2523
+   },
+   "is_sharpe": 0.677,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.0945,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.603（冠軍 0.851）、年化 9.5%（16.3%）、最大跌幅 −18.4%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "volume_liquidity",
+   "group": "tweak",
+   "name": "成交量（量價配合、量縮、流動性、爆量下跌）",
+   "what": "常聽到「沒量的漲不可信」「爆量長黑是出貨」：過去 50 天下跌日的成交量比上漲日大、最近成交量萎縮、交易變得不流動、或最近一週有爆量下跌時，把投入減半；也試了依量價方向調整上漲機率。",
+   "why": "事先選出的「下跌日的量比較大就減半」2024 年後只比冠軍多一點點，跟直接把冠軍打 85 折差不多，而且全靠 BTC、ETH 反而變差；量縮就減半明顯更差、流動性差就減半也略差；爆量下跌後的那一週平均反而上漲（ETH 2024 年後例外，次數也很少），所以「爆量就減碼」2024 年後比冠軍差。依量價方向調整上漲機率小幅變準但不顯著，只是把機率往 50% 拉近。另外 2022 年 7 月到 2023 年 3 月 Binance 的 BTC 零手續費活動把成交量灌大好幾倍，成交量本身就不太可靠。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_volume_liquidity_results.json",
+   "proposal": "forecast/proposals/P-volume-liquidity.md",
+   "variant": "obv_cut",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.863,
+    "cagr": 0.1528,
+    "maxdd": -0.182,
+    "brier": 0.2523
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842,
+    "brier": 0.2523
+   },
+   "is_sharpe": 0.8,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.506,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.863（冠軍 0.851）、年化 15.3%（16.3%）、最大跌幅 −18.2%（−18.4%）。",
+   "judge_text": "只比冠軍多一點點，比冠軍好的把握 50.6%（規則要約 97.5%），很可能只是運氣。"
   },
   {
    "id": "calibrated_band",
