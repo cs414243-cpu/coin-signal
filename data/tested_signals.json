@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-12T05:40:46+00:00",
+ "generated_at": "2026-11-12T07:33:44+00:00",
  "as_of": "2026-11-12",
  "champion": "trend_vt@1",
  "pass_p": 0.975,
  "oos_period": "2024-01-01 起（選模時沒有看過的期間），BTC＋ETH 合計",
  "source": "forecast/proposals/proto_*_results.json（backtest/tested_signals.py 只讀取）",
- "count": 14,
+ "count": 15,
  "signals": [
   {
    "id": "stablecoin_liquidity",
@@ -426,6 +426,39 @@
    "p_sharpe_better": 0.069,
    "brier_dm_p": null,
    "result_text": "2024 年起：夏普 0.841（冠軍 0.851）、年化 16.1%（16.3%）、最大跌幅 −18.5%（−18.4%）。",
+   "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "calendar_cycle",
+   "group": "news",
+   "name": "比特幣減半週期、月初月底、星期幾、月份季節性",
+   "what": "常聽到「減半後第二年是熊市」「月初容易漲」「某些月份比較會漲」：在這些日子把投入減半或加碼；也試了固定每週同一天才調整一次，以及依月份調整上漲機率。",
+   "why": "事先選出的「每週四才調整一次」省了一半手續費，但跟不上行情，2024 年後比冠軍差；「減半後第二年減半」2024 年後只是打平，等於少放一點，而且減半到現在只有兩三輪，樣本太少，無法證明有沒有用；月初月底和月份的規律在 2024 年後方向反了；依月份調整上漲機率反而變不準。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_calendar_cycle_results.json",
+   "proposal": "forecast/proposals/P-calendar-cycle.md",
+   "variant": "dow_reb",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.789,
+    "cagr": 0.1494,
+    "maxdd": -0.1971,
+    "brier": 0.2523
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842,
+    "brier": 0.2523
+   },
+   "is_sharpe": 0.833,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.3555,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.789（冠軍 0.851）、年化 14.9%（16.3%）、最大跌幅 −19.7%（−18.4%）。",
    "judge_text": "比冠軍差。"
   },
   {
