@@ -1,5 +1,20 @@
 # 幣訊號 更新紀錄
 
+## v16（2026-11-12）：可靠度修正（試過的訊號補上「跌深或盤勢轉差時先減碼」的白話說明）
+
+### 為什麼
+- 2026-11-12 13:39 台北開始。這次只修可靠度和白話說明，不加新模型、不改首頁。11/12 12:42 測完的 P-drawdown-regime 沒有白話說明，「試過但沒通過的訊號」卡只顯示「新測完的候選訊號（白話說明整理中）」；`app/data/tested_signals.json` 也還沒重產，`tests/tested.test.mjs` #88、#92（資料過期）、#95（測試假設「目前沒有任何未說明的提案」）失敗。
+
+### 修正
+- **「試過但沒通過的訊號」新增第 14 項「跌深或盤勢轉差時先減碼」**（放在「調整目前規則的細節」）。顯示事先只用 2022–23 選出的 dd_own_cut（冠軍自己的虛擬帳戶離一年內最高點跌超過樣本內第 80 百分位就減半），數字全部讀自 `forecast/proposals/proto_drawdown_regime_results.json`：2024 年起夏普 0.841（冠軍 0.851）、年化 16.1%（16.3%）、最大跌幅 −18.5%（−18.4%），比冠軍差。白話原因（每一句都有測試對照結果檔）：2022–23 年有用（夏普 0.773 vs 0.723），但 2024 年後幾乎沒觸發（BTC 0%、ETH 0.2% 的日子）；不如直接把冠軍打 85 折（0.855、最大跌幅 −15.8%）；「大起大落就減半」夏普 0.700、成本每年 5.3%（冠軍 3.2%）；調整上漲機率的版本 Brier 0.25112 vs 0.2523（DM p 0.23，不顯著），和單純往歷來上漲比例收（0.25118）一樣，仍輸給一律 50%（0.25000）。
+- `app/data/tested_signals.json` 用 `backtest/tested_signals.py` 重產（14 列、`unlisted`／`errors` 皆空）。
+- `tests/tested.test.mjs` #95（模擬新結果檔＋壞檔）改成不假設真實資料裡沒有未說明的提案：預期的 `unlisted`／`errors`／「N 個說明整理中」都從已發布的 `tested_signals.json` 推算再加上模擬的那兩檔；檢查內容沒有放寬。新增 1 項：drawdown 那列和結果檔逐項一致、白話原因在結果檔裡成立、白話文字沒有「回撤／體制／HMM／Sharpe／Brier」等術語。
+- Service worker 快取版本 `v16-2026-11-12`；App 版本 v16。帳本、凍結模型、登記表、升級規則、提案檔都沒動，沒有註冊模型。首頁、頁尾警語不變。
+
+### 測試
+- 修改前：node 單元測試 101／104（`tested` #88、#92、#95 失敗）。
+- 修改後：node 單元測試 105／105 全過。`forecast/test_forecast.py` 10／10、`forecast/events/test_events.py` 5／5。`e2e`、`e2e_v2`～`e2e_v14`、`fallback` 全過；`e2e_v7` 第一次因 CoinGecko 暫時擋請求（瀏覽器回報 CORS 錯誤）失敗，重跑 3 次過 2 次，屬外部 API 偶發狀況，和這次修改無關。
+
 ## v15（2026-11-12）：可靠度修正（試過的訊號補上傳統市場風險訊號、舊測試不再隨日期壞掉）
 
 ### 為什麼
@@ -18,6 +33,16 @@
 ### 測試
 - 修改前：node 單元測試 95／102（7 個失敗：`decision` #8、`fresh` #4、`journal` #6、`trust` #3、#8、`tested` #1、#5）。
 - 修改後：node 單元測試 104／104 全過（`tested.test.mjs` 新增 2 項：跨資產那列和結果檔逐項一致、白話原因在結果檔裡成立；模擬一個沒說明的新結果檔＋一個壞掉的結果檔 → 前者出現通用列且數字一致、後者列在 `errors`、產生器正常結束）。`forecast/test_forecast.py` 10／10、`forecast/events/test_events.py` 5／5。`e2e`、`e2e_v2`～`e2e_v14`、`fallback` 全過（`e2e_v13` 第一次跑失敗一次、之後連續 3 次通過，判斷是即時價抓取的偶發狀況）。`weekly.sh` 語法檢查通過；`tested_signals.py` 重跑結果和測試一致。
+
+### 2026-11-12 12:34 台北：候選模型提案 P-drawdown-regime（未註冊）
+- 只做研究，不是新版 App：App、帳本、凍結模型、登記表、升級規則、`events.jsonl`、`common.py`、`engine.py`、`review_weekly.py`、`register.py`、`walkforward.py` 都沒動（19 檔前後 sha256 相同），沒有呼叫 `register.py`，coin-signal repo 沒動（HEAD c1356ab）。
+- 題目：「帳戶跌深了就少放一點」（回撤控制）和「市場處在高波動狀態就少放一點」（兩狀態體制模型），能不能讓冠軍 trend_vt@1 的一週預測或虛擬投組變好，而且勝過單純「冠軍 ×常數」？全部只用決策當下（日K收盤）已知的資料；體制模型參數只用 2023 年底以前的資料估一次後固定，之後只往前濾波、不回頭修正。
+- 事先固定 5 版（12:37 登記）：dd_own_cut（冠軍自己單幣虛擬帳戶離一年內最高點跌超過樣本內第 80 百分位〔BTC 23.2%、ETH 19.5%〕就減半）、dd_px_cut（幣價離一年高點跌超過樣本內第 80 百分位〔約 67%〕就減半）、hmm_cut（兩狀態模型判斷「高波動狀態」機率 > 50% 就減半）、rg_pup（上漲機率＝冠軍與「同一狀態歷來上漲比例」各半）、rg_lead_pup（樣本內最好的投入版＋rg_pup 機率）；對照「冠軍 ×0.9755」（同平均投入）與「冠軍 ×0.85」。
+- 只用 2022–23 挑：dd_own_cut 領先（夏普 0.773 vs 冠軍 0.723，只靠 BTC），rg_lead_pup 樣本內合格（Brier 0.25168 vs 0.25202）。hmm_cut 0.531 明顯較差。
+- 結果（2024 年起，兩幣合計）：冠軍 夏普 0.851、年化 16.3%、最大跌幅 −18.4%、Brier 0.2523；dd_own_cut 0.841／16.1%／−18.5%（2024 年起幾乎沒觸發：BTC 0 天、ETH 0.2% 的日子；比冠軍好的把握 0.07、比「冠軍 ×0.85」〔0.855／14.0%／−15.8%〕好的把握 0.11）；dd_px_cut 0.849（從未觸發）；hmm_cut 0.700（成本每年 5.3%，常在大跌大漲隔天減碼、錯過反彈）；rg_pup Brier 0.2511（DM p 0.23，不顯著；事後檢查：不分狀態只往歷來上漲比例收也有 0.2512，狀態資訊沒有貢獻；仍比「一律 50%」0.2500 差）。
+- 目前（11/11 收盤）：BTC 離一年高點 −27%、冠軍虛擬帳戶回撤 9.3%；ETH −40%、回撤 12.8%；兩幣都在低波動狀態（機率 0.11／0.13）。所有版本都不改今天的建議（BTC 0.427、ETH 空手）。
+- 判定 **rejected**：建議 11/16 週檢**不註冊、不採用**。不需要宗做新決定。
+- 檔案：`forecast/proposals/P-drawdown-regime.md`、`forecast/proposals/proto_drawdown_regime.py`（以及 `_IS_only.json`、`_results.json`、`_daily.csv`、`_diag_posthoc.json`）；研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261112-1234-drawdown-regime.md`。`forecast/test_forecast.py` 10/10、`forecast/events/test_events.py` 5/5 通過，帳本驗證通過。`backtest/tested_signals.py` 會自動把它列成「說明整理中」（已用暫存輸出確認），但 `app/data/tested_signals.json` 這次沒重產、白話說明也沒加（不改 App），所以 node 單元測試 101／104：`tested.test` #88、#92 要等 11/16 weekly.sh 重產資料後才過，#95 要等補上白話說明列才過。
 
 ## v14（2026-11-12）：試過但沒通過的訊號
 
@@ -59,6 +84,16 @@
 - 「沒通過」是依目前的升級規則；看起來略好的版本（例如差一點不交易）只是沒被證實，不代表一定比較差。樣本約 150 週，統計力有限。
 - 「少放一點」的兩個數字都是事後對照，不是事先登記的版本。
 
+### 2026-11-12 10:40 台北：候選模型提案 P-cross-asset（未註冊）
+- 只做研究，不是新版 App：App、帳本、凍結模型、登記表、升級規則、`events.jsonl`、`common.py`、`engine.py`、`review_weekly.py`、`register.py`、`walkforward.py` 都沒動（20 檔前後 sha256 相同），沒有呼叫 `register.py`，coin-signal repo 沒動（HEAD 65fc857）。
+- 題目：美股趨勢（S&P 500 對 200 日線、Nasdaq-100 對 50 日線）、美元指數、美國 10 年期殖利率、VIX 這些傳統市場風險訊號，能不能讓冠軍 trend_vt@1 的一週預測或虛擬投組變好？為了不偷看，決策只用**前一個美國交易日（含）以前**的收盤（週末假日沿用最後一個值）。資料：FRED 從本機連不上（全部逾時）、Stooq 是驗證頁，改用 Yahoo（S&P 500、Nasdaq-100、美元指數）、CBOE 官方 VIX、美國財政部官方 10 年期殖利率；原始檔存 `/workspace/trading/research/crypto/data/c_crossasset/`。Yahoo 的 VIX、10 年期和官方資料逐日比對過。
+- 事先固定 5 版（10:52 登記）：xa_spx200_cut（S&P 跌破 200 日線就減半）、xa_usd_cut（美元 20 日漲幅超過樣本內第 80 百分位 +2.46% 就減半）、xa_riskoff_cut（五項風險趨避中至少三項就減半）、xa_pup（上漲機率＝冠軍與「同一風險分數組歷來上漲比例」各半）、xa_lead_pup（樣本內最好的投入版＋xa_pup 機率）；另固定對照「冠軍 ×0.951」（和領先版同樣平均投入）。
+- 只用 2022–23 挑：xa_usd_cut 領先（夏普 0.852 vs 冠軍 0.723）；但 xa_pup 的 Brier 較差（0.25216 vs 0.25202）→ **唯一可能升級的 xa_lead_pup 在樣本內就不合格**。S&P 跌破 200 日線版 0.393（明顯較差）。
+- 結果（2024 年起，兩幣合計）：冠軍 夏普 0.851、年化 16.3%、最大跌幅 −18.4%、Brier 0.2523；xa_usd_cut 0.890／16.8%／−18.3%（比冠軍好的把握 0.73、比「冠軍 ×0.951」0.852／15.6%／−17.6% 好的把握 0.71，規則要 0.975；優勢全在 ETH，BTC 略差；晚一天用就只剩 0.858）；xa_spx200_cut 0.806；xa_riskoff_cut 0.827；xa_pup Brier 0.2515（DM p 0.40，樣本內反而變差，仍比「一律 50%」差）。各訊號對下一週報酬的相關全部接近 0；美元急升後一週 BTC 平均反而 +1.4%、S&P 在 200 日線下的週 BTC +2.5%。→ 加密幣和美股「同一天一起動」，但美股／美元的狀態**不能事先預測**加密幣下一週。拿掉最後 400 根K重算，之前每一天都不變。
+- 目前（決策用美國 11/10 收盤）：S&P 500 在 200 日線上 +2.6%、Nasdaq-100 在 50 日線下 −6.2%、美元 20 日 +0.05%、10 年期 4.98%（20 日 −0.23 個百分點）、VIX 19.5（11/11 已降到 17.5）；風險分數 1／5。所有版本都不改今天的建議（BTC 0.427、ETH 空手）。
+- 建議 11/16 週檢**不註冊、不採用**；挑戰者也已滿 3 個。不需要宗做新決定。
+- 檔案：`forecast/proposals/P-cross-asset.md`、`forecast/proposals/proto_cross_asset.py`（以及 `_IS_only.json`、`_results.json`、`_daily.csv`）；研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261112-1040-cross-asset-risk.md`。`forecast/test_forecast.py` 10/10、`forecast/events/test_events.py` 5/5 通過，帳本驗證通過。
+
 ## v13（2026-11-12）：盤中離翻轉價多遠
 
 ### 為什麼
@@ -96,6 +131,25 @@
 - 過去比例用整點價格，手機的即時價可能在整點後最多 59 分鐘；比例沒有分幣、分均線或分距離，只是平均經驗，不是預測，也不改規則。
 - 「規則會轉為」只看趨勢這一半；30 日波動到收盤也會小幅變動，實際建議比例以早上 8 點的預測為準。
 
+### 2026-11-12 08:36 台北：候選模型提案 P-implied-vol（未註冊）
+- 只做研究，不是新版 App：App、帳本、凍結模型、登記表、升級規則、`events.jsonl`、`common.py`、`engine.py`、`review_weekly.py`、`register.py`、`walkforward.py` 都沒動（20 檔前後 sha256 相同），沒有呼叫 `register.py`，coin-signal repo 沒動（HEAD d5abe76）。
+- 題目：選擇權市場的「隱含波動」（Deribit DVOL，市場對未來 30 天波動的預期，BTC、ETH 都從 2021-03-24 開始）能不能讓冠軍 trend_vt@1 的一週預測或虛擬投組變好？資料用 Deribit 免金鑰 API，原始檔存 `/workspace/trading/research/crypto/data/c_dvol/`。用小時線核對：日K的時間是開始時間，收盤和 Binance 日K同一刻（台北 8 點）；當天進行中那列丟掉。和 11/10 抓的副本比，已收完的列沒有被改過。本機 Binance 日K已由今天 08:20 更新到 11/11。
+- 事先固定 5 版（08:38 登記）：iv_target（用 DVOL 取代過去 30 天波動來算投入）、vrp_cut（實現波動遠高於隱含時減半）、iv_spike_cut（隱含波動一週急升時減半）、iv_pup（上漲機率＝冠軍與「同一隱含減實現三分位歷來上漲比例」各半）、iv_lead_pup（樣本內最好的投入版＋iv_pup 機率）；另固定對照「冠軍 ×0.85」（和 iv_target 同樣平均投入）。
+- 只用 2022–23 挑：**沒有任何版本勝過冠軍**（冠軍夏普 0.723；iv_target 0.698、vrp_cut 0.650、iv_spike_cut 0.457；iv_pup Brier 也較差）→ 依規則在樣本內就失敗。
+- 結果（2024 年起，兩幣合計）：冠軍 夏普 0.851、年化 16.3%、最大跌幅 −18.4%、Brier 0.2523；iv_target 0.791／12.9%／−16.9%（P(較好) 0.37）；vrp_cut 0.802；iv_spike_cut 0.704（顯著較差，P 0.017）；iv_pup Brier 0.2513（DM p 0.41，樣本內反而變差，仍比「一律 50%」差）；對照「冠軍 ×0.85」0.855／14.0%／−15.8%，比 iv_target 好 → DVOL 預測波動確實比較準（和之後 30 天實際波動的相關 BTC 0.42 vs 0.15），但用它只是「平均少拿一點」，不是更好的決策。隱含波動一週急升之後一週，BTC 平均反而 +5%（多半是急跌後反彈），所以急升就減碼是錯的方向。晚 1、2 天的版本、拿掉最後 400 根K重算，結論都一樣。
+- 目前（11/11 收盤）：DVOL BTC 38.9、ETH 54.8，都在 2021 年以來的低檔（第 13、18 百分位），一週變化不大，沒有壓力訊號。只有 iv_target 會把 BTC 從 0.427 降到 0.385（不採用）；ETH 所有版本都維持空手。
+- 建議 11/16 週檢**不註冊、不採用**；挑戰者也已滿 3 個。不需要宗做新決定。
+- 檔案：`forecast/proposals/P-implied-vol.md`、`forecast/proposals/proto_implied_vol.py`（以及 `_IS_only.json`、`_results.json`、`_daily.csv`）；研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261112-0840-implied-vol-dvol.md`。`forecast/test_forecast.py` 10/10、`forecast/events/test_events.py` 5/5 通過，帳本驗證通過。
+
+### 2026-11-12 07:40 台北：候選模型提案 P-portfolio-risk（未註冊）
+- 只做研究，不是新版 App：App、帳本、凍結模型、登記表、升級規則、`events.jsonl`、`common.py`、`engine.py`、`review_weekly.py`、`register.py` 都沒動（20 檔前後 sha256 相同），沒有呼叫 `register.py`，coin-signal repo 沒動（HEAD 9db29f0）。
+- 題目：冠軍 trend_vt@1 把 BTC、ETH 分開調整投入，但兩個幣幾乎同漲同跌（相關係數約 0.85–0.9），合起來的風險會不會超過原本的預算？加一層「看兩幣合起來的風險」的調整，能不能少跌又不少賺？
+- 事先固定 4 版（07:40 登記）：pr_cap（合計預期波動超過 21.2% 就兩幣一起縮小）、pr_vt（合計波動目標 22.5%，可放大到每幣上限 1）、pr_corr（30 天相關 > 樣本內第 80 百分位 0.939 就兩幣 ×0.75）、pr_rp（兩幣都持有時按波動倒數分配）。只用 2022–23 挑：pr_cap 領先（夏普 0.762 vs 冠軍 0.723）。
+- 結果（2024 年起，兩幣合計）：冠軍 夏普 0.850、年化 16.3%、最大跌幅 −18.4%、最差 5% 週 −4.7%；pr_cap 0.769／12.3%／−15.9%／−3.9%（夏普較好機率 0.35，跌幅較小機率 0.998）；pr_vt 0.491（更差）；pr_corr 0.861（P 0.41，平手、樣本內沒被選上）；pr_rp 0.828。週虧損超過預算線 6.85% 的週數：冠軍 0/149，本來就沒超過。事後對照：直接「建議比例 ×0.83」就有夏普 0.855、最大跌幅 −15.4%，比 pr_cap 好 → pr_cap 只是「少拿一點」，不是更聰明的風控。
+- 目前（11/10 收盤）：30 天相關 0.944（偏高），但冠軍只持有 BTC 0.420、ETH 0，合計預期波動 7.8%，pr_cap 不會調整；pr_corr 會把 BTC 降到 0.315（此版回測沒比較好，不採用）。
+- 建議 11/16 週檢**不註冊、不採用**；上漲機率和冠軍一樣，依規則本來就不可能升級；挑戰者也已滿 3 個。不需要宗做新決定。
+- 檔案：`forecast/proposals/P-portfolio-risk.md`、`forecast/proposals/proto_portfolio_risk.py`（以及 `_IS_only.json`、`_results.json`、`_daily.csv`、`_diag_posthoc.json`）；研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261112-0740-portfolio-risk-overlay.md`。拿掉最後 400 根K重算，之前每一天的持有比例都不變。`forecast/test_forecast.py` 10/10、`forecast/events/test_events.py` 5/5 通過，帳本驗證通過。
+
 ## v12（2026-11-12）：我的決策紀錄（只存在這支手機）
 
 ### 為什麼
@@ -120,6 +174,18 @@
 - 只是宗自己的紀錄：週數少時差別多半是運氣；不能證明模型或宗的做法誰比較好。
 - 每筆都是「單獨一週、從現金開始」，每週付一次來回成本，也不跟著每天調整；和虛擬投資（每天調整）的數字不會一樣。
 - 只存在這支手機，沒有備份或匯出；用的是手機抓到的最近約 600 根日K（約 1 年 8 個月），太舊的紀錄會顯示「太舊」。
+
+### 2026-11-12 05:37 台北：候選模型提案 P-stablecoin-liquidity（未註冊）
+- 只做研究，不是新版 App：App、帳本、凍結模型、登記表、升級規則、`events.jsonl`、`common.py`、`engine.py`、`review_weekly.py` 都沒動（前後 sha256 相同），沒有呼叫 `register.py`，coin-signal repo 沒動。
+- 題目：穩定幣（USDT＋USDC）流通量的 30／60 天增減，能不能讓冠軍 trend_vt@1 的一週預測（上漲機率 Brier）或虛擬投組（夏普／最大跌幅）變好？常見說法是「穩定幣變多＝資金進場」。資料：DefiLlama 免金鑰 API（主資料）、CoinMetrics 社群 API `SplyCur`（對照），原始檔存 `/workspace/trading/research/crypto/data/c_stablecoin/`。
+- 只用「前一天」以前的供給（DefiLlama 最後一列是當天盤中值，事後會改，最多差 2.5%），另測晚 2、3 天。資料修訂檢查：USDT／USDC 與 11/10 快取完全相同；全市場總量對 Wayback 2025-11～2026-10 舊版在 2024 年後有 1–3% 的改寫（所以只當對照）。2025-11 以前的改寫無法排除。
+- 事先固定 5 個版本：sc_g30_cut（30 天縮水就投入減半）、sc_g60_cut（60 天）、sc_g30_tilt（縮水減半、30 天增加 ≥3% 投入 ×1.25）、sc_pup（上漲機率＝冠軍與「同狀態歷來上漲比例」各半）、sc_lead_pup（樣本內最好的投入版＋sc_pup 機率，原則上可同時過 Brier 與夏普）。
+- 只用 2022–23 挑：sc_g30_cut 夏普 0.874 領先（冠軍 0.723），sc_lead_pup Brier 0.2514 也比冠軍 0.2520 好 → **第一次有可升級版本在樣本內合格**。
+- 結果（2024 年起，兩幣合計）：冠軍 夏普 0.850、年化 16.3%、最大跌幅 −18.4%、Brier 0.2523；sc_g30_cut 0.815／14.7%／−18.7%（P(較好) 0.28）；sc_g60_cut 0.789；sc_g30_tilt 0.863／18.0%／−19.6%（P 0.45，Holm 1.00）；sc_pup／sc_lead_pup Brier 0.2508（DM p 0.17，週檢式 P 0.95 < 門檻 0.975），仍比「一律 50%」的 0.2500 差，而且單純「往 50% 收一半」更好（0.2507）→ 改善是收縮效果、不是穩定幣資訊；sc_lead_pup「兩項都更好」機率 0.35，18 段 8 週視窗兩項同時過 0/18。晚 1 天（lag 2）sc_g30_cut 連樣本內都輸冠軍（0.686）；換成全市場總量或 CoinMetrics 資料，結果大幅搖擺。
+- 原因：樣本內 2022 年穩定幣連續縮水 234 天剛好碰上熊市；2024 年後穩定幣大多在增加，縮水時冠軍常已空手，減碼幫不上忙。和文獻一致（Wei 2018、Kristoufek 2021：穩定幣發行不能預測之後的 BTC 報酬，比較像跟著價格走）。
+- 目前：USDT＋USDC 2,468 億美元，30 天 −4.1%、距 5 月高點 −7.9%（縮水中）；三個減碼版本會把 BTC 投入從 0.420 減半成 0.210，但這些版本回測比冠軍差，App 不採用。
+- 建議 11/16 週檢**不註冊、不採用**；挑戰者也已滿 3 個。不需要宗做新決定。
+- 檔案：`forecast/proposals/P-stablecoin-liquidity.md`、`forecast/proposals/proto_stablecoin_liquidity.py`（以及 `_IS_only.json`、`_results.json`、`_daily.csv`）；研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261112-0537-stablecoin-liquidity.md`。拿掉最後 400 根K重算，之前每一天的機率和持有比例都不變。`forecast/test_forecast.py` 10/10、`forecast/events/test_events.py` 5/5 通過，帳本驗證通過。
 
 ## v11（2026-11-11）：首頁不再把上漲機率寫成方向建議
 

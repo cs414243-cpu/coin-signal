@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-12T03:40:54+00:00",
+ "generated_at": "2026-11-12T05:40:46+00:00",
  "as_of": "2026-11-12",
  "champion": "trend_vt@1",
  "pass_p": 0.975,
  "oos_period": "2024-01-01 起（選模時沒有看過的期間），BTC＋ETH 合計",
  "source": "forecast/proposals/proto_*_results.json（backtest/tested_signals.py 只讀取）",
- "count": 13,
+ "count": 14,
  "signals": [
   {
    "id": "stablecoin_liquidity",
@@ -394,6 +394,39 @@
    "brier_dm_p": 0.25698,
    "result_text": "2024 年起：夏普 0.852（冠軍 0.850）、年化 15.9%（16.3%）、最大跌幅 −17.9%（−18.4%）。上漲機率誤差 0.25119（冠軍 0.25232，越小越好）。",
    "judge_text": "只比冠軍多一點點，比冠軍好的把握 51.8%（規則要約 97.5%），很可能只是運氣。"
+  },
+  {
+   "id": "drawdown_regime",
+   "group": "tweak",
+   "name": "跌深或盤勢轉差時先減碼",
+   "what": "帳戶從一年內最高點跌太多、或市場進入「大起大落」的狀態時，先把投入減半；也試了依照目前盤勢調整上漲機率。",
+   "why": "事先選出的「帳戶跌深就減半」在 2022–23 年有用，但 2024 年後幾乎沒有跌到門檻、等於沒動作，結果還略輸冠軍，也不如直接把冠軍的建議打 85 折來得穩；「大起大落就減半」常在大跌或大漲隔天減碼、錯過反彈，手續費也多，明顯更差；調整上漲機率的版本只是把機率往平常上漲的比例拉近，不顯著，也還是輸給一律猜 50%。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_drawdown_regime_results.json",
+   "proposal": "forecast/proposals/P-drawdown-regime.md",
+   "variant": "dd_own_cut",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.841,
+    "cagr": 0.1608,
+    "maxdd": -0.1847,
+    "brier": 0.2523
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842,
+    "brier": 0.2523
+   },
+   "is_sharpe": 0.773,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.069,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.841（冠軍 0.851）、年化 16.1%（16.3%）、最大跌幅 −18.5%（−18.4%）。",
+   "judge_text": "比冠軍差。"
   },
   {
    "id": "calibrated_band",
