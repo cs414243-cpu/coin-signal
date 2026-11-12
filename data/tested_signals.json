@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-12T01:39:11+00:00",
+ "generated_at": "2026-11-12T03:40:54+00:00",
  "as_of": "2026-11-12",
  "champion": "trend_vt@1",
  "pass_p": 0.975,
  "oos_period": "2024-01-01 起（選模時沒有看過的期間），BTC＋ETH 合計",
  "source": "forecast/proposals/proto_*_results.json（backtest/tested_signals.py 只讀取）",
- "count": 12,
+ "count": 13,
  "signals": [
   {
    "id": "stablecoin_liquidity",
@@ -204,6 +204,39 @@
    "brier_dm_p": null,
    "result_text": "2024 年起：夏普 0.769（冠軍 0.850）、年化 12.3%（16.3%）、最大跌幅 −15.9%（−18.4%）。",
    "judge_text": "比冠軍差。"
+  },
+  {
+   "id": "cross_asset",
+   "group": "news",
+   "name": "美股、美元、美債殖利率、VIX（傳統市場的風險訊號）",
+   "what": "美股跌破 200 日均線、美元 20 天內大漲、或好幾個風險訊號（含 VIX、美債殖利率）同時出現時，把投入減半；也試了用它們調整上漲機率。",
+   "why": "事先選出的「美元走強就減半」2024 年後只多一點點、不顯著，而且好處全來自 ETH、BTC 反而略差；同時調整上漲機率的版本在 2022–23 年就比冠軍差。這些美國市場訊號和下一週的漲跌幾乎沒有關係。",
+   "verdict": "沒通過",
+   "registered": false,
+   "tested_on": "2026-11-12",
+   "file": "forecast/proposals/proto_cross_asset_results.json",
+   "proposal": "forecast/proposals/P-cross-asset.md",
+   "variant": "xa_usd_cut",
+   "is_failed": false,
+   "kind": "portfolio",
+   "oos": {
+    "sharpe": 0.89,
+    "cagr": 0.1682,
+    "maxdd": -0.1834,
+    "brier": 0.2523
+   },
+   "champ_oos": {
+    "sharpe": 0.851,
+    "cagr": 0.163,
+    "maxdd": -0.1842,
+    "brier": 0.2523
+   },
+   "is_sharpe": 0.852,
+   "champ_is_sharpe": 0.723,
+   "p_sharpe_better": 0.7285,
+   "brier_dm_p": null,
+   "result_text": "2024 年起：夏普 0.890（冠軍 0.851）、年化 16.8%（16.3%）、最大跌幅 −18.3%（−18.4%）。",
+   "judge_text": "只比冠軍多一點點，比冠軍好的把握 72.9%（規則要約 97.5%），很可能只是運氣。"
   },
   {
    "id": "vol_estimator",
@@ -459,5 +492,6 @@
  ],
  "earlier_source": "forecast/proposals/P-events-C-rejected.md",
  "missing": [],
- "unlisted": []
+ "unlisted": [],
+ "errors": []
 }

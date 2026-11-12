@@ -3,7 +3,7 @@
 // forecast/proposals/proto_*_results.json). Lives only in 進階; the homepage is not touched.
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const md = s => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s || ''); return m ? `${+m[2]}/${+m[3]}` : '—'; };
-export const GROUPS = [['news', '新聞和研究常提到的指標'], ['tweak', '調整目前規則的細節']];
+export const GROUPS = [['news', '新聞和研究常提到的指標'], ['tweak', '調整目前規則的細節'], ['new', '剛測完、白話說明整理中']];   // v15: 'new' = generic rows
 
 export function itemHtml(s) {
   return `<li class="ts-item" data-id="${esc(s.id)}"><p class="ts-head"><strong>${esc(s.name)}</strong> <span class="badge v-none">${esc(s.verdict)}</span></p>
@@ -34,7 +34,7 @@ export function testedCard(T) {
     <ul class="facts small">${T.earlier_ideas.map(e => `<li>${esc(e.idea)}：${esc(e.why)}</li>`).join('')}</ul>` : '';
   return `<section class="card" id="tested"><h2>試過但沒通過的訊號</h2>
     <p class="small">這些都是新聞或研究常提到、聽起來有道理的訊號。每一個都和目前的預測規則（冠軍）比過：先只用 2022–23 年的資料事先選好版本，再看 <strong>2024 年起</strong>（選的時候沒看過的期間，BTC＋ETH 合計）的結果。</p>
-    <p class="ts-sum"><strong>共 ${n} 個，${rej} 個沒通過，0 個採用。</strong>看到這些標題時，不用為了它們調整買賣。</p>
+    <p class="ts-sum"><strong>共 ${n} 個，${rej} 個沒通過${n > rej ? `，${n - rej} 個說明整理中` : ''}，0 個採用。</strong>看到這些標題時，不用為了它們調整買賣。</p>
     ${groups}
     ${holdHtml(T)}
     ${early}
