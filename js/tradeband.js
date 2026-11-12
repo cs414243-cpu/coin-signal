@@ -69,6 +69,15 @@ export function coinMix(T, k) {
   const [B, E] = [b('BTC'), b('ETH')];
   return B === E ? `兩個幣都${B ? '略好' : '略差'}。` : `BTC ${B ? '變好' : '變差'}、ETH ${E ? '變好' : '變差'}，方向不一致。`;
 }
+// v20: 幾點動手 — numbers copied from forecast/proposals/proto_execution_timing_results.json (tests check they match).
+// Same champion exposures, executed at different Taipei hours after the 08:00 daily close; 2024→ backtest, costs as paper_sim.
+export const EXEC_TIMING = {"as_of":"2026-11-10","oos_start":"2024-01-01","h0":{"cagr":0.1629,"maxdd":-0.1842},"h1":{"cagr":0.1646,"maxdd":-0.1819},"h4":{"cagr":0.1584,"maxdd":-0.1908},"h12":{"cagr":0.1535,"maxdd":-0.1913},"h16":{"cagr":0.138,"maxdd":-0.2056},"h24":{"cagr":0.1063,"maxdd":-0.2261},"same_day_min_holm_worse_p":0.279,"h24_holm_worse_p":0.0035,"tod_reliable":false};
+/** One plain line for the advanced 「差一點要不要動手」 card. */
+export function timingLine(X = EXEC_TIMING) {
+  if (!X?.h1 || !X?.h24) return '';
+  const y = X.oos_start.slice(0, 4), sameOk = X.same_day_min_holm_worse_p >= 0.05, lateBad = X.h24_holm_worse_p < 0.05;
+  return `<p id="exectiming"><strong>幾點動手</strong>：同一份建議，${y} 年起回測（到 ${X.as_of}）早上 9 點做年化 ${pc1(X.h1.cagr)}、中午 12 點 ${pc1(X.h4.cagr)}、晚上 8 點 ${pc1(X.h12.cagr)}、半夜 12 點 ${pc1(X.h16.cagr)}${sameOk ? '（同一天內的差別沒有證明，可能只是運氣）' : ''}；${lateBad ? `<strong>拖到隔天早上才做，年化只剩 ${pc1(X.h24.cagr)}、最慘時虧 ${pc1(X.h24.maxdd)}（9 點做 ${pc1(X.h1.maxdd)}），這個差別在統計上站得住</strong>，主要虧在趨勢轉向的那幾天。` : `拖到隔天早上年化 ${pc1(X.h24.cagr)}。`}${X.tod_reliable ? '' : '沒有哪個時段固定比較好：看到建議就做，最晚當天做完。'}</p>`;
+}
 export function tradeBandCard(T) {
   if (!T?.results?.daily) return '';
   const s = T.selection, { tol, backed } = tolOf(T), y = T.oos_start.slice(0, 4), tp = Math.round(tol * 100);
@@ -80,6 +89,7 @@ export function tradeBandCard(T) {
     <p class="small">首頁的「建議放 X%」每天都會小幅變動（主要是因為最近漲跌的劇烈程度在變）。真的每天去買賣幾百塊不實際，所以這裡用冠軍模型自己每天的建議比例，模擬幾種一般人做得到的做法：你實際放的比例會跟著價格漂，差距超過門檻才調回建議；建議變成 0（先不要放）時一律當天全部賣出。</p>
     <p>${verdict}</p>
     <p><strong>只在每週一看一次（連「先不要放」也等到週一才賣）</strong>：${y} 年起年化 ${pc1(w.cagr)}、最慘時虧 ${pc1(w.maxdd)}，${w.sharpe < d.sharpe - 0.1 ? `比每天看差很多（比每天調好的把握 ${pc0(R(T, 'weekly').oos_p_better)}）。趨勢轉壞時晚幾天賣，就把這個規則主要的好處（大跌時少虧）丟掉了。` : `和每天看差不多（比每天調好的把握 ${pc0(R(T, 'weekly').oos_p_better)}）。`}</p>
+    ${timingLine()}
     <div class="scroll"><table class="bt"><thead><tr><th>做法</th><th>${y} 起年化</th><th>夏普值</th><th>${y} 起最慘時虧</th><th>每年動手天數</th><th>成本／年</th><th>比每天調好的把握</th></tr></thead><tbody>
     ${ORDER.map(k => row(T, k, 'oos')).join('')}</tbody></table></div>
     <p class="small muted">算法：<code>backtest/trade_band.py</code> → <code>data/tradeband.json</code>（${esc(T.source)}）。BTC、ETH 各半的虛擬 NT$100 萬，和「預測成績單」同一套模擬；成本：${esc(T.costs.note)}。每一天只用當天以前的資料決定要不要調；門檻和選法在算任何結果之前寫好（2022–23 年夏普不低於每天調 0.02 以上、最慘跌幅不多 2 個百分點，取最大的門檻；${y} 年起再用同樣條件檢查）。夏普值下面的小字是 2022–23 年選規則時期。「比每天調好的把握」是區塊重抽 ${2000} 次中夏普比較高的比例，要 97.5% 以上才算證明。這和「試過但沒通過的訊號」裡的「差一點就不調」是同一個想法：它不會讓預測變準，所以不能當新模型，只是執行上的省事做法。這是過去紀錄，不是預測，也不是投資建議。</p>
