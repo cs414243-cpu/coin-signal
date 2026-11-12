@@ -5,6 +5,7 @@ import * as DX from './decision.js';
 import { weekCard, eventsCard } from './events.js';
 import * as FL from './flips.js';
 import * as OC from './outcomes.js';
+import * as WR from './weekrisk.js';
 import * as TR from './trust.js';
 import * as FR from './fresh.js';
 import * as PU from './pup.js';
@@ -151,7 +152,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v17';
+const VERSION = 'v18';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -607,7 +608,7 @@ function intraOut() {
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
-let FLIPS = null, PENDING = {}, OUTC = null;
+let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null;
 const ZH = FL.ACTION_ZH;
 const p0 = e => `${Math.round((e ?? 0) * 100)}%`;
 function changeBanner() {
@@ -677,7 +678,7 @@ function moneyLine(c) {
   if (B <= 0) return `<p class="money small">你的計畫沒有配置 ${c}（到「進階 → 定期定額」可以調 BTC／ETH 比例）。</p>`;
   const have = (num(S[c.toLowerCase()]) ?? 0) * px, tgt = f.exposure * B, diff = tgt - have;
   const act = Math.abs(diff) < Math.max(1000, B * 0.02) ? '和建議差不多，<strong>不用動</strong>' : diff > 0 ? `可以<strong>買進約 ${ntd(diff)}</strong>` : `建議<strong>賣出約 ${ntd(-diff)}</strong>`;
-  return `<p class="money">你打算放在 ${c} 的錢 ${ntd(B)}（總資產 × ${esc(S.dcaW)}%${c === 'BTC' ? ` × ${esc(S.dcaBtc)}%` : ` × ${100 - (num(S.dcaBtc) ?? 100)}%`}），建議放 <strong>${ntd(tgt)}</strong>。你現在有 ${ntd(have)}，${act}。</p>`;
+  return `<p class="money">你打算放在 ${c} 的錢 ${ntd(B)}（總資產 × ${esc(S.dcaW)}%${c === 'BTC' ? ` × ${esc(S.dcaBtc)}%` : ` × ${100 - (num(S.dcaBtc) ?? 100)}%`}），建議放 <strong>${ntd(tgt)}</strong>。你現在有 ${ntd(have)}，${act}。</p>${WR.moneyText(f, B) ? `<p class="small badweek-ntd">${esc(WR.moneyText(f, B))}</p>` : ''}`;
 }
 function coinBlock(c) {
   const f = LIVE.coins[c]; if (!f) return '';
@@ -690,6 +691,7 @@ function coinBlock(c) {
       <p class="share">${share}</p>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；現在 ${usd(f.price_usd)}）</p>
+      <p class="badweek small">${esc(WR.homeLine(f, c, WRISK))}</p>
       <p class="why">原因：${esc(f.reason)}</p>
       ${OUTC ? `<p class="past small muted" data-coin="${c}">${esc(OC.homeLine(OUTC, c, f.action))}</p>` : ''}
       <div id="fc-money-${c}"></div>
@@ -788,6 +790,7 @@ async function render(force = false) {
   try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
   try { EV = await fetch('data/events.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EV; } catch { EV = EV || null; }
   try { OUTC = await fetch('data/outcomes.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || OUTC; } catch { OUTC = OUTC || null; }
+  try { WRISK = await fetch('data/weekrisk.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || WRISK; } catch { WRISK = WRISK || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
   try { TESTED = await fetch('data/tested_signals.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TESTED; } catch { TESTED = TESTED || null; }
@@ -835,9 +838,10 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
+      ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
       ${FR.withAsof(intraCard(), FR.asofOf('intraday', INTRA), NOW)}
       ${relCard()}
@@ -864,7 +868,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }

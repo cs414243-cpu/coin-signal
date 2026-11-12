@@ -1,4 +1,4 @@
-# 幣訊號 v16 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks + recommendation-change notice + next-week outcomes after each recommendation + forecast freshness / ledger trust check + dated, weekly auto-refreshed backtests + private decision journal + intraday distance to the flip prices + list of tested-and-rejected signals + date-independent tests + plain row for every tested signal (PWA, personal use)
+# 幣訊號 v18 — BTC/ETH weekly forecast + self-improving model loop + market-move cause log + data-reliability checks + recommendation-change notice + next-week outcomes after each recommendation + forecast freshness / ledger trust check + dated, weekly auto-refreshed backtests + private decision journal + intraday distance to the flip prices + list of tested-and-rejected signals + date-independent tests + plain row for every tested signal + bad-week money line (PWA, personal use)
 v4 puts one plain 「未來一週預測建議」 card on top (from the current champion model in an append-only forecast ledger), a 「預測成績單」 below it, and moves everything else into 「進階（可不看）」. v3 added 定期定額與再平衡計畫 (DCA + rebalancing planner). v2 added the decision layer (今天怎麼做 / 部位與風險 / 槓桿檢查 / 台幣買幣成本); v1 signals live under 訊號細節. See CHANGELOG.md.
 Research only, not investment advice. No keys, no accounts, no trading.
 
@@ -162,3 +162,4 @@ The reviewing agent reads the events report next to the review. If a relationshi
 - `cd forecast/events && python3 test_events.py`
 - `node --test tests/` (includes `events.test.mjs`)
 - UI: `python3 -m http.server 8765 --directory app & node tests/e2e_v6.mjs` (writes `screenshots/v6-*.png`; older `e2e_v2`…`e2e_v5` still pass)
+- v18 「運氣差的一週」: `backtest/week_risk.py` → `app/data/weekrisk.json` checks the champion's lower 10% edge out of sample (2023+: BTC 9.8%, ETH 11.0% of weeks below it) and the cost of such weeks (follow vs all-in, costs included); top card adds one plain line per coin (edge × suggested share, plus NT$ when holdings are set); 進階 card `#weekrisk`; refresh_all step `weekrisk`; tests `weekrisk.test.mjs`, `e2e_v18.mjs`.
