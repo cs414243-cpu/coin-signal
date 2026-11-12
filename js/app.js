@@ -14,6 +14,7 @@ import * as ID from './intraday.js';
 import * as TS from './tested.js';
 import * as TB from './tradeband.js';
 import * as RB from './robust.js';
+import * as OF from './overfit.js';
 import * as GD from './guard.js';
 
 const $ = s => document.querySelector(s);
@@ -155,7 +156,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v22';
+const VERSION = 'v23';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -747,6 +748,7 @@ function modelsCard() {
     <div class="scroll"><table class="bt"><thead><tr><th>模型</th><th>實盤預測／已評分</th><th>實盤 Brier</th><th>虛擬投資</th><th>回測 Brier</th><th>回測年化</th><th>回測最大跌幅</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="small muted" id="pup-note">${esc(PU.advNote(LIVE))}</p>
     ${RB.robustLine()}
+    ${OF.overfitLine()}
     <p class="small muted">Brier：預測機率和實際結果的平方差，越低越好（永遠猜 50% = 0.25）。回測期間 ${esc(W[LIVE.champion.key]?.start || '—')}～${esc(W[LIVE.champion.key]?.end || '—')}，每天只用當天以前的資料。帳本：<a href="${esc(LIVE.ledger.repo)}" target="_blank" rel="noopener">GitHub coin-signal/ledger</a>（最後一筆雜湊 ${esc((LIVE.ledger.last_hash || '').slice(0, 12))}…）。預測產生於 ${fmtTime(Date.parse(LIVE.generated_at))}。</p>
   </section>`;
 }

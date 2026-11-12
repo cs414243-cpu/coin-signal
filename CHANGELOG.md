@@ -1,5 +1,28 @@
 # 幣訊號 更新紀錄
 
+## v23（2026-11-13）：回測是不是運氣（過度擬合檢查）＋稽核 P-overfit-audit（不是候選訊號、不註冊）
+
+- 2026-11-13 07:37 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-0737-overfit-audit.md`，Drive 1lm-GDoEbiICPhHfK6UoF9jfqM1ib0027）。C#6 回測陷阱筆記列過的 DSR／PBO／Reality Check 第一次套用到冠軍與整串提案。
+- `forecast/proposals/proto_overfit_audit.py`（事先登記在 docstring，先跑 `--is-only`；結果檔刻意命名 `proto_overfit_audit_report.json`，因為 `tested_signals.py` 讀 `*_results.json`，而稽核不是訊號）：
+  - 重建了 400 條日報酬（300 組參數網格＋100 個不重複的被否決對手＋冠軍）。
+  - 誠實試驗數 N＝440（300 網格＋100 對手＋4 個 P-events-A＋36 個 C#9/C#10 冠軍前試驗）。
+  - 冠軍＝paper_sim（2.8e−7）；截斷檢查差 0；重跑結果完全相同。
+- **Deflated Sharpe**：冠軍 2024→ Sharpe 0.851，DSR 0.785；2022→ 0.800，DSR 0.826。N＝10～471 都落在 0.78–0.91，都沒到 0.95 →「有跡象、未證實」。
+  - PSR 對 0 是 0.928，對買進持有 0.735。
+  - MinTRL 1,325 天（約 3.6 年）。
+- **PBO（CSCV，300 組網格，S＝16，12,870 種切法）0.285（中等）**：S＝10／20 為 0.310／0.312，只用 2022–23 為 0.551。用 IS 挑疊加版本的 PBO 是 0.793，比亂挑還差。
+- **White RC／Hansen SPA（平穩自助法，平均區塊 28 天，B 2,000）**：100 個對手 2024→ 有 16 個 Sharpe 高於冠軍，但聯合檢定 Sharpe-RC p 0.997、SPA_c 0.921（波動對齊）；網格 0.841；全部 0.949。2022→ 的 SPA_c 為 0.79–0.87。
+  - 結論：沒有錯殺。但 Sharpe 只小幅改善的做法驗不出來（RC 10% 門檻需 Sharpe 差 +0.58）。
+- 注意：2024→ 對冠軍只是準樣本外（規則在 2026-11-10 才選定），真正乾淨的只有實盤。
+- App：進階「預測模型與自我改善機制」卡內新增一行「回測是不是運氣」（`app/js/overfit.js`，數字直接抄自結果檔、測試核對）；首頁不變；SW `v23-2026-11-13`。
+- 新增測試：`tests/overfit.test.mjs` 4 項、`tests/e2e_v23.mjs`。
+- 建議不變（BTC 0.427、ETH 0）。不註冊，規則／帳本／registry／升級規則都沒動，18 個核心檔 sha256 前後相同。
+- `tested_signals.py` 不加列：稽核沒有「領先版本＋IS/OOS Sharpe／Brier」，不符合該表格式；試算仍 27 項、0 錯誤。
+- 測試結果：
+  - node 139／139；`test_forecast.py` 10／10；`test_events.py` 5／5。
+  - `e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v23`、`fallback` 本機全過。
+  - 部署後檢查：DEPLOY_PENDING
+
 ## v22（2026-11-13）：盤中急跌要不要先賣（盤中急跌保護）＋提案 P-intraday-guard → rejected
 
 ### 為什麼
