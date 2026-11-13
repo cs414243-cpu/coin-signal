@@ -139,3 +139,6 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .ts-list{list-style:none;margin:0;padding:0}.ts-item{border-top:1px solid #2a3044;padding:8px 0}.ts-item:first-child{border-top:0}
 .ts-item p{margin:3px 0}.ts-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ts-sum{margin:8px 0}
 .ts-note{background:#1d2333;border-radius:10px;padding:2px 12px 6px;margin-top:12px}
+/* v26 空手要等多久 */
+.spell-home:empty { display: none; }
+.spell-now { margin: .3rem 0; }
