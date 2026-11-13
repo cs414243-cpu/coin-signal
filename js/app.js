@@ -159,7 +159,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v29';
+const VERSION = 'v30';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -549,7 +549,7 @@ function relLine(c) {
   let flip = '';
   if (near) {
     const nextClose = closeMD(addDays(ymd(last.t), 1));
-    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>，${XS.homeAddon(near.price, XS.maxRate(XSRC, PRICES))}，規則會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
+    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>${XS.homeAddon(near.price, XS.maxRate(XSRC, PRICES))}，建議就會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
   }
   const f = LIVE?.coins?.[c];
   const edge = f && RL.nearActionEdge(f.exposure) ? `<p class="small">建議比例 ${Math.round(f.exposure * 100)}% 剛好在「持有／減碼」的分界附近，小小的波動就可能改變動作。</p>` : '';
@@ -767,7 +767,9 @@ function closeLabel(f) {
 }
 // v29: 首頁一眼版 — visible: 建議、原因、什麼時候會變 (+ 運氣差的一週 only when money is in, + 金額 when holdings are set);
 // everything else from v5–v28 is unchanged but folded into 「看 X 的細節」/「更多說明」 (progressive disclosure, same IDs).
-function trigHome(c) { try { return esc(NM.triggerLine(c, nmCur()[c])); } catch { return ''; } }
+// v30: when the yellow 「接近翻轉」 box (relLine, < 1% from the flip price) is showing, it already says the same price and
+// action — so the plain trigger line is left empty instead of repeating it.
+function trigHome(c) { try { if (relInfo(c)?.near) return ''; return esc(NM.triggerLine(c, nmCur()[c])); } catch { return ''; } }
 function coinBlock(c) {
   const f = LIVE.coins[c]; if (!f) return '';
   const e = f.exposure, sharePct = Math.round(e * 100), inMkt = e >= 0.005;
