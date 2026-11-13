@@ -20,6 +20,7 @@
   - 新增 `tests/xsrc.test.mjs`（6 項：用 JS 從原始快取獨立重算比較次數與不同次數、台幣翻轉價＝App `flipLevels` × MAX 收盤、MAX 台幣K線翻轉價、MAX 誤差中位數、匯率後備、白話句、來源紀錄、SW）、`tests/e2e_v24.mjs`（iPhone 390×844，首頁不多字、卡片在進階、台幣＝美元×顯示匯率、擋 CoinGecko 時改用 MAX 收盤、無水平捲動與主控台錯誤；截圖 `screenshots/v24-*.png`）。
   - 修 3 個會隨每日預測變壞的舊測試（`pup.test.mjs`、`e2e_v11.mjs` 寫死 BTC 48%，改讀 live.json；`tradeband.test.mjs` 把 frame 截在資料檔 as_of）。
   - 結果：node 145／145；`test_forecast.py` 10／10；`test_events.py` 5／5；`test_verify_live.py` 11／11；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`fallback` 本機全過。
+  - 部署後檢查：coin-signal ebca6d2 已推送；線上 sw `v24-2026-11-13`；`verify_live.py` LIVE CHECK OK；`e2e_v24` 線上也過（線上即時匯率 33.02，BTC 200 日線 ≈ NT$2,414,569）。
 
 ## v23（2026-11-13）：回測是不是運氣（過度擬合檢查）＋稽核 P-overfit-audit（不是候選訊號、不註冊）
 
