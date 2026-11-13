@@ -1,0 +1,566 @@
+{
+ "as_of": "2026-11-12",
+ "generated_at": "2026-11-13T08:38:23+08:00",
+ "fetched_at_utc": {
+  "coinbase": "2026-11-13T00:33:20Z",
+  "bitstamp": "2026-11-13T00:33:34Z",
+  "max": "2026-11-13T00:33:41Z"
+ },
+ "sources": {
+  "binance": "Binance 現貨 USDT（App 規則使用）",
+  "coinbase": "Coinbase Exchange USD",
+  "bitstamp": "Bitstamp USD",
+  "max": "MAX（MaiCoin）TWD"
+ },
+ "conventions": {
+  "rule": "trend3 × min(1, 0.30/vol30)，各來源用自己的收盤價算自己的 50／200 日線與 30 天波動",
+  "action": "forecast/run_daily.action_for（加碼／減碼＝與前一天差 ≥ 10 個百分點；否則 ≥ 67% 持有）",
+  "periods": [
+   "2018-03-05..2023-12-31",
+   "2024-01-01..2026-11-12"
+  ],
+  "cost": "paper_sim：每次進出 0.15%＋買進 0.27% 台幣溢價，NT$100 萬 BTC/ETH 各半",
+  "script": "backtest/fetch_xsrc.py → backtest/xsrc.py"
+ },
+ "coins": {
+  "BTC": {
+   "coinbase": {
+    "all": {
+     "days": 3175,
+     "first": "2018-03-05",
+     "last": "2026-11-12",
+     "close_bps_median": 5.2,
+     "close_bps_p95": 61.2,
+     "close_bps_max": 535.2,
+     "state_diff_days": 24,
+     "state_diff_pct": 0.00756,
+     "action_diff_days": 47,
+     "action_diff_pct": 0.0148,
+     "level_diff_pct": 0.00598,
+     "action_diff_same_state_days": 23,
+     "expo_absdiff_mean": 0.0059,
+     "expo_diff_gt5pp_pct": 0.01291,
+     "expo_diff_gt10pp_pct": 0.00819
+    },
+    "is": {
+     "days": 2128,
+     "first": "2018-03-05",
+     "last": "2023-12-31",
+     "close_bps_median": 6.4,
+     "close_bps_p95": 91.9,
+     "close_bps_max": 535.2,
+     "state_diff_days": 23,
+     "state_diff_pct": 0.01081,
+     "action_diff_days": 34,
+     "action_diff_pct": 0.01598,
+     "level_diff_pct": 0.00376,
+     "action_diff_same_state_days": 11,
+     "expo_absdiff_mean": 0.0074,
+     "expo_diff_gt5pp_pct": 0.0188,
+     "expo_diff_gt10pp_pct": 0.01175
+    },
+    "oos": {
+     "days": 1047,
+     "first": "2024-01-01",
+     "last": "2026-11-12",
+     "close_bps_median": 3.8,
+     "close_bps_p95": 14.6,
+     "close_bps_max": 27.1,
+     "state_diff_days": 1,
+     "state_diff_pct": 0.00096,
+     "action_diff_days": 13,
+     "action_diff_pct": 0.01242,
+     "level_diff_pct": 0.01051,
+     "action_diff_same_state_days": 12,
+     "expo_absdiff_mean": 0.0028,
+     "expo_diff_gt5pp_pct": 0.00096,
+     "expo_diff_gt10pp_pct": 0.00096
+    }
+   },
+   "bitstamp": {
+    "all": {
+     "days": 3175,
+     "first": "2018-03-05",
+     "last": "2026-11-12",
+     "close_bps_median": 5.6,
+     "close_bps_p95": 59.9,
+     "close_bps_max": 551.3,
+     "state_diff_days": 22,
+     "state_diff_pct": 0.00693,
+     "action_diff_days": 46,
+     "action_diff_pct": 0.01449,
+     "level_diff_pct": 0.0063,
+     "action_diff_same_state_days": 24,
+     "expo_absdiff_mean": 0.0058,
+     "expo_diff_gt5pp_pct": 0.01228,
+     "expo_diff_gt10pp_pct": 0.00756
+    },
+    "is": {
+     "days": 2128,
+     "first": "2018-03-05",
+     "last": "2023-12-31",
+     "close_bps_median": 6.9,
+     "close_bps_p95": 87.8,
+     "close_bps_max": 551.3,
+     "state_diff_days": 21,
+     "state_diff_pct": 0.00987,
+     "action_diff_days": 32,
+     "action_diff_pct": 0.01504,
+     "level_diff_pct": 0.00376,
+     "action_diff_same_state_days": 11,
+     "expo_absdiff_mean": 0.0072,
+     "expo_diff_gt5pp_pct": 0.01786,
+     "expo_diff_gt10pp_pct": 0.01081
+    },
+    "oos": {
+     "days": 1047,
+     "first": "2024-01-01",
+     "last": "2026-11-12",
+     "close_bps_median": 4.0,
+     "close_bps_p95": 14.2,
+     "close_bps_max": 25.5,
+     "state_diff_days": 1,
+     "state_diff_pct": 0.00096,
+     "action_diff_days": 14,
+     "action_diff_pct": 0.01337,
+     "level_diff_pct": 0.01146,
+     "action_diff_same_state_days": 13,
+     "expo_absdiff_mean": 0.0029,
+     "expo_diff_gt5pp_pct": 0.00096,
+     "expo_diff_gt10pp_pct": 0.00096
+    }
+   }
+  },
+  "ETH": {
+   "coinbase": {
+    "all": {
+     "days": 3175,
+     "first": "2018-03-05",
+     "last": "2026-11-12",
+     "close_bps_median": 5.3,
+     "close_bps_p95": 63.6,
+     "close_bps_max": 514.3,
+     "state_diff_days": 7,
+     "state_diff_pct": 0.0022,
+     "action_diff_days": 15,
+     "action_diff_pct": 0.00472,
+     "level_diff_pct": 0.00252,
+     "action_diff_same_state_days": 11,
+     "expo_absdiff_mean": 0.0022,
+     "expo_diff_gt5pp_pct": 0.00315,
+     "expo_diff_gt10pp_pct": 0.00189
+    },
+    "is": {
+     "days": 2128,
+     "first": "2018-03-05",
+     "last": "2023-12-31",
+     "close_bps_median": 6.8,
+     "close_bps_p95": 93.8,
+     "close_bps_max": 514.3,
+     "state_diff_days": 6,
+     "state_diff_pct": 0.00282,
+     "action_diff_days": 7,
+     "action_diff_pct": 0.00329,
+     "level_diff_pct": 0.00094,
+     "action_diff_same_state_days": 4,
+     "expo_absdiff_mean": 0.0026,
+     "expo_diff_gt5pp_pct": 0.00423,
+     "expo_diff_gt10pp_pct": 0.00235
+    },
+    "oos": {
+     "days": 1047,
+     "first": "2024-01-01",
+     "last": "2026-11-12",
+     "close_bps_median": 3.8,
+     "close_bps_p95": 14.5,
+     "close_bps_max": 23.8,
+     "state_diff_days": 1,
+     "state_diff_pct": 0.00096,
+     "action_diff_days": 8,
+     "action_diff_pct": 0.00764,
+     "level_diff_pct": 0.00573,
+     "action_diff_same_state_days": 7,
+     "expo_absdiff_mean": 0.0014,
+     "expo_diff_gt5pp_pct": 0.00096,
+     "expo_diff_gt10pp_pct": 0.00096
+    }
+   },
+   "bitstamp": {
+    "all": {
+     "days": 3175,
+     "first": "2018-03-05",
+     "last": "2026-11-12",
+     "close_bps_median": 6.0,
+     "close_bps_p95": 62.1,
+     "close_bps_max": 501.0,
+     "state_diff_days": 7,
+     "state_diff_pct": 0.0022,
+     "action_diff_days": 12,
+     "action_diff_pct": 0.00378,
+     "level_diff_pct": 0.00189,
+     "action_diff_same_state_days": 8,
+     "expo_absdiff_mean": 0.0021,
+     "expo_diff_gt5pp_pct": 0.00315,
+     "expo_diff_gt10pp_pct": 0.00189
+    },
+    "is": {
+     "days": 2128,
+     "first": "2018-03-05",
+     "last": "2023-12-31",
+     "close_bps_median": 7.7,
+     "close_bps_p95": 93.2,
+     "close_bps_max": 501.0,
+     "state_diff_days": 6,
+     "state_diff_pct": 0.00282,
+     "action_diff_days": 6,
+     "action_diff_pct": 0.00282,
+     "level_diff_pct": 0.00094,
+     "action_diff_same_state_days": 3,
+     "expo_absdiff_mean": 0.0024,
+     "expo_diff_gt5pp_pct": 0.00423,
+     "expo_diff_gt10pp_pct": 0.00235
+    },
+    "oos": {
+     "days": 1047,
+     "first": "2024-01-01",
+     "last": "2026-11-12",
+     "close_bps_median": 4.2,
+     "close_bps_p95": 14.7,
+     "close_bps_max": 26.9,
+     "state_diff_days": 1,
+     "state_diff_pct": 0.00096,
+     "action_diff_days": 6,
+     "action_diff_pct": 0.00573,
+     "level_diff_pct": 0.00382,
+     "action_diff_same_state_days": 5,
+     "expo_absdiff_mean": 0.0013,
+     "expo_diff_gt5pp_pct": 0.00096,
+     "expo_diff_gt10pp_pct": 0.00096
+    }
+   }
+  }
+ },
+ "backtest": {
+  "is": {
+   "binance": {
+    "start": "2018-03-05",
+    "end": "2023-12-31",
+    "cagr": 0.2616,
+    "sharpe": 1.222,
+    "maxdd": -0.2657,
+    "cost_twd": 313238.0,
+    "final_twd": 3871406.0
+   },
+   "coinbase_signal": {
+    "start": "2018-03-05",
+    "end": "2023-12-31",
+    "cagr": 0.2608,
+    "sharpe": 1.231,
+    "maxdd": -0.2641,
+    "cost_twd": 309660.0,
+    "final_twd": 3855617.0,
+    "daily_ret_corr": 0.9987,
+    "sharpe_diff": 0.0095,
+    "p_better_than_binance": 0.646
+   },
+   "coinbase_both": {
+    "start": "2018-03-05",
+    "end": "2023-12-31",
+    "cagr": 0.2623,
+    "sharpe": 1.224,
+    "maxdd": -0.2651,
+    "cost_twd": 312256.0,
+    "final_twd": 3883145.0,
+    "sharpe_diff": 0.0024,
+    "p_better_than_binance": 0.53
+   },
+   "bitstamp_signal": {
+    "start": "2018-03-05",
+    "end": "2023-12-31",
+    "cagr": 0.2547,
+    "sharpe": 1.208,
+    "maxdd": -0.2692,
+    "cost_twd": 304714.0,
+    "final_twd": 3749472.0,
+    "daily_ret_corr": 0.9992,
+    "sharpe_diff": -0.0141,
+    "p_better_than_binance": 0.28
+   },
+   "bitstamp_both": {
+    "start": "2018-03-05",
+    "end": "2023-12-31",
+    "cagr": 0.2561,
+    "sharpe": 1.202,
+    "maxdd": -0.2698,
+    "cost_twd": 306986.0,
+    "final_twd": 3774096.0,
+    "sharpe_diff": -0.0202,
+    "p_better_than_binance": 0.186
+   }
+  },
+  "oos": {
+   "binance": {
+    "start": "2024-01-01",
+    "end": "2026-11-12",
+    "cagr": 0.1509,
+    "sharpe": 0.805,
+    "maxdd": -0.1824,
+    "cost_twd": 125363.0,
+    "final_twd": 1492144.0
+   },
+   "coinbase_signal": {
+    "start": "2024-01-01",
+    "end": "2026-11-12",
+    "cagr": 0.1443,
+    "sharpe": 0.781,
+    "maxdd": -0.1824,
+    "cost_twd": 125567.0,
+    "final_twd": 1467872.0,
+    "daily_ret_corr": 0.9994,
+    "sharpe_diff": -0.0247,
+    "p_better_than_binance": 0.018
+   },
+   "coinbase_both": {
+    "start": "2024-01-01",
+    "end": "2026-11-12",
+    "cagr": 0.1427,
+    "sharpe": 0.77,
+    "maxdd": -0.1834,
+    "cost_twd": 125255.0,
+    "final_twd": 1461738.0,
+    "sharpe_diff": -0.0352,
+    "p_better_than_binance": 0.0
+   },
+   "bitstamp_signal": {
+    "start": "2024-01-01",
+    "end": "2026-11-12",
+    "cagr": 0.1447,
+    "sharpe": 0.782,
+    "maxdd": -0.1824,
+    "cost_twd": 125679.0,
+    "final_twd": 1469077.0,
+    "daily_ret_corr": 0.9994,
+    "sharpe_diff": -0.0235,
+    "p_better_than_binance": 0.034
+   },
+   "bitstamp_both": {
+    "start": "2024-01-01",
+    "end": "2026-11-12",
+    "cagr": 0.1435,
+    "sharpe": 0.774,
+    "maxdd": -0.1832,
+    "cost_twd": 125518.0,
+    "final_twd": 1464812.0,
+    "sharpe_diff": -0.0316,
+    "p_better_than_binance": 0.002
+   }
+  }
+ },
+ "headline": {
+  "all": {
+   "action": {
+    "days": 12700,
+    "diff": 120,
+    "pct": 0.00945,
+    "same_state": 66
+   },
+   "state": {
+    "days": 12700,
+    "diff": 60,
+    "pct": 0.00472
+   },
+   "action_any": {
+    "days": 6350,
+    "diff": 66,
+    "pct": 0.01039
+   }
+  },
+  "is": {
+   "action": {
+    "days": 8512,
+    "diff": 79,
+    "pct": 0.00928,
+    "same_state": 29
+   },
+   "state": {
+    "days": 8512,
+    "diff": 56,
+    "pct": 0.00658
+   },
+   "action_any": {
+    "days": 4256,
+    "diff": 44,
+    "pct": 0.01034
+   }
+  },
+  "oos": {
+   "action": {
+    "days": 4188,
+    "diff": 41,
+    "pct": 0.00979,
+    "same_state": 37
+   },
+   "state": {
+    "days": 4188,
+    "diff": 4,
+    "pct": 0.00096
+   },
+   "action_any": {
+    "days": 2094,
+    "diff": 22,
+    "pct": 0.01051
+   }
+  }
+ },
+ "champion_check": {
+  "days": 30,
+  "max_abs_exposure_diff": 0.0
+ },
+ "max": {
+  "usdttwd_last": {
+   "date": "2026-11-12",
+   "close": 33.01
+  },
+  "coins": {
+   "BTC": {
+    "basis_days": 3124,
+    "basis_first": "2018-04-25",
+    "basis_bps_median": 0.1,
+    "basis_absbps_median": 7.5,
+    "basis_absbps_p95": 83.5,
+    "basis_365_median": 0.3,
+    "basis_365_absbps_p95": 8.2,
+    "own_chart_days": 2988,
+    "own_chart_state_diff_pct": 0.06325,
+    "own_chart_action_diff_pct": 0.09337,
+    "own_chart_state_diff_oos_pct": 0.08214,
+    "flip_usdt": {
+     "f50": 80875.64,
+     "f200": 73115.59,
+     "close": 71460.0
+    },
+    "flip_twd_approx": {
+     "f50": 2669705,
+     "f200": 2413546,
+     "close": 2358895
+    },
+    "flip_on_max_chart": {
+     "f50": 2620110,
+     "f200": 2340643,
+     "close": 2358107.4
+    },
+    "max_close": {
+     "date": "2026-11-12",
+     "close": 2358107.4
+    }
+   },
+   "ETH": {
+    "basis_days": 3124,
+    "basis_first": "2018-04-25",
+    "basis_bps_median": 0.4,
+    "basis_absbps_median": 8.3,
+    "basis_absbps_p95": 102.0,
+    "basis_365_median": 0.7,
+    "basis_365_absbps_p95": 11.4,
+    "own_chart_days": 2988,
+    "own_chart_state_diff_pct": 0.03347,
+    "own_chart_action_diff_pct": 0.05087,
+    "own_chart_state_diff_oos_pct": 0.0382,
+    "flip_usdt": {
+     "f50": 2425.99,
+     "f200": 2149.89,
+     "close": 2019.74
+    },
+    "flip_twd_approx": {
+     "f50": 80082,
+     "f200": 70968,
+     "close": 66672
+    },
+    "flip_on_max_chart": {
+     "f50": 78566,
+     "f200": 68823,
+     "close": 66698.3
+    },
+    "max_close": {
+     "date": "2026-11-12",
+     "close": 66698.3
+    }
+   }
+  },
+  "premium": {
+   "last_date": "2026-11-12",
+   "last": 0.0038,
+   "median_30d": 0.00326,
+   "note": "MAX USDT/TWD ÷ Yahoo TWD=X − 1（未除 USDT 美元價；USDT≈1）"
+  },
+  "staleness": {
+   "rate_1d": {
+    "median_bps": 16.5,
+    "p95_bps": 88.4
+   },
+   "rate_7d": {
+    "median_bps": 43.2,
+    "p95_bps": 187.6
+   },
+   "rate_30d": {
+    "median_bps": 99.2,
+    "p95_bps": 314.7
+   },
+   "premium_1d": {
+    "median_bps": 20.4,
+    "p95_bps": 101.4
+   },
+   "premium_7d": {
+    "median_bps": 34.5,
+    "p95_bps": 171.4
+   },
+   "premium_30d": {
+    "median_bps": 41.6,
+    "p95_bps": 198.4
+   }
+  },
+  "coingecko": {
+   "first": "2025-11-13",
+   "last": "2026-11-12",
+   "premium_last": 0.00263,
+   "premium_median_30d": 0.00255,
+   "premium_p5_30d": 0.00015,
+   "premium_p95_30d": 0.00653,
+   "eval": {
+    "cg_premium_1d": {
+     "n": 345,
+     "median_bps": 16.7,
+     "p95_bps": 64.5
+    },
+    "stale_rate_1d_same_days": {
+     "n": 365,
+     "median_bps": 13.1,
+     "p95_bps": 57.3
+    },
+    "cg_premium_7d": {
+     "n": 339,
+     "median_bps": 16.7,
+     "p95_bps": 76.8
+    },
+    "stale_rate_7d_same_days": {
+     "n": 365,
+     "median_bps": 37.1,
+     "p95_bps": 125.6
+    },
+    "cg_premium_30d": {
+     "n": 316,
+     "median_bps": 18.7,
+     "p95_bps": 75.3
+    },
+    "stale_rate_30d_same_days": {
+     "n": 365,
+     "median_bps": 100.7,
+     "p95_bps": 246.0
+    }
+   },
+   "fetched_at_utc": "2026-11-13T00:36:25Z",
+   "note": "App 用 CoinGecko 即時 tether→TWD ×（1＋最近 30 天 MAX 溢價中位數）估 MAX 的 USDT/TWD；抓不到才用檔案裡最後一根 MAX 收盤"
+  },
+  "fetched_at_utc": "2026-11-13T00:33:44Z"
+ }
+}

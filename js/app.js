@@ -16,6 +16,7 @@ import * as TB from './tradeband.js';
 import * as RB from './robust.js';
 import * as OF from './overfit.js';
 import * as GD from './guard.js';
+import * as XS from './xsrc.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -156,7 +157,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v23';
+const VERSION = 'v24';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -541,11 +542,18 @@ function relLine(c) {
   let flip = '';
   if (near) {
     const nextClose = closeMD(addDays(ymd(last.t), 1));
-    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>，規則會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
+    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>，${XS.homeAddon(near.price, XS.maxRate(XSRC, PRICES))}，規則會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
   }
   const f = LIVE?.coins?.[c];
   const edge = f && RL.nearActionEdge(f.exposure) ? `<p class="small">建議比例 ${Math.round(f.exposure * 100)}% 剛好在「持有／減碼」的分界附近，小小的波動就可能改變動作。</p>` : '';
   return `<p class="rel-line"><span class="rel-badge rel-${rel.level === 'pending' ? 'green' : rel.level}">● ${esc(rel.label)}</span>${why}</p>${flip}${edge}`;
+}
+// v24: 台幣翻轉價＋別家交易所比對
+function xsrcHtml() {
+  try {
+    const F = {}; for (const c of ['BTC', 'ETH']) { const I = CTX[c] ? relInfo(c) : null; if (I?.flips) F[c] = I.flips; }
+    return XS.xsrcCard(XSRC, F, XS.maxRate(XSRC, PRICES));
+  } catch (e) { return `<section class="card" id="xsrc"><h2>台幣翻轉價＋別家交易所比對</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; }
 }
 function relCard() {
   return `<section class="card" id="data"><h2>資料可靠度（各交易所比對）</h2><div id="rel-out">${relOut()}</div></section>`;
@@ -576,7 +584,7 @@ function relOut() {
 }
 
 // ======================= v13: 盤中離翻轉價多遠 =======================
-let TICK = {}, INTRA = null, TESTED = null;
+let TICK = {}, INTRA = null, TESTED = null, XSRC = null;
 function liveInfo(c) {
   const ctx = CTX[c], t = TICK[c]; if (!ctx || !t || t.status !== 'ok') return null;
   const bars = RL.closedBars(ctx.live.candles, t.at), last = bars[bars.length - 1]; if (!last) return null;
@@ -804,6 +812,7 @@ async function render(force = false) {
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
   try { TESTED = await fetch('data/tested_signals.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TESTED; } catch { TESTED = TESTED || null; }
   try { INTRA = await fetch('data/intraday.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || INTRA; } catch { INTRA = INTRA || null; }
+  try { XSRC = await fetch('data/xsrc.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XSRC; } catch { XSRC = XSRC || null; }
   TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
   FL.setBadge(Object.keys(PENDING).length);
@@ -847,7 +856,7 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
@@ -855,6 +864,7 @@ async function renderAdv(force = false) {
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
       ${FR.withAsof(intraCard(), FR.asofOf('intraday', INTRA), NOW)}
       ${relCard()}
+      ${FR.withAsof(xsrcHtml(), XSRC?.as_of ?? null, NOW)}
       ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
       ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
       ${FR.withAsof(riskCard(), FR.asofOf('weekly', DEC), NOW)}
