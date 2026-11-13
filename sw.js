@@ -1,5 +1,5 @@
 // App-shell cache. Market API calls are never cached here (always live; app keeps its own last-good copy).
-const VERSION = 'v28-2026-11-13';
+const VERSION = 'v29-2026-11-14';
 const SHELL = ['./', './index.html', './css/style.css', './js/app.js', './js/signals.js', './js/data.js', './js/decision.js', './js/events.js', './js/reliability.js', './js/flips.js', './js/outcomes.js', './js/trust.js', './js/fresh.js', './js/pup.js', './js/journal.js', './js/intraday.js', './js/tested.js', './js/weekrisk.js', './js/tradeband.js', './js/robust.js', './js/guard.js', './js/overfit.js', './js/xsrc.js', './js/spells.js', './js/nextmove.js',
   './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './data/backtest.json', './data/decision.json', './data/dca.json', './data/live.json', './data/events.json', './data/flips.json', './data/outcomes.json', './data/trust.json', './data/intraday.json', './data/tested_signals.json', './data/weekrisk.json', './data/tradeband.json', './data/xsrc.json', './data/spells.json', './data/nextmove.json'];
 self.addEventListener('install', e => {

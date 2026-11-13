@@ -146,3 +146,8 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .next-home:empty { display: none; }
 .nm-now { margin: .3rem 0; }
 .nm-plan { margin: .3rem 0; padding: .4rem .6rem; border-left: 3px solid #8ab4f8; background: rgba(138,180,248,.08); }
+/* v29 首頁一眼版 */
+.fc .trig{font-size:14px;margin:6px 0 2px;color:#d5dbe6}
+.fc .trig:empty{display:none}
+details.fc-more{margin-top:6px;padding-top:6px}
+details.fc-more>summary{font-size:13px;font-weight:500}

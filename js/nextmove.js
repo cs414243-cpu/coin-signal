@@ -77,6 +77,13 @@ export function homeSentence(N, st, plan = {}) {
   if (!parts.length) return '';
   return `這週會不會要動手：${parts.join('；')}。這是過去紀錄、不是預測，細節在進階「這週可能要動手嗎」。`;
 }
+/** v29: one visible plain line per coin on the top card — the nearest flip price for the next 08:00 close and what the
+ *  suggestion becomes. s: state from pickState (null/undefined → ''). Same numbers as homeSentence (which moved under 細節). */
+export function triggerLine(c, s) {
+  if (!s || !s.near || !Number.isFinite(s.near.price) || !Number.isFinite(s.near.dist)) return '';
+  const hl = s.near.dist > 0 ? '高於' : '低於';
+  return `什麼時候會變：${c} 早上 8 點收盤${hl} ${usd0(s.near.price)} 美元（比上次收盤${sgn(s.near.dist)}），建議就會轉為${actionAfter(s)}；盤中碰到不算。`;
+}
 /** Short plan text for the home sentence from TB.act-like object {kind, amt}. */
 export function planShort(a) {
   if (!a) return '';

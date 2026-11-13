@@ -159,7 +159,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v28';
+const VERSION = 'v29';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -495,6 +495,8 @@ function updateOuts() {
   set('fc-money-BTC', () => moneyLine('BTC'));
   set('fc-spell', spellHome);
   set('fc-next', nmHome);
+  set('fc-trig-BTC', () => trigHome('BTC'));
+  set('fc-trig-ETH', () => trigHome('ETH'));
   set('nm-wrap', () => FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now()));
   set('fc-money-ETH', () => moneyLine('ETH'));
   set('fc-rel-BTC', () => relLine('BTC'));
@@ -763,21 +765,29 @@ function closeLabel(f) {
   if (!Number.isFinite(t)) return '上次收盤';
   const x = new Date(t); return `${x.getUTCMonth() + 1}/${x.getUTCDate()} 早上 8 點收盤`;
 }
+// v29: 首頁一眼版 — visible: 建議、原因、什麼時候會變 (+ 運氣差的一週 only when money is in, + 金額 when holdings are set);
+// everything else from v5–v28 is unchanged but folded into 「看 X 的細節」/「更多說明」 (progressive disclosure, same IDs).
+function trigHome(c) { try { return esc(NM.triggerLine(c, nmCur()[c])); } catch { return ''; } }
 function coinBlock(c) {
   const f = LIVE.coins[c]; if (!f) return '';
-  const e = f.exposure, sharePct = Math.round(e * 100);
-  const share = e < 0.005 ? '建議：<strong>先不要放</strong>（0%）' : `建議：放你打算投入 ${c} 的錢的 <strong>${sharePct}%</strong>${e >= 0.95 ? '（差不多全部）' : (e >= 0.4 && e <= 0.6) ? '（大約一半）' : ''}`;
+  const e = f.exposure, sharePct = Math.round(e * 100), inMkt = e >= 0.005;
+  const share = !inMkt ? '建議：<strong>先不要放</strong>（0%）' : `建議：放你打算投入 ${c} 的錢的 <strong>${sharePct}%</strong>${e >= 0.95 ? '（差不多全部）' : (e >= 0.4 && e <= 0.6) ? '（大約一半）' : ''}`;
+  const bad = `<p class="badweek small">${esc(WR.homeLine(f, c, WRISK))}</p>`;
   return `<div class="fc" data-coin="${c}">
       <div class="fc-head"><span class="coin">${c}</span><span class="state-big ${ACT_CLS[f.action]}">${esc(f.action_zh)}</span><span class="muted small">${ACT_HINT[f.action]}</span></div>
       <div id="fc-rel-${c}" class="rel">${relLine(c)}</div>
-      <div id="fc-live-${c}" class="live">${liveLine(c)}</div>
       <p class="share">${share}</p>
+      <p class="why">原因：${esc(f.reason)}</p>
+      ${inMkt ? bad : ''}
+      <p id="fc-trig-${c}" class="trig small">${trigHome(c)}</p>
+      <div id="fc-money-${c}"></div>
+      <details class="fc-more" data-coin="${c}"><summary>看 ${c} 的細節（盤中價、一週價格範圍、過去紀錄）</summary>
+      <div id="fc-live-${c}" class="live">${liveLine(c)}</div>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；${closeLabel(f)} ${usd(f.price_usd)}）</p>
-      <p class="badweek small">${esc(WR.homeLine(f, c, WRISK))}</p>
-      <p class="why">原因：${esc(f.reason)}</p>
+      ${inMkt ? '' : bad}
       ${OUTC ? `<p class="past small muted" data-coin="${c}">${esc(OC.homeLine(OUTC, c, f.action))}</p>` : ''}
-      <div id="fc-money-${c}"></div>
+      </details>
     </div>`;
 }
 function forecastCard() {
@@ -788,12 +798,14 @@ function forecastCard() {
     <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
     <div id="fc-stale-wrap">${TR.topLine(LIVE, TRUST, Date.now(), DEV)}</div>
     ${coinBlock('BTC')}${coinBlock('ETH')}
+    <div id="jr-hint-wrap">${JR.homeHint(JR.load(localStorage), LIVE)}</div>
+    <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>
+    <details class="fc-more" id="fc-more-all"><summary>更多說明（空手多久、這週動手的機率、要不要每天微調）</summary>
     <p id="fc-spell" class="small spell-home">${spellHome()}</p>
     <p id="fc-next" class="small next-home">${nmHome()}</p>
-    <div id="jr-hint-wrap">${JR.homeHint(JR.load(localStorage), LIVE)}</div>
     ${holdingsSet() ? '' : '<p class="small muted">想直接看要買賣多少錢：打開下面「進階 → 我的部位」填總資產和持有數量，這裡就會換算成金額。</p>'}
     ${TB.homeNote(TBAND) ? `<p class="small muted tb-note">${esc(TB.homeNote(TBAND))}</p>` : ''}
-    <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>
+    </details>
   </section>`;
 }
 function trackCard() {
