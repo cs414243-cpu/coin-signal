@@ -14,6 +14,9 @@
 - App：進階卡資料來源那行加「每週一自動更新（新資料檢查不過就保留上一版）」；首頁、頁尾不變。SW `v25-2026-11-13`。
 - 不註冊；帳本、凍結模型、registry、升級規則、`daily.sh` 都沒動，18 個核心檔 sha256 前後相同（`weekly.sh` 是這次有意修改的唯一例行檔）。
 - 測試：新增 `tests/test_refresh_xsrc.py` 4 項（無新K時照常通過；舊快取少 3 根＋舊檔時增量合併後 as_of 前進、數字＝正式檔；缺日、變短、負價、匯率跳動、as_of 倒退、抓取失敗、重算失敗 7 種壞資料都保留舊檔且檔案 sha256 不變；weekly.sh 接線與順序），`tests/xsrc.test.mjs` 加 1 項。
+  - 修 `forecast/test_verify_live.py::test_stale_forecast`：原本寫死「預報是 11/11」，今早每日預測後就壞；改成依已發布 live.json 的 asof 計算。
+  - 結果：node 146／146；`test_refresh_xsrc.py` 4／4；`test_forecast.py` 10／10；`test_events.py` 5／5；`test_verify_live.py` 11／11；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24` 本機全過。
+  - 部署後檢查：coin-signal 3479acb 已推送；線上 sw `v25-2026-11-13`、卡片文字已上線；`verify_live.py` LIVE CHECK OK；`e2e_v24` 線上也過。研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-0936-xsrc-auto-refresh.md`，Drive 1NYbr49qkViiJQisjl1VZ5MDBfzVuJTqu。
 ## v24（2026-11-13）：台幣翻轉價＋別家交易所比對
 
 - 2026-11-13 08:30 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-0830-xexchange-ntd-flip.md`，Drive 16jU5P61nlDwBw0agMdmXrFMSqhURJ_s6）。v23 稽核結論是不要再調冠軍參數，所以這次做幫實際下單的 App 改進：宗在 MAX 用台幣買，規則看的是 Binance USDT 收盤。
