@@ -1,5 +1,16 @@
 # 幣訊號 更新紀錄
 
+## v32（2026-11-14）：成績單加一句「現在的差距算不算數」（短期誰贏主要看漲跌）
+
+- 2026-11-14 05:38 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261114-0538-scorecard-noise.md`）。查重：v9（紀錄可信度）、v23（回測過度擬合檢查）都不是在回答「實盤才幾天的差距有多少是運氣」；CHANGELOG v4–v31 沒有。今晚 5 個模型提案已否決，這次做幫解讀的 App 改進。不是新訊號、不改預測規則、不註冊。依據 Tversky & Kahneman 1971 *Psychological Bulletin* 76(2):105–110（doi 10.1037/h0031322，小數法則）、Bailey & López de Prado 2012 *J. Risk* 15(2):3–44（doi 10.21314/jor.2012.255，最短紀錄長度；讀作者版第 4 節）。
+- 新回測 `backtest/score_noise.py` → `app/data/scorenoise.json`：讀冠軍與一直抱著的 walk-forward 快取（凍結、每天只用當天以前的資料），2022-01-01 起每天各開一個**全新**虛擬 NT$100 萬，N 天後誰多（N＝1–91 逐日、之後每 7 天到 728）；成本＝成績單同一套（0.15%／邊、買進台幣溢價、第一天買進成本自己付），`--check` 對 24 個隨機視窗與 `engine.paper_sim` 誤差 < 1e−9。猜對率：同樣 K 天（2K 筆）的 10／90 分位，結果須在 as_of 前已知。資料到 2026-11-10。
+- 結果（2024→ 起始的視窗；括號 2022→）：照建議贏的比例 2 天 54%（54%）、1 週 51%、4 週 45%、**8 週 44%**（44%）、半年 57%（46%）、1 年 58%（40%）；**幣價跌時贏 90–97%、漲時只贏 0–3%**（8 週內）；8 週差距一般範圍 −21～+21 個百分點。猜對率 28 天一般 30%～66%、91 天 40%～59%。結論：短期誰贏幾乎完全由漲跌決定，和「主要作用是大跌時少虧」一致。
+- 首頁「預測成績單」兩個虛擬投資下面加一句（目前）：「照建議領先，但還不算數：這 2 天幣價在跌（一直抱著 −2.81%）。回測裡同樣 2 天的期間，幣價跌時照建議 97% 會贏、漲時只有 3%——短期誰贏主要看漲跌，不代表預測準。拉長到 8 週，照建議贏的期間也只有 44%；它的用處是大跌時少虧。」跟著天數、誰領先、漲跌自動換字，滿 8 週拿掉後半句。11/17 起有到期預測時加猜對率範圍句（在範圍內＝「還看不出準不準」；高／低於範圍＝「筆數還少，可能只是運氣／先不要下結論」）。進階「預測模型與自我改善機制」卡加 6 列表（1 天～1 年、跌時／漲時、差距範圍）與算法說明。
+- `scorenoise.json` 暫不接 weekly.sh（不在 11/16 第一次完整週檢討前改例行腳本；長期分布、多一週影響很小，表上標資料日期）；之後可接進 `refresh_all.py`。
+- SW `v32-2026-11-14`（快取清單加 `js/scorenoise.js`、`data/scorenoise.json`）；`app.js` 版本 v32。帳本、凍結模型、registry、升級規則、`daily.sh`、`weekly.sh` 都沒動。建議不變 BTC 0、ETH 0。
+- 測試：新增 `tests/scorenoise.test.mjs` 7 項（pick；資料形狀；首頁句數字＝資料、抱著 %＝KPI、無術語、領先／落後／漲跌／8 週子句；猜對率三種判斷；進階表；**重跑 `score_noise.py --end 2026-11-10 --check` 與發布檔完全相同**；接線）與 `tests/e2e_v32.mjs`（iPhone 390×844：句子在首頁可見不在摺疊內、數字＝資料、抱著 %＝KPI；進階表 6 列；無水平捲動、免責句、無錯誤；截圖 `screenshots/v32-*.png`）。`home_v31` 版本斷言放寬到 v32。
+- 結果：node 188／188；`test_forecast.py` 10／10；`events/test_events.py` OK；`test_refresh_xsrc.py` 4／4；`tests/test_cusum_exit.py` 7／7；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`～`e2e_v32`、`fallback` 本機全過。部署庫 `.lock` 05:40 原子建立。
+
 ## v31（2026-11-14）：「什麼時候會變」直接說變成多少（例：建議就會轉為加碼（放約 42%））
 
 - 2026-11-14 04:37 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261114-0437-flip-share.md`）。連續三次模型提案被否決（P-changepoint、P-trailing-stop、P-realized-moments），這次做幫實際決策的 App 改進。先查重：v29 首頁「什麼時候會變」和 v6／v30 黃色「接近翻轉」框只說會轉為「加碼／減碼／空手」，**沒說要放多少**；翻轉後的比例只在進階「這週可能要動手嗎」（v27「建議比例約 X%」）裡。CHANGELOG v4–v30 沒有首頁顯示翻轉後比例、也沒有驗證過這個估計準不準。不改預測規則、不是新訊號、不註冊。
@@ -7,10 +18,31 @@
 - **這個估計準不準（新回測 `backtest/flip_size_check.py`，只用已收完的 Binance 日K）**：2018 年起 BTC 226＋ETH 205＝431 次一階翻轉（資料到 2026-11-12），估的比例和翻轉當天實際比例：差 ≤ 5 個百分點 93.3%（2023 年起 200 次：90.0%）、中位差 0.29 個百分點；BTC OOS 90% 分位 5.7pp、ETH 2.5pp。差超過 15pp 只有 4 次，都是翻轉當天大漲大跌讓 30 日波動跳高（ETH 2026-08-19 單日 +17.5%：估 98%、實際 47%；BTC 2019-04-02 估 100%、實際 51%）；動作字（加碼／減碼／空手）和每日規則不同 5 次（1.2%，同樣是這種日子）。所以首頁寫「約」，進階卡說明這個例外並註明「真的變了以 08:20 每日預測為準」。改用「剛好收在翻轉價時的波動」估，BTC 90% 分位改善（4.0→2.7pp）但中位變差（0.29→0.46），不值得換、沒採用。
 - SW `v31-2026-11-14`；`app.js` 版本 v31。帳本、凍結模型、registry、升級規則、`daily.sh`、`weekly.sh` 都沒動。建議不變 BTC 0、ETH 0。
 - 測試：新增 `tests/home_v31.test.mjs` 3 項（shareAfter 用語；200 組隨機走勢首頁句＝v27 估計、加碼／減碼／空手用語一致；黃框接線、版本；`flip_size_check.py --end 2026-11-12` 重現卡上 431／93%／90%／ETH 8/19 98→47）與 `tests/e2e_v31.mjs`（iPhone 390×844：首頁句的 N% ＝進階 v27 卡「建議比例約 N%」、無術語；強制接近翻轉時黃框含比例、「什麼時候會變」空白；無水平捲動與錯誤；截圖 `screenshots/v31-near.png`）。`home_v29`（首頁句加上比例）、`home_v30`、`e2e_v29`、`e2e_v30` 的句型／版本斷言放寬到 v31。
+- 結果：node 181／181；`test_forecast.py` 10／10；`events/test_events.py` 5／5；`test_refresh_xsrc.py` 4／4；`tests/test_cusum_exit.py` 7／7；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`～`e2e_v31`、`fallback` 本機全過。部署後：coin-signal f483f4c（crypto-predictor 303b904），線上 sw `v31-2026-11-14`，`verify_live.py` LIVE CHECK OK、`test_verify_live.py` 11／11、`e2e_v29`／`e2e_v30`／`e2e_v31` 線上也過。部署庫 `.lock` 04:38 原子建立、完成後移除。研究筆記 Drive 1crsF0PgKt-oC3VkN7RmYqPx_jb6AQ4nO。
+
+## 提案 P-realized-moments（2026-11-14，不是 App 版本）：高頻已實現偏態／峰態／跳躍占比當冠軍的「只減碼」覆蓋層 → rejected
+
+- 2026-11-14 03:32 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261114-0332-realized-moments.md`，Drive 1BEt9xZ6WCbBppz0XiCg_usTftQOByDZ2）。先查重：P-vol-estimator／P-calibrated-band 是已實現「波動大小」，P-options-skew 是選擇權隱含偏態，P-intraday-guard 是小時K跌幅；**已實現三階／四階動差與 bipower 跳躍占比沒測過**。依據 Amaya, Christoffersen, Jacobs & Vasquez 2015 *JFE* 118(1):135–167（doi 10.1016/j.jfineco.2015.02.009）、Jia, Liu & Yan 2021 *Finance Research Letters* 39:101536（doi 10.1016/j.frl.2020.101536）、Barndorff-Nielsen & Shephard 2004 *J. Financial Econometrics* 2(1):1–37（doi 10.1093/jjfinec/nbh001），皆核對書目、讀摘要。
+- 事先登記在 `forecast/proposals/proto_realized_moments.py` docstring（第一次執行前單獨 commit）。小時K快取 03:35 台北用 `backtest/fetch_hourly.py` 更新到 2026-11-13 18:00 UTC。
+- 事先登記 commit 26fef04（03:33 台北），之後才跑 `--is-only` 與完整版各一次。日窗 7 天小時對數報酬（N ≥ 150）；RSK＝√N·Σr³／RV^1.5、RKT＝N·Σr⁴／RV²、JS＝max(0,1−BV/RV)；跟自己過去 365 天分位數比：rsk_hi（> q80）、krt_lo（< q20）、jump_hi（> q80）→ 冠軍 ×0.5，永遠 ≤ 冠軍。
+- IS：冠軍 0.723；rsk_hi 0.430、krt_lo 0.558、jump_hi 0.579，**全部不合格**（fallback 領先 jump_hi）。**OOS 2024→ jump_hi 0.611／年化 10.2%／DD −19.3% vs 冠軍 0.836／15.9%／−18.4%（P 0.040、Holm 1.00、WF 不過）→ rejected**；rsk_hi 0.428（P 0.0005，顯著更差）、krt_lo 0.763（P 0.27）。成本每年多 1.0–1.6pp。各動差與下週報酬 Spearman |ρ| ≤ 0.12、方向跨幣跨期不一致；論文是橫斷面結果，沒轉成單幣時序訊號。截斷 400 根差 0；冠軍重建 < 2e−6。
+- 今天（日K 11-12）：ETH jump_hi 觸發（JS 0.441 > 門檻 0.256），但冠軍兩幣空手。建議不變 BTC 0、ETH 0。寫在 `forecast/proposals/P-realized-moments.md`。
+- `backtest/tested_signals.py` 加 realized_moments 白話列（本機重算到 /tmp：37 項 0 錯誤；`app/data/tested_signals.json` 照原計畫 11/16 weekly.sh 發布）。App 不改（仍 v30），帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。
+- 測試：node 178／178、`test_forecast.py` 10／10、`events/test_events.py` OK、`test_refresh_xsrc.py` 4／4、`tests/test_cusum_exit.py` 7／7、`test_verify_live.py` 通過、`verify_live.py` LIVE CHECK OK（線上仍＝v30）。e2e 未重跑（App 沒改）。
+
+## 提案 P-trailing-stop（2026-11-14，不是 App 版本）：移動停損（Le Beau 吊燈停損 chandelier／ATR、Donchian 20 日低點）當冠軍的「只出場」覆蓋層 → rejected
+
+- 2026-11-14 02:35 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261114-0235-trailing-stop.md`，Drive 15eV1IHX4TQv6tn5Av-9BaUaoh7PLuBqY）。先查重：P-intraday-guard 是小時K、相對上一根日收盤的固定 % 跌幅（每天重設），P-drawdown-regime 是回撤分位數減半，P-trend-ensemble 的 Donchian 是獨立進出場；**日K、ATR 尺度、跨日只升不降、附回場規則的移動停損沒測過**。依據 Kaminski & Lo 2014 *J. Financial Markets* 18:234–254（doi 10.1016/j.finmar.2013.07.001，核對書目、讀摘要）、Le Beau chandelier exit（StockCharts ChartSchool；Weintraub《Trading Chicago Style》引述 Le Beau，已讀）。
+- **事先登記**（`forecast/proposals/proto_trailing_stop.py` docstring；第一次執行前單獨 commit 55c46ba，02:38 台北；docstring 寫的「~02:50」是撰寫時的預估）：ATR22 Wilder；ce22＝22 日最高 − 3×ATR22；ce_entry＝持有段進場以來最高 − 3×ATR22、只升不降（Le Beau 原版）；dc20＝前 20 根最低。收盤跌破 → 0；回場需 trend3 上升（冠軍重新訊號）且收盤 > 停損；永遠 ≤ 冠軍；p_up 沿用冠軍。判定 candidate／observe／rejected 規則同慣例（IS 2022–23 選模、OOS 2024→、bootstrap ≥ 0.975、Holm、×0.85、const_scale、maxDD、WF）。`--is-only` 先跑。
+- IS：冠軍 Sharpe 0.723；ce22 0.635、**ce_entry 0.769／maxDD −13.7%（唯一合格 → 領先）**、dc20 0.559。**OOS 2024→ ce_entry 0.394／年化 4.6%／DD −19.4% vs 冠軍 0.836／15.9%／−18.4%（P(較好) 0.163、Holm 1.00、WF 0.556 不過）** → **rejected**。ce22 OOS 0.997／DD −18.0%（P 0.61），但 IS 不合格、事前不會被選，ATR 倍數 2／3／4 的 IS–OOS 排序相反（×2：IS 0.117、OOS 1.143）；dc20 0.863（P 0.41）。
+- 診斷（只報告）：ce_entry 停損中那幾天幣的平均日報酬 BTC +0.105%／ETH +0.195%，**高於**持有日 +0.084%／+0.137%（負的停損溢酬）；日報酬 lag-1 自我相關 OOS BTC −0.053、ETH −0.010（2018–21 約 −0.1）＝短期沒有動能，符合 Kaminski–Lo「沒有動能時停損會降低報酬」。2018-09→2021 三版都低於冠軍（1.703）。截掉 400 根重算差 0；冠軍＝WF 快取 < 2e−6；每天斷言覆蓋層 ≤ 冠軍。
+- 今天（日K 11-12）：冠軍兩幣 trend3 = 0、空手，停損不適用。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 加 trailing_stop 白話列（本機重算到 /tmp：36 項 0 錯誤；`app/data/tested_signals.json` 照原計畫 11/16 weekly.sh 發布）。App 不改（仍 v30），帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。
+- 測試：node 178／178、`test_forecast.py` 10／10、`events/test_events.py` 5／5、`test_refresh_xsrc.py` 4／4、`tests/test_cusum_exit.py` 7／7、ledger verify OK、`test_verify_live.py` 11／11、`verify_live.py` LIVE CHECK OK（線上仍＝v30）。e2e 未重跑（App 沒改）。
 
 ## v30（2026-11-14）：接近翻轉時，首頁不再把同一個翻轉價講兩次
 
-- 2026-11-14 01:32 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261114-0132-flip-price-dedupe.md`）。v29 的 CHANGELOG 自己列的後續：離翻轉價不到 1% 時，首頁每個幣同時有黃色「接近翻轉」框（v6）和新的「什麼時候會變」（v29），兩行講同一個價格、同一個動作。不是新訊號、不改預測規則、不註冊。
+- 2026-11-14 01:32 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261114-0132-flip-price-dedupe.md`，Drive 1kM_PCKifJgAVsiMdENvHJxk6BJRMpNXE，commit crypto-predictor 9ae149f／coin-signal 2f10571，LIVE CHECK OK）。v29 的 CHANGELOG 自己列的後續：離翻轉價不到 1% 時，首頁每個幣同時有黃色「接近翻轉」框（v6）和新的「什麼時候會變」（v29），兩行講同一個價格、同一個動作。不是新訊號、不改預測規則、不註冊。
 - 修正：黃框出現時，「什麼時候會變」那行留空（CSS `.trig:empty` 本來就隱藏）；黃框沒出現（離翻轉價 ≥ 1%，今天就是這樣的常態）時行為與 v29 完全相同。保留黃框是因為它多了台幣換算（MAX 約 NT$）與「差距很小，各交易所可能給不同答案」。黃框文字順手改白話：「規則會轉為」→「建議就會轉為」（與 v29 同一句型），並修掉標點瑕疵（沒有台幣換算時是「美元，，規則」、有時是「美元，（…），規則」，現在是「美元（在 MAX 約 NT$…），建議就會轉為…」）。
 - 重看 iPhone 390×844 首頁：外面只剩建議、原因、什麼時候會變（或黃框）；沒有新的術語或重複，沒有其他改動。
 - SW `v30-2026-11-14`；`app.js` 版本 v30。帳本、凍結模型、registry、升級規則、`daily.sh`、`weekly.sh` 都沒動。
@@ -27,6 +59,66 @@
 - 測試：新增 `tests/home_v29.test.mjs` 3 項（triggerLine 空狀態、200 組隨機走勢與 v27 首頁句同價格同距離同動作、週檔備援；接線：ID 都在、收合位置、免責句在外、版本）；新增 `tests/e2e_v29.mjs`（iPhone 390×844：兩個細節區和「更多說明」預設收合、外面只看得到建議／原因／什麼時候會變（＝頁面用 nextmove.js 重算）、看得到的字 ≤ 60%、外面沒有術語、打開後 v13／v18／v26／v27／v28 內容都看得到、無水平捲動與主控台錯誤；截圖 `screenshots/v29-home.png`、`v29-home-open.png`）。`e2e_v26`、`e2e_v27` 的「首頁句看得到」改成先打開「更多說明」再檢查（其他斷言不變）。
 - 結果：node 177／177；`test_forecast.py` 10／10；`events/test_events.py` OK；`test_refresh_xsrc.py` 4／4；`tests/test_cusum_exit.py` 7／7；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`～`e2e_v29`、`fallback` 本機全過（`e2e_v26`／`e2e_v27` 第一次因「首頁句看得到」斷言失敗＝預期，改成先打開「更多說明」後通過）。`test_verify_live.py` 部署前照預期因「原始碼≠部署庫」失敗。
 - 部署後檢查：coin-signal d976cfa 已推送（本機 crypto-predictor 6ebda3f）；線上 sw `v29-2026-11-14`；`verify_live.py` LIVE CHECK OK；`test_verify_live.py` 11／11；`e2e_v29`、`e2e_v28`、`e2e_v27` 線上也過。部署庫 `.lock` 00:32 原子建立、完成後移除。研究筆記 Drive 1NAXb3xZtVOR2NUyuefUCobHMhGrW0RGv。
+
+## 提案 P-cusum-exit（2026-11-13，不是 App 版本）：CUSUM「只出場」覆蓋層重新事先登記，只用 2026-11-14 以後的資料前向影子追蹤 → collecting（0 個前向天）
+
+- 2026-11-13 23:31 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-2330-cusum-exit-forward.md`，Drive 1NE2jfyVow-w83-JOssPXAhTaGdxvUmnw）。22:36 的 P-changepoint 判定 rejected 後，事後拆解發現好處幾乎全來自「CUSUM 向下警報後 30 天把冠軍投入減半」；那是看過歷史才挑出來的，歷史不能再驗證它，所以照該提案的建議**重新事先登記、只用寫規則時還不存在的資料**。依據 Page 1954 Biometrika 41:100–115（先前已核對書目）與 P-changepoint 的結果／事後拆解檔。
+- **事先登記 23:33 台北**（`forecast/proposals/proto_cusum_exit.py` docstring＋`SPEC`，spec sha256 4b13a706…；第一次執行前先單獨 commit 7002514）：標準化日 log 報酬雙邊 CUSUM k 0.5、h 5，警報後狀態 30 根（新警報取代）；狀態 −1 且冠軍有部位 → 冠軍 × 0.5；**沒有向上回補**；成本與冠軍相同（0.15%／邊＋買進 0.27%）。前向起點＝第一根日期 ≥ 2026-11-14 的已收盤日K；損益、警報、事件只算 ≥ 11-14 的K。**最低樣本**：≥ 56 個前向天且 BTC＋ETH ≥ 4 個已完成的有作用向下事件（可能要一年以上；不放寬）。**成功標準**：前向淨報酬 ≥ 冠軍、最大回撤不更深、事件超額總和 > 0 且至少一半 > 0、成本/年 ≤ 冠軍＋1pp。達標也只代表「可以在週檢討提出」；**註冊只能經週檢討＋8 週實測規則，追蹤器與每小時例行永不註冊。**
+- 追蹤器輸出 `forecast/proposals/proto_cusum_exit_shadow.json`（每天兩幣的冠軍／覆蓋層投入、CUSUM S+／S−、警報、前向統計；檔名刻意不符合 `proto_*_results.json`，所以 `tested_signals.py` 不列它，**這次不加 tested_signals 列**——它還沒有任何結果）。**沒有接進 daily.sh／weekly.sh、帳本、registry、凍結模型**；週檢討若要看，可在刷新後執行 `python3 proposals/proto_cusum_exit.py` 讀 `status`／`forward.pooled`／`min_sample`（P-cusum-exit.md 有說明）。
+- 今天（日K 11-12）：狀態 **collecting**、前向 0 天。BTC CUSUM 狀態 0、S− 2.80／5（上次警報 2026-08-21 向上），約再一天 −5.1% 左右（或幾天累積下跌）才會向下警報；ETH 狀態 0、S− 3.56／5（上次 2026-08-19 向上），約一天 −5.0%。冠軍兩幣空手，所以就算警報，覆蓋層也是 0。建議不變 BTC 0、ETH 0。
+- 新增 `tests/test_cusum_exit.py` 7 項：規格凍結（sha256 釘住，改了就失敗）；無偷看（截掉最後 1／7／30／400 根、把後 200 根換成亂數走勢，之前的投入／狀態／S 完全相同）；與 P-changepoint 的只出場序列逐日相同；前向只看 ≥ 起點的K（今天 0 前向天；合成資料把起點前所有列亂改，前向統計一字不差；起點晚一天就少一根）；事件與「只出場」語意（覆蓋層永遠 ≤ 冠軍）；決定性（跑兩次 JSON 相同）；沒有接線（例行腳本、registry 都不提它、原始碼不寫帳本）。
+- App 不改（仍 v28），帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。
+- 測試：node 174／174、`test_forecast.py` 10／10、`test_verify_live.py` 11／11、`events/test_events.py` 5／5、`test_refresh_xsrc.py` 4／4、`tests/test_cusum_exit.py` 7／7、ledger verify OK、`verify_live.py` LIVE CHECK OK（線上仍＝v28）。commit 7002514（事先登記）／3510053。
+
+## 提案 P-changepoint（2026-11-13，不是 App 版本）：變點偵測（CUSUM／貝氏線上變點 BOCPD）當冠軍的快速出場／回補覆蓋層 → rejected（CUSUM 只出場列觀察）
+
+- 2026-11-13 22:37 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-2236-changepoint.md`，Drive 1uKnpWhinvO1ovZKxQ-laeJtrO47K2lcT）。任務建議的新模型家族：已測 HMM（固定狀態）、回撤門檻、盤中跌幅、卡爾曼、波動估計器，**序列變點偵測從沒測過**。依據 Adams & MacKay 2007（arXiv:0710.3742，已讀全文）、Page 1954 Biometrika 41:100–115（核對書目）、Li 2026 ACM CSMT 與 Ding（BOCPD／CUSUM 用在股市，已讀摘要）。
+- `forecast/proposals/proto_changepoint.py` 事先登記（~22:45 台北寫在 docstring、先於任何結果；`--is-only` 先跑）：BOCPD Normal-Gamma（μ0 0、κ0 1、α0 1、β0 1e−3、hazard 1/250＝論文值），每天算 cp10（10 天內有變點的機率）、預測波動、目前這段平均報酬；CUSUM 標準化日報酬 k 0.5、h 5、警報後 30 天。版本 cp_gate（剛換到更高波動段→減半）、cp_mean（½ trend3 + ½[段平均 > 0]）、cusum_ovl（向下警報→減半、向上警報且 trend3<1→+0.25vt）；對照 ×0.85、const_scale（c 1.0016）。
+- IS 2022–23 三版都不合格（冠軍 Sharpe 0.723；gate 0.673、mean 0.250、cusum 0.712）→ fallback 領先 cusum_ovl。**OOS 2024→ cusum_ovl Sharpe 0.912／年化 17.5%／DD −17.1%／成本 3.01% vs 冠軍 0.836／15.9%／−18.4%／3.23%（P(較好) 0.973、門檻 0.975；Holm 0.081；WF 通過）**；cp_gate 0.758（P 0.050）、cp_mean 0.717／DD −21.1%（Brier 0.25162，DM p 0.36）。IS 不合格＋bootstrap 差一點 → **rejected**。hazard 100／1000 也不比冠軍好。截掉 400 根重算差 0；冠軍＝WF 快取 < 2e−6。
+- 偵測延遲（事後標籤，只診斷）：OOS BTC 15 次大跌，7 天內 cp10 響 4 次、CUSUM 5 次；ETH 12 次中 3／2 次——多數大波動事前與當週都抓不到。事後拆解（判定後才跑、不能選模）：好處幾乎全來自「向下警報後 30 天減半」（只出場 IS 0.760、OOS 0.913；只回補 OOS 0.836），但 OOS 只作用 BTC 43 天／ETH 76 天、各 7–8 次警報。若要繼續，須**重新事先登記**「CUSUM 只出場」並只用 11/14 以後資料前向影子追蹤，之後才談註冊與 8 週實測。
+- 今天（日K 11-12）：BTC cp10 0.023、CUSUM 狀態 0；ETH cp10 0.154、狀態 0；冠軍兩幣空手、三版也是 0。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 加 changepoint 白話列（本機重算 35 項 0 錯誤；`app/data/tested_signals.json` 照原計畫 11/16 weekly.sh 發布）。App 不改（仍 v28），帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。
+- 測試：node 174／174、`test_forecast.py` 10／10、`test_verify_live.py` 11／11、`events/test_events.py` 5／5、`test_refresh_xsrc.py` 4／4、ledger verify OK、`verify_live.py` LIVE CHECK OK（線上仍＝v28）。commit 418988d。
+
+## 提案 P-kalman-trend（2026-11-13，不是 App 版本）：卡爾曼濾波趨勢（狀態空間平滑趨勢模型，取代或混合 50／200 日均線）→ rejected
+
+- 2026-11-13 21:38 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-2138-kalman-trend.md`，Drive 18JNsgJPXV03U-FTsj4IE0d4qduZFeWkN）。選 (a) 新趨勢估計器家族：已測過 tsmom、多均線／Donchian 集成（P-trend-ensemble）、均線長度格點（P-trend-robustness）、盤整程度（P-trend-quality）、HMM（P-regime-hmm），**狀態空間／卡爾曼濾波從沒測過**；(b) 變點偵測與已否決的 HMM 太重疊，(c) 事前訊號已由 v5／P-events-A/B/C 做過，(d) 首頁今天已改 6 版，故不選。依據 Kalman 1960、Harvey 1989、Harvey–Jaeger 1993、Bruder–Dao–Richard–Roncalli 2011（已讀摘要與部分正文）。
+- 事前發現：自由 MLE 的 local linear trend（≤2021）斜率變異退化成 ≈0（BTC 7.9e−12、ETH 3.0e−8）＝資料選不出平滑度，所以平滑度事先固定。`forecast/proposals/proto_kalman_trend.py` 事先登記（~21:40 台北寫在 docstring、先於任何結果；`--is-only` 先跑）：log 收盤平滑趨勢模型、單邊濾波，HP 半增益週期對齊 50／200 日（λ 4,021／1,026,767）；kf_slope3（兩條斜率向上各半）、kf_level3（價格在兩條濾波線之上各半）、kf_mix（½ trend3 + ½ kf_slope3），× 冠軍相同波動目標；對照 ×0.85、const_scale（c 0.9875）。
+- IS 2022–23 三版都不合格（冠軍 Sharpe 0.723；slope3 0.319、level3 0.250、mix 0.543）→ fallback 領先 kf_mix。**OOS 2024→ kf_mix Sharpe 0.661／年化 11.5%／DD −21.5%／成本 2.69% vs 冠軍 0.836／15.9%／−18.4%／3.23%（P(較好) 0.053）**；kf_slope3 0.436／6.7%／−26.3%（P 0.039），翻轉 BTC 33.5→20.2 次/年、14 天內翻回 71%→38%（少翻轉但轉向太慢）；kf_level3 0.752／DD −19.0%／成本 7.45%（翻轉 65.2 次/年），Brier 0.25065 vs 0.25228（DM p 0.44，仍輸一律 50%）。Holm 全 1.00、WF 2022→ 全不過 → **rejected**。2018-09→2021 slope3 1.845 vs 冠軍 1.703（只有大多空循環好看）。截掉 400 根重算差 0；冠軍＝WF 快取 < 2e−6。
+- 今天（日K 11-12）：BTC 快斜率 −0.53%/天、慢斜率 +0.10%/天，ETH −0.73%／+0.04%；冠軍兩幣空手。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 加 kalman_trend 白話列（本機重算 34 項 0 錯誤；`app/data/tested_signals.json` 照原計畫 11/16 weekly.sh 發布）。App 不改（仍 v28），帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。
+- 測試：node 174／174、`test_forecast.py` 10／10、`test_verify_live.py` 11／11、`events/test_events.py` OK、`test_refresh_xsrc.py` 4／4、ledger verify OK、`verify_live.py` LIVE CHECK OK（線上仍＝v28）。commit 8c3ec00。
+
+## 可靠度：修好週一 weekly.sh 的三個問題（2026-11-13，不是 App 版本；11/16 09:00 第一次完整週檢討之前）
+
+- 2026-11-13 20:35 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-2035-weekly-reliability-fixes.md`，Drive 1Eub-cFnYVxHrqnsDZepItemNfkFGuSju；commit 03c83b4）。19:37 的彩排找到、cs 決定要在週一前修的三件事：(1) weekly.sh 本機 commit 用一整行 `git add`，任何一個列出的檔不在就**整批不加**、被 `|| true` 吞掉，而且漏了 `app/data/events.json`；(2) 盡力而為的步驟失敗時只印一行，weekly.sh 照樣 **exit 0**（例行會回報「成功」，但卡片停在舊版）；(3) 部署庫的 `.lock` 只等 20 分鐘，週一 08:30 那次每小時例行若佔著鎖到 09:20 以後，weekly 就 `PUBLISH SKIPPED`。不改預測、不是新訊號、不註冊、不動帳本／凍結模型／升級規則。
+- 新增 `forecast/routine_lib.sh`（daily.sh、weekly.sh、events/publish.sh 共用）：`take_lock`（用 noclobber 原子建立 `.lock`，內容「誰 台北時間 pid」；等待時寫 `.lock-wanted`，拿到或放棄時刪掉；`.lock` 滿 2 小時＝和每小時例行相同的「過期」規則，記一行後移除；逾時回 3）、`soft`（明確標示的盡力而為步驟：失敗印 `STEP FAILED (best-effort, continuing): …`、記下來、繼續）、`stage_existing`／`commit_local`（每個存在的路徑分別加入，缺的／被 ignore 的各印一行、不讓整批失敗；沒有變動不是錯誤）、`finish`（最後一行 `WEEKLY OK: all steps succeeded` 或 `WEEKLY FAILED: n best-effort step(s) failed: …`，有失敗時 exit 0→2）。
+- `weekly.sh`：7 個盡力而為步驟（events_weekly、trust_export、refresh_all、小時K＋intraday、tested_signals、refresh_xsrc、本機 commit）改用 `soft`；核心步驟（review_weekly.py、run_daily.py --no-fetch、部署庫複製／commit）失敗由 ERR trap 印 `WEEKLY FAILED: core step exited N at line L: 指令` 並停止（非 0）。本機 commit 改成逐路徑（含 events.json），部署庫 `git add` 也改逐路徑。鎖：本機週檢討／刷新／commit **不需要鎖**，只有發布前才拿；最多等 `WEEKLY_LOCK_WAIT_MIN`＝100 分鐘（每 30 秒看一次）。exit：0 OK、1 核心步驟／PUBLISH FAILED／LIVE CHECK FAILED、2 有盡力而為步驟失敗（其餘照樣發布）、3 鎖等不到（本機已 commit、線上沒更新）。
+- `daily.sh`：同一套鎖（最多 60 分鐘、`.lock-wanted`、2 小時過期）和逐路徑本機 commit（events.json 不在時帳本仍會 commit）；其他步驟與 exit 行為不變。`events/publish.sh`：同一套鎖，仍等 20 分鐘。
+- 每小時例行那一側：建議在例行提示加一句「`.lock` 或 `.lock-wanted` 存在且未滿 2 小時就只規劃」（`.lock-wanted` 代表有排程發布在排隊）。
+- `forecast/weekly_rehearsal.sh`：顯示新的 STEP／WEEKLY／LOCK／commit 行；`STEP FAILED` 算「步驟退回舊檔」；沒看到 `WEEKLY OK` 就判失敗。
+- 測試：新增 `tests/routines.test.mjs`（10 項，在暫存假目錄上跑**真正的** weekly.sh／daily.sh，只換路徑那一行，python 步驟是樁、部署推本機 bare repo）：全部正常→exit 0、本機 commit 含 events.json、遠端收到、再跑一次「nothing changed」；缺 events.json／nextmove.json→各印一行、其他照樣 commit，之後出現會補上；tested_signals 失敗→exit 2＋`WEEKLY FAILED: 1 best-effort step(s) failed`、其他照樣發布；review_weekly 失敗→非 0、`WEEKLY FAILED: core step`、沒發布、沒拿鎖；verify_live 失敗→exit 1；鎖被每小時例行佔著→等待（寫 `.lock-wanted`）、釋放後發布；一直佔著→exit 3、本機 commit 在、別人的鎖不動；3 小時前的鎖→移除後發布（weekly＋daily）；daily 同樣等待、逐路徑 commit；6 個同時搶鎖只有 1 個贏；接線檢查。修改舊接線測試的比對（`|| echo`→`soft`、`git add`→`stage_existing`）：fresh、intraday、trust、xsrc、tested、`test_refresh_xsrc.py`、`test_verify_live.py`。
+
+## 可靠度：週一 weekly.sh 事前彩排（2026-11-13，不是 App 版本；在複本上跑完整刷新＋發布＋線上檢查＋全部測試）
+
+- 2026-11-13 19:37 台北開始。11/16（週一）09:00 是第一次跑「完整」的 weekly.sh：v10 以後加了 spells、nextmove、xsrc、tested_signals（今天 6 個提案、33 列首次上線）等步驟，**從沒有整段實際跑過**；而 weekly.sh 很多步驟失敗時只印一行、照樣 exit 0，週一才發現就要再等一週。任務建議 (a) 虛擬投組卡：v9「紀錄可信度」卡已列每個模型的虛擬投資金額、且只有 3 天，不重做；(b) 做這個。不改預測、不是新訊號、不註冊。依據：Beyer 等《Site Reliability Engineering》(O'Reilly 2016) 第 17 章「Testing for Reliability」（在與正式環境相同的設定上演練、先驗證再發布）、Humble & Farley《Continuous Delivery》(2010)（類正式環境的部署演練）。
+- 新增 `forecast/weekly_rehearsal.sh`（手動／例行代理人可在週一前跑；**沒有接進 daily.sh／weekly.sh**）：把 crypto-predictor 與 coin-signal-repo 複製到 `/tmp/weekly-rehearsal.*`，部署庫改推到本機 bare repo（絕不推 GitHub）；**原封不動使用 weekly.sh**，只改兩個路徑變數和最後的 `verify_live.py`（改指向本機 http 伺服器上的彩排網站，同一套 push／source／served／雜湊鏈／首頁＝帳本檢查）；路徑改寫後還有 `/workspace` 就中止。之後在刷新後的複本跑 node 單元測試、`test_forecast.py`、帳本驗證、25 個 iPhone e2e（對彩排網站）。前後比對真實帳本／registry／凍結模型／app/data／reports／backtest/data、兩個 repo 的 HEAD 與 origin、review_weekly.py／daily.sh／weekly.sh 的指紋，不同就 exit 4。另會抓 weekly.sh 自己吞掉的問題：任何步驟「failed／kept previous／WARNING」、本機 weekly commit 沒發生（`git add` 有一個檔不在就整批不加、被 `|| true` 吞掉）、彩排遠端沒收到 weekly commit。測試 hook `REHEARSAL_PRE`（只在複本內執行，例行程序不用）。
+- **彩排結果（今天的資料，日K 11-12）：REHEARSAL OK**。weekly.sh rc 0、68–76 秒；events／週檢討（4 個挑戰者全部「不升級」，live 0 筆已評分，第一次評分 11/17）／trust（forecasts 30、chain ok）／refresh_all 9 個資料集全 ok（as_of 2026-11-12）／小時K＋intraday／tested_signals **33 項 0 錯誤**／refresh_xsrc OK（沒有新K）；推送 18 個檔；**LIVE CHECK OK**；node 163／163（含 tested.test，週一發布後警告消失）、test_forecast 10／10、帳本驗證 OK；e2e 25 個全過（`e2e_v14` 33 項、SW v28）。真實系統指紋前後相同。
+- 負向檢查（證明真的抓得到）：在複本讓 `tested_signals.py` 一開始就 exit 1 → weekly.sh 自己仍 rc 0、LIVE CHECK OK（＝週一會「看起來成功」但「試過的訊號」卡停在舊版），彩排則判 **REHEARSAL FAILED**（步驟退回舊檔＋node 1 項失敗），exit 1。刪掉 spells.json → refresh_all 會重產，彩排 OK（正確）。
+- 找到但**沒改**的（避免週一前動例行腳本）：(1) weekly.sh 本機 commit 的 `git add` 是一整行，任何一個列出的檔不存在就全部不加、被 `|| true` 吞掉（目前所有檔都在，彩排會抓到）；本機 commit 也沒加 `app/data/events.json`（隔天 daily.sh 會補）。(2) 鎖最多等 20 分鐘，若週一 08:36 的每小時例行佔著鎖超過 09:20，weekly 會 `PUBLISH SKIPPED`（exit 3、會通知），刷新的資料要等手動或下週才上線。(3) backtest／decision／dca 的 2018–2022 區塊每次重跑會變一點：只是 bootstrap p 值（0.406→0.400 等，跟樣本長度有關）和 Yahoo 調整後收盤造成 NT$1 差，不是偷看未來。要不要修 (1)(2) 給宗決定。
+- 測試修正：`tests/e2e_v13.mjs` 用畫面上四捨五入後的盤中價（如 1,961）重算距離，App 用未四捨五入的價（1,960.6）→ 偶爾差 0.1 個百分點而失敗（v26 也遇過）；改成接受 ±0.5 美元內任何價算出的距離。對線上跑 3 次全過。新增 `tests/rehearsal.test.mjs` 1 項（彩排改寫的兩行仍在 weekly.sh、暫存複本、本機 bare remote、殘留路徑就中止、前後指紋、不含 register／github.io／git push、例行腳本沒呼叫它）。
+- App 不改（仍 v28，不需換 SW）；帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。建議不變 BTC 0、ETH 0。
+- 研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1937-weekly-rehearsal.md`（Drive 13kpk3EQb7mNct3fu2AAGgW9_jgbKsDuv）；commit 30fee57。
+- 結果：node 164／164；`test_forecast.py` 10／10；`events/test_events.py` 5／5；`test_verify_live.py` 11／11；`test_refresh_xsrc.py` 4／4；ledger verify OK；`verify_live.py` LIVE CHECK OK（線上＝v28）；彩排 REHEARSAL OK（含 25 個 e2e）。
+
+## 提案 P-gbdt（2026-11-13，不是 App 版本）：梯度提升樹分類器（機器學習新模型家族，逐月只用已知結果的過去資料重訓）→ rejected
+
+- 2026-11-13 18:37 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1837-gbdt-walkforward.md`，Drive 1MswT3ilm4x5kgy5raizUrIpcoB6MmElg）。任務建議 (a) 資料過期警示已由 v6／v9／v20 涵蓋、(b) 帳本命中率要等 11/17 才有第一筆評分（scores.jsonl 0 列），所以做 (c) 新模型家族：現有挑戰者是線性 logit、最近鄰 knn、tsmom，今天否決的 HMM 是狀態模型，**樹狀集成從沒測過**。依據 Friedman 2001、Ke et al. 2017（LightGBM）、Gu–Kelly–Xiu 2020 RFS、Jaquart–Dann–Weinhardt 2021 JFDS 7:45–66（BTC 分鐘級 GBDT 最好但扣成本為負）、López de Prado 2018（purge）。
+- `forecast/proposals/proto_gbdt.py`：事先登記（18:39 台北寫在 docstring、先於任何結果；`--is-only` 先跑）sklearn `HistGradientBoostingClassifier`（200 輪、學習率 0.05、深度 3、葉 ≥ 100、L2 1、不 early stop、random_state 0，未調參），10 個價格特徵（d50、d200、mom7/30/90/180、vol30、7÷30 日波動、rsi14、離一年高點），兩幣合併；2022-01 起每月第一根日K重訓，只用 ≤ d−7 天（標籤已知）的列，59 次、訓練列 2,786→6,316。版本 gb_cut（p<0.45 減半）、gb_reentry（p>0.55 且空手／減碼 +0.25vt）、gb_standalone（vt×1[p>0.5]）、gb_pup_raw、gb_pup_blend、gb_lead_pup；對照 const_scale（c 0.9259）、×0.85。
+- IS 2022–23 三版都不合格（冠軍 0.723；cut 0.508、reentry 0.438、standalone −0.603），無領先。**OOS 2024→ gb_cut 0.579／年化 9.3%／DD −19.8%／成本 4.96% vs 冠軍 0.836／15.9%／−18.4%／3.23%（P 0.015，Holm 較差 0.058）**；reentry 0.759／−22.2%（P 0.176）；standalone −0.116／−4.6%／−39.0%（成本 14.2%／年）。上漲機率 Brier：raw IS 0.27341／OOS 0.26144 vs 冠軍 0.25202／0.25228（DM −1.82 p 0.068，變差），blend 0.25416（p 0.442）；OOS 校準 GB 0.36→實際 50.5%、0.67→55.0%（過度自信）；排列重要度 mom30／mom90／rsi14 打亂反而更準＝擬合雜訊。t−1 結論相同；WF 全不過 → **rejected**。冠軍＝WF 快取 < 2e−6、重訓決定性差 0、截掉 400 根抽 4 月重訓差 0。
+- 今天（日K 11-12）：GB p_up BTC 0.419、ETH 0.537；冠軍兩幣空手，所以 cut／reentry 都是 0。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 加 gbdt 白話列（「試過但沒通過的訊號」，本機重算 33 項 0 錯誤；`app/data/tested_signals.json` 照原計畫 11/16 weekly.sh 發布）。App 不改（仍 v28），帳本、凍結模型、registry、升級規則、daily.sh、weekly.sh 都沒動，沒註冊。
+- 測試：node 163／163、`test_forecast.py` 10／10、`events/test_events.py` OK、`test_refresh_xsrc.py` 4／4、`test_verify_live.py` 全過、ledger verify OK、`verify_live.py` LIVE CHECK OK（線上仍＝v28）。commit 35681bb。
 
 ## v28（2026-11-13）：首頁每個價格都標清楚是「盤中」還是「哪天早上 8 點的收盤」
 

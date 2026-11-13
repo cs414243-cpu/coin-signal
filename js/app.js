@@ -19,6 +19,7 @@ import * as GD from './guard.js';
 import * as XS from './xsrc.js';
 import * as SP from './spells.js';
 import * as NM from './nextmove.js';
+import * as SN from './scorenoise.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -159,7 +160,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v31';
+const VERSION = 'v32';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -595,7 +596,7 @@ function relOut() {
 }
 
 // ======================= v13: 盤中離翻轉價多遠 =======================
-let TICK = {}, INTRA = null, TESTED = null, XSRC = null;
+let TICK = {}, INTRA = null, TESTED = null, XSRC = null, SNOISE = null;
 function liveInfo(c) {
   const ctx = CTX[c], t = TICK[c]; if (!ctx || !t || t.status !== 'ok') return null;
   const bars = RL.closedBars(ctx.live.candles, t.at), last = bars[bars.length - 1]; if (!last) return null;
@@ -830,6 +831,7 @@ function trackCard() {
       <div><div class="label">虛擬投資：照建議</div><div class="num sm">${ret(ch)}</div></div>
       <div><div class="label">虛擬投資：一直抱著</div><div class="num sm">${ret(b)}</div></div>
     </div>
+    ${SN.paperLine(SNOISE, T)}${ns ? SN.hitLine(SNOISE, ns, ch.scores.hit) : ''}
     <p class="small muted">各用虛擬 NT$100 萬（BTC、ETH 各半）、每天照建議調整，已扣手續費和台幣買 USDT 的溢價。不是真的錢。</p>
     ${hist}
     <p class="warn">實際紀錄才剛開始（${since}）。至少要累積 8 週，系統才會開始比較不同的預測方法，表現更好的才會換上來；在那之前，請把建議當參考就好。</p>
@@ -847,6 +849,7 @@ function modelsCard() {
     <p class="small muted" id="pup-note">${esc(PU.advNote(LIVE))}</p>
     ${RB.robustLine()}
     ${OF.overfitLine()}
+    ${SN.advBlock(SNOISE)}
     <p class="small muted">Brier：預測機率和實際結果的平方差，越低越好（永遠猜 50% = 0.25）。回測期間 ${esc(W[LIVE.champion.key]?.start || '—')}～${esc(W[LIVE.champion.key]?.end || '—')}，每天只用當天以前的資料。帳本：<a href="${esc(LIVE.ledger.repo)}" target="_blank" rel="noopener">GitHub coin-signal/ledger</a>（最後一筆雜湊 ${esc((LIVE.ledger.last_hash || '').slice(0, 12))}…）。預測產生於 ${fmtTime(Date.parse(LIVE.generated_at))}。</p>
   </section>`;
 }
@@ -904,6 +907,7 @@ async function render(force = false) {
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
   try { TESTED = await fetch('data/tested_signals.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TESTED; } catch { TESTED = TESTED || null; }
   try { INTRA = await fetch('data/intraday.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || INTRA; } catch { INTRA = INTRA || null; }
+  try { SNOISE = await fetch('data/scorenoise.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || SNOISE; } catch { SNOISE = SNOISE || null; }
   try { XSRC = await fetch('data/xsrc.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XSRC; } catch { XSRC = XSRC || null; }
   TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
