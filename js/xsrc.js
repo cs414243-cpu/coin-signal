@@ -65,6 +65,6 @@ export function xsrcCard(X, F, rate) {
     <div class="scroll"><table class="bt"><thead><tr><th></th><th>2018-03～2023</th><th>2024 起（樣本外）</th></tr></thead><tbody>
       ${row('binance', 'Binance（現在用的）')}${row('coinbase_signal', 'Coinbase 的訊號')}${row('bitstamp_signal', 'Bitstamp 的訊號')}${row('coinbase_both', 'Coinbase 價格＋訊號')}${row('bitstamp_both', 'Bitstamp 價格＋訊號')}
     </tbody></table></div>
-    <p class="small muted">「的訊號」＝用那家的收盤算規則、在 Binance 價格成交，只看訊號差異。成本同虛擬投資（每次進出 0.15%＋買進 0.27% 台幣溢價，NT$100 萬 BTC/ETH 各半），收盤後才決定、隔天才持有。${diffText(bt)}這裡的 2024 年起是 1/1 從空倉重新開始算，所以和別張卡的冠軍數字略不同。資料：Binance、Coinbase Exchange、Bitstamp、MAX 公開日K，CoinGecko，不用金鑰；抓取 ${X.fetched_at_utc?.coinbase?.slice(0, 10) ?? '—'}（UTC），程式 backtest/fetch_xsrc.py → backtest/xsrc.py。</p>
+    <p class="small muted">「的訊號」＝用那家的收盤算規則、在 Binance 價格成交，只看訊號差異。成本同虛擬投資（每次進出 0.15%＋買進 0.27% 台幣溢價，NT$100 萬 BTC/ETH 各半），收盤後才決定、隔天才持有。${diffText(bt)}這裡的 2024 年起是 1/1 從空倉重新開始算，所以和別張卡的冠軍數字略不同。資料：Binance、Coinbase Exchange、Bitstamp、MAX 公開日K，CoinGecko，不用金鑰；抓取 ${X.fetched_at_utc?.coinbase?.slice(0, 10) ?? '—'}（UTC），每週一自動更新（新資料檢查不過就保留上一版），程式 backtest/fetch_xsrc.py → backtest/xsrc.py。</p>
   </section>`;
 }
