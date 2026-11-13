@@ -142,3 +142,7 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 /* v26 空手要等多久 */
 .spell-home:empty { display: none; }
 .spell-now { margin: .3rem 0; }
+/* v27 這週可能要動手嗎 */
+.next-home:empty { display: none; }
+.nm-now { margin: .3rem 0; }
+.nm-plan { margin: .3rem 0; padding: .4rem .6rem; border-left: 3px solid #8ab4f8; background: rgba(138,180,248,.08); }
