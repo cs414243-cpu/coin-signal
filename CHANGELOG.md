@@ -15,6 +15,8 @@
 - 每週一自動重算：`backtest/refresh_all.py` 加 `nextmove` 步驟（fail-safe：每幣 > 2,000 天、分組加總＝總數、與凍結冠軍一致、目前狀態有分組，否則保留上一版）；`forecast/weekly.sh` 本機 commit、部署複製清單與 `git add` 加入 `nextmove.json`。今天用 `refresh_all.py --only nextmove --no-fetch` 產生（`refresh_status.json` 還原為原本內容，11/16 weekly 完整重寫）。
 - 不註冊；帳本、凍結模型、registry、升級規則、`daily.sh` 都沒動（`weekly.sh` 只加檔名）。建議不變 BTC 0、ETH 0。
 - 測試：新增 `tests/nextmove.test.mjs` 7 項（與凍結冠軍一致、分組固定、加總、單調；**用原始日K以 JS 獨立重算每一天的分組與結果＝Python 每格計數**；Brier 檢查 JS 重算；手機公式＝檔案的目前狀態、曝險＝live.json；截到 2025-10-08 重跑＝選規則時期區塊相同、之前每天的分組不變；同日重跑相同；首頁句無術語 < 140 字、數字＝`rateFor`、合成資料「低於…轉為空手」、計畫文字；接線）；`tests/e2e_v27.mjs`（iPhone 390×844：首頁一句、數字＝頁面用同一批已收完日K重算、卡片在進階、資料日期、沒填部位時不出金額、填部位後首頁與卡片金額及 MAX 成本、無水平捲動與主控台錯誤；截圖 `screenshots/v27-*.png`）。`spells.test.mjs` weekly.sh 檢查放寬為允許 spells 後面接新檔名。
+- 結果：node 160／160；`test_forecast.py` 10／10；`events/test_events.py` 5／5；`test_verify_live.py` 11／11（部署後）；`test_refresh_xsrc.py` 4／4；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`、`e2e_v27`、`fallback` 本機全過。
+- 部署後檢查：coin-signal 6e9f6ad 已推送；線上 sw `v27-2026-11-13`；`verify_live.py` LIVE CHECK OK（55 檔；tested_signals.json 照原計畫 11/16 weekly.sh 發布、只警告）；`e2e_v27` 線上也過。研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1638-next-move-odds.md`，Drive 1DT60D3ZG2ATthZPsZpMtQ1hxG45clUeK。
 
 ## v26（2026-11-13）：現在空手，通常要等多久？空手期間錯過／避開了多少
 
