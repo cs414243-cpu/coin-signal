@@ -82,7 +82,19 @@ export function homeSentence(N, st, plan = {}) {
 export function triggerLine(c, s) {
   if (!s || !s.near || !Number.isFinite(s.near.price) || !Number.isFinite(s.near.dist)) return '';
   const hl = s.near.dist > 0 ? '高於' : '低於';
-  return `什麼時候會變：${c} 早上 8 點收盤${hl} ${usd0(s.near.price)} 美元（比上次收盤${sgn(s.near.dist)}），建議就會轉為${actionAfter(s)}；盤中碰到不算。`;
+  const sh = shareAfter(s);
+  return `什麼時候會變：${c} 早上 8 點收盤${hl} ${usd0(s.near.price)} 美元（比上次收盤${sgn(s.near.dist)}），建議就會轉為${actionAfter(s)}${sh ? `（${sh}）` : ''}；盤中碰到不算。`;
+}
+/** v31: how much the suggestion becomes after the flip, in the same words as the top card's 「建議：」 line.
+ *  nextExpo = next trend × min(1, 30% ÷ today's 30-day vol) (same estimate as the v27 card's 「建議比例約」).
+ *  backtest/flip_size_check.py: on 431 one-step flips since 2018 the estimate was within 5 points of the real share on
+ *  the flip close 93% of the time (median error 0.3 points); a very big move on the flip day raises vol and lowers it. */
+export function shareAfter(s) {
+  const e = s?.near?.nextExpo;
+  if (!Number.isFinite(e)) return '';
+  if (e < 0.005) return '先不要放';
+  const pct = Math.round(e * 100);
+  return s.near.next < s.trend ? `降到約 ${pct}%` : `放約 ${pct}%`;
 }
 /** Short plan text for the home sentence from TB.act-like object {kind, amt}. */
 export function planShort(a) {
@@ -123,6 +135,6 @@ export function nextMoveCard(N, st, plans = {}, twd = null) {
     <p id="nm-line">建議只在收盤穿過 50 日或 200 日均線時才會大改（空手⇄減碼⇄持有）。離那個價格越近，越可能這幾天就要動手；這張卡把「離多近」換成過去實際發生的比例，並先算好到時要做什麼。</p>
     ${['BTC', 'ETH'].filter(c => N.coins[c]).map(c => coinBlock(N, c, st?.[c], plans[c], twd)).join('')}
     <p class="small"><strong>重點</strong>：距離不到半週的典型波動時，2023 年起 7 天內建議改變 ${pc0(PB.lt05.p7)}（兩個幣合計）；超過 2 週的典型波動時幾乎不會（${pc0(PB.ge2.p7)}）。用 2022 年以前的比例去猜 2023 年起，7 天內會不會變的準確度（Brier）比只用平均比例好 ${pc0(k.skill)}（${k.brier_bucket} vs ${k.brier_base}，${k.n} 天），隔天會不會變好 ${pc0(k1.skill)}，所以這些比例在樣本外也站得住。<strong>它只說「會不會要動手」，不說會漲還是會跌</strong>；建議變了之後也常在兩週內又變回來（見「建議變化」）。真的變了以 08:20 的每日預測為準，盤中碰到不算。</p>
-    <p class="small muted">算法：<code>backtest/next_move.py</code> → <code>data/nextmove.json</code>（${esc(N.source)}；${esc(N.model)}）。每天只用當天以前的收盤：翻轉價＝讓下一根收盤剛好等於含它的均線的價格（50 日＝最近 49 根平均、200 日＝最近 199 根平均）；${esc(N.z_def)}；距離分 4 組（事先固定）。「變」＝之後 1／7 根收盤中，趨勢狀態和今天不同。2023 年以前是選規則時看過的時期，之後才算樣本外；相鄰日子的 7 天會重疊，天數不是獨立樣本。翻轉後的建議比例用今天的 30 日波動估，收盤時會小幅變動。金額用「我的部位」和「差一點要不要動手」同一套算法，成本用「買幣成本」的 MAX 掛單簿快照。只是過去紀錄、不是預測，也不是投資建議。每週一自動重算。</p>
+    <p class="small muted">算法：<code>backtest/next_move.py</code> → <code>data/nextmove.json</code>（${esc(N.source)}；${esc(N.model)}）。每天只用當天以前的收盤：翻轉價＝讓下一根收盤剛好等於含它的均線的價格（50 日＝最近 49 根平均、200 日＝最近 199 根平均）；${esc(N.z_def)}；距離分 4 組（事先固定）。「變」＝之後 1／7 根收盤中，趨勢狀態和今天不同。2023 年以前是選規則時看過的時期，之後才算樣本外；相鄰日子的 7 天會重疊，天數不是獨立樣本。翻轉後的建議比例用今天的 30 日波動估，收盤時會小幅變動：2018 年起 431 次翻轉（資料到 2026/11/12），估的和翻轉當天實際的比例差 5 個百分點以內 93%（2023 年起 90%）、中位差 0.3 個百分點；翻轉那天如果大漲大跌，30 日波動會跳高、實際比例會低很多（差超過 15 個百分點 4 次，例如 ETH 2026/8/19 估 98%、實際 47%，那天的建議甚至是減碼），所以真的變了以 08:20 的每日預測為準（<code>backtest/flip_size_check.py</code>）。金額用「我的部位」和「差一點要不要動手」同一套算法，成本用「買幣成本」的 MAX 掛單簿快照。只是過去紀錄、不是預測，也不是投資建議。每週一自動重算。</p>
   </section>`;
 }

@@ -159,7 +159,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v30';
+const VERSION = 'v31';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -541,6 +541,10 @@ function relInfo(c) {
   const closes = bars.map(k => k.c);
   return { live, bars, last, chk, a, b, tA, tB, cross, usdt, rel, flips: RL.flipLevels(closes), near: RL.nearFlip(closes) };
 }
+// v31: the near-flip box also says how much the suggestion becomes (same estimate as the trigger line / v27 card)
+function flipShare(c, near) {
+  try { const s = nmCur()[c]; if (!s?.near || s.near.ma !== near.ma || s.near.next !== near.next) return ''; const t = NM.shareAfter(s); return t ? `${t}；` : ''; } catch { return ''; }
+}
 function relLine(c) {
   const I = relInfo(c);
   if (!I) return `<p class="rel-line small muted">${ADV === 'error' ? '資料狀態：暫時無法檢查（行情連不上）' : '資料狀態：檢查中…'}</p>`;
@@ -549,7 +553,7 @@ function relLine(c) {
   let flip = '';
   if (near) {
     const nextClose = closeMD(addDays(ymd(last.t), 1));
-    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>${XS.homeAddon(near.price, XS.maxRate(XSRC, PRICES))}，建議就會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
+    flip = `<p class="flip">接近翻轉：${c} 若 ${nextClose} 早上 8 點收盤${near.above ? '低於' : '高於'} <strong>${usd0(near.price)} 美元</strong>${XS.homeAddon(near.price, XS.maxRate(XSRC, PRICES))}，建議就會轉為<strong>${RL.flipAction(near.trend, near.next)}</strong>（${flipShare(c, near)}現在 ${usd0(near.close)}，差 ${pctS(Math.abs(near.dist), 2)}）。${near.tight ? '差距很小，各交易所可能給不同答案。' : ''}</p>`;
   }
   const f = LIVE?.coins?.[c];
   const edge = f && RL.nearActionEdge(f.exposure) ? `<p class="small">建議比例 ${Math.round(f.exposure * 100)}% 剛好在「持有／減碼」的分界附近，小小的波動就可能改變動作。</p>` : '';
