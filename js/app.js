@@ -159,7 +159,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v27';
+const VERSION = 'v28';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -757,6 +757,12 @@ function moneyLine(c) {
   const act = TB.actHtml(TB.act({ have, B, e: f.exposure, T: TBAND }));   // v19: gap threshold from data/tradeband.json
   return `<p class="money">你打算放在 ${c} 的錢 ${ntd(B)}（總資產 × ${esc(S.dcaW)}%${c === 'BTC' ? ` × ${esc(S.dcaBtc)}%` : ` × ${100 - (num(S.dcaBtc) ?? 100)}%`}），建議放 <strong>${ntd(tgt)}</strong>。你現在有 ${ntd(have)}，${act}。</p>${WR.moneyText(f, B) ? `<p class="small badweek-ntd">${esc(WR.moneyText(f, B))}</p>` : ''}`;
 }
+// v28: the forecast price is the last daily close (Taipei 08:00 the day after f.asof), not "now"
+function closeLabel(f) {
+  const t = f?.asof ? Date.parse(f.asof + 'T00:00:00Z') + 86400000 : NaN;
+  if (!Number.isFinite(t)) return '上次收盤';
+  const x = new Date(t); return `${x.getUTCMonth() + 1}/${x.getUTCDate()} 早上 8 點收盤`;
+}
 function coinBlock(c) {
   const f = LIVE.coins[c]; if (!f) return '';
   const e = f.exposure, sharePct = Math.round(e * 100);
@@ -767,7 +773,7 @@ function coinBlock(c) {
       <div id="fc-live-${c}" class="live">${liveLine(c)}</div>
       <p class="share">${share}</p>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
-      <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；現在 ${usd(f.price_usd)}）</p>
+      <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；${closeLabel(f)} ${usd(f.price_usd)}）</p>
       <p class="badweek small">${esc(WR.homeLine(f, c, WRISK))}</p>
       <p class="why">原因：${esc(f.reason)}</p>
       ${OUTC ? `<p class="past small muted" data-coin="${c}">${esc(OC.homeLine(OUTC, c, f.action))}</p>` : ''}

@@ -58,13 +58,22 @@ const md = t => { const d = new Date(t + TPE); return `${d.getUTCMonth() + 1}/${
 const pc = x => `${(Math.abs(x) * 100).toFixed(x !== 0 && Math.abs(x) < 0.01 ? 2 : 1)}%`;
 const since = s => s === 'since2023' ? '2023 年起' : '2018 年起';
 
+/** v28: "比 11/13 早上 8 點收盤 −3.3%" — the intraday price vs the last closed daily bar (the one the forecast uses). */
+export function closeVs(price, L) {
+  if (!L || !(L.lastClose > 0) || !Number.isFinite(L.closeAt)) return '';
+  const r = price / L.lastClose - 1;
+  const p = `${(Math.abs(r) * 100).toFixed(1)}%`;
+  return `比 ${md(L.closeAt - DAY)} 早上 8 點收盤${p === '0.0%' ? '差不多' : (r > 0 ? '+' : '−') + p}`;
+}
+
 /** One small plain line for the homepage card. tick: {status, price, at, source} ; L: liveCheck result. */
 export function homeLine(coin, tick, L, intra) {
   if (!tick || tick.status === 'loading') return `<p class="live-line small muted">盤中價格：讀取中…</p>`;
   if (tick.status !== 'ok') return `<p class="live-line small muted">盤中價格：抓不到即時價（建議本身不受影響，仍以早上 8 點收盤為準）。</p>`;
   if (!L) return `<p class="live-line small muted">盤中價格：日K還沒載入，暫時算不出離翻轉價多遠。</p>`;
-  const head = `盤中 ${hhmm(tick.at)}（台北）${coin} ${fmtUsd(tick.price)} 美元`;
-  if (L.stale) return `<p class="live-line small muted">${head}；日K還沒更新到最新，暫時不比較翻轉價。</p>`;
+  if (L.stale) return `<p class="live-line small muted">盤中 ${hhmm(tick.at)}（台北）${coin} ${fmtUsd(tick.price)} 美元；日K還沒更新到最新，暫時不比較翻轉價。</p>`;
+  // v28: say which close the intraday price is compared with, so it never looks like it contradicts the close-based lines below
+  const head = `盤中 ${hhmm(tick.at)}（台北）${coin} ${fmtUsd(tick.price)} 美元（${closeVs(tick.price, L)}）`;
   const when = `${md(L.closeAt)} 早上 8 點`;
   if (L.changed) {
     const cr = L.crossed, side = cr[0].above ? '低於' : '高於';

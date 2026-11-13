@@ -1,5 +1,18 @@
 # 幣訊號 更新紀錄
 
+## v28（2026-11-13）：首頁每個價格都標清楚是「盤中」還是「哪天早上 8 點的收盤」
+
+- 2026-11-13 17:36 台北開始。今天六個疊加訊號都被否決、v26／v27 是決策功能，這次做首頁白話與數字一致性（任務建議清單中的「首頁白話修飾」）。v4–v27 沒做過：v6／v13 加了盤中價、v24 台幣翻轉價、v27 用「比上次收盤 +x%」，但首頁同一張卡上**同時出現兩個價格卻沒說差在哪**：盤中句「BTC 69,081 美元，再漲 5.8% 會碰到翻轉價」，幾行下面價格區間卻寫「現在 $71,460」（其實是 11/13 早上 8 點的收盤），v27 句又寫「比上次收盤 +2.3%」。三個數字都對，但「現在」標錯，看起來像互相矛盾，容易誤判離翻轉價多近。不改預測規則、不是新訊號、不註冊。
+- 依據（白話風險溝通）：Gigerenzer & Edwards (2003, BMJ 327:741)「Simple tools for understanding risks」與 Spiegelhalter (2017, Annual Review of Statistics and Its Application 4:31–60)「Risk and uncertainty communication」都強調每個數字要講清楚參考點／參考類別，避免同一畫面出現看似衝突的數字。這是溝通修正，不宣稱提高準確度。
+- 改動：
+  - 首頁價格區間那行：「現在 $X」→「**M/D 早上 8 點收盤 $X**」（M/D＝預測日期的隔天台北 08:00，就是預測用的那根收盤；`app.js closeLabel`）。
+  - 首頁盤中那行：價格後面加「（**比 M/D 早上 8 點收盤 ±x%**）」（`intraday.js closeVs`，＝盤中價 ÷ 手機抓到的最後一根已收完日K收盤 − 1，和預測用的是同一根；差不到 0.05% 寫「差不多」）。例（17:40 台北）：BTC 69,084 美元（比 11/13 早上 8 點收盤 −3.3%），再漲 5.8% 會碰到翻轉價 73,116；ETH 1,941（−3.9%），再漲 10.8% 到 2,150。日K還沒更新時不比較（維持原句）。
+  - 數字都是原本就在頁面上的資料，沒有新數字來源；版面沒有變長（每幣只多約 18 個字）。
+  - SW `v28-2026-11-13`；`app.js` 版本 v28。
+- 帳本、凍結模型、registry、升級規則、`daily.sh`、`weekly.sh` 都沒動。建議不變 BTC 0、ETH 0。
+- 測試：新增 `tests/labels_v28.test.mjs` 3 項（closeVs 正負號／四捨五入／日期，200 個隨機價格＝price/lastClose−1；首頁盤中句各分支都帶收盤比較且日期是決定收盤的前一天、日K過期不比較；app.js 不再有「現在 $」、closeLabel 跨年、版本）；`tests/e2e_v28.mjs`（iPhone 390×844：價格區間標「M/D 早上 8 點收盤」且＝live.json 價格、盤中句的 ±x% 用畫面上的盤中價與預測收盤重算、卡片上每個美元價格都有時間／種類標示、無水平捲動與主控台錯誤；截圖 `screenshots/v28-home.png`）。`intraday.test.mjs`、`e2e_v13.mjs` 的盤中句格式更新為允許新括號。
+- 結果：node 163／163；`test_forecast.py` 10／10；`events/test_events.py` 5／5；`test_refresh_xsrc.py` 4／4；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`～`e2e_v28`、`fallback` 本機全過（`e2e_v13` 第一次因舊格式斷言失敗，更新斷言後通過）。`test_verify_live.py` 部署前照預期因「原始碼≠部署庫」失敗，部署後重跑。
+
 ## v27（2026-11-13）：這週可能要動手嗎（離翻轉價多近 → 過去 1／7 天內建議改變的比例＋到時要在 MAX 買賣多少）
 
 - 2026-11-13 16:38 台北開始。今天六個疊加訊號提案都被否決，這次做幫實際決策的 App 改進。CHANGELOG v4–v26 沒有這個功能：v6／v13／v24 只告訴「翻轉價在哪、差幾 %」（且首頁只在差 < 1% 才出現），v7 是變了之後 14 天內翻回，v19 是現在差多少才調，v26 是空手多久；**「離翻轉價這麼遠，這幾天要動手的機會多大、到時要做什麼」**是第一次。不改預測規則、不是新訊號、不註冊。
@@ -34,6 +47,57 @@
 - 每週一自動重算：`backtest/refresh_all.py` 加 `spells` 步驟（fail-safe 檢查：每幣 ≥ 20 次、樣本外 > 0、與凍結冠軍一致，否則保留上一版）；`forecast/weekly.sh` 本機 commit、部署複製清單與 `git add` 加入 `spells.json`。其他步驟與順序不變。
 - 不註冊；帳本、凍結模型、registry、升級規則、`daily.sh` 都沒動（`weekly.sh` 只加檔名）。建議不變 BTC 0、ETH 0。
 - 測試：新增 `tests/spells.test.mjs` 7 項（成本＝common.py、與凍結冠軍一致、每次空手的天數／報酬／成本算式、中位數與比例用 JS 重算、用原始日K以 JS 獨立重推空手期與目前空手期、live.json 空手⇔有目前空手期、截到 2025-10-08 重跑＝前段相同且選規則時期區塊不變、同日重跑完全相同、合成資料、首頁句無術語 < 140 字、SW／refresh_all／weekly.sh 接線）、`tests/e2e_v26.mjs`（iPhone 390×844：首頁只有一句、卡片在進階、數字＝spells.json、無水平捲動與主控台錯誤；截圖 `screenshots/v26-*.png`）。
+- 結果：node 153／153；`test_forecast.py` 10／10；`events/test_events.py` 5／5；`test_verify_live.py` 11／11；`test_refresh_xsrc.py` 4／4；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`、`fallback` 本機全過（`e2e_v13` 第一次因盤中價四捨五入差 0.1 個百分點失敗、重跑通過，與本版無關）。
+- 部署後檢查：coin-signal a865096 已推送；線上 sw `v26-2026-11-13`；`verify_live.py` LIVE CHECK OK（53 檔；tested_signals.json 照原計畫 11/16 weekly.sh 發布、只警告）；`e2e_v26` 線上也過。研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1533-flat-spells.md`，Drive 1vduAN-Nv7wUsFaxwzxsnR7Owbrmwtpp7；crypto-predictor commit 75c4ae6。
+
+## 提案 P-regime-hmm（2026-11-13，不是 App 版本）：隱藏馬可夫體制模型（高斯 HMM 2／3 狀態，逐月只用過去資料重估）→ rejected
+
+- 2026-11-13 14:39 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1439-regime-hmm.md`，Drive 1BIMDYr-LbLZhA4rubvP_YqeHpL6DPLob）。前四次都是疊加訊號且都否決，這次換「不同的模型家族」：用每日報酬的隱藏狀態（平靜／動盪、空頭／中性／多頭）當 (a) 冠軍的曝險疊加或獨立曝險模型、(b) 上漲機率模型（Brier 對冠軍、DM 檢定）。只用冠軍自己的 Binance 日K收盤（無新下載、免金鑰）；coin-signal 沒有 `.lock`，本次只做提案、App 不動。
+- `forecast/proposals/proto_regime_hmm.py`：事先登記（14:42 台北，`--is-only` 先跑）statsmodels `MarkovRegression`（狀態相依均值＋變異數＝高斯 HMM），K＝2（依變異數排序）、3（依均值排序）；2019-01 起每月第一根日K用當時以前全部報酬重估，當月每天只用 Hamilton **濾波**機率（不用平滑／Viterbi）；hmm2_hv_cut（下一天動盪機率 > 0.5 減半）、hmm3_bear_cut（空頭 > 0.5 減半）、hmm3_bull_reentry（多頭 > 0.5 且空手／減碼 +0.25vt）、hmm2_standalone（獨立模型：vt×1[7 天預期報酬 > 0]）、hmm_pup（同狀態歷史上漲率）、hmm_pup_raw（模型自己的 Φ(m7/s7)）、hmm_lead_pup。參數快取 `proposals/data_hmm/params.json`（2 幣 × 2 K × 95 個月，0 次失敗）。
+- **可重現性修正（揭露）**：第一次完整版的截斷檢查抓到抽樣月份重估參數差 4.36——statsmodels 起始值搜尋用自己的 `rng` 參數、`np.random.seed()` 無效；14:53 改 `fit(rng=YYYYMM+K)`、刪快取全部重估、`--is-only` 與完整版重跑，沒改任何版本／門檻／規則；結論相同、數字差很小（bull_reentry OOS 0.567→0.551）。
+- IS 2022–23 四版都不合格（冠軍 0.723；hv_cut 0.598、bear_cut 0.711、bull_reentry 0.499、standalone 0.204），無領先；const_scale c＝0.9739。**OOS 2024→：hv_cut 0.678／年化 11.6%／DD −20.1% vs 冠軍 0.836／15.9%／−18.4%（P 0.055）**；bear_cut 0.809（P 0.079）、bull_reentry 0.551／−27.0%（Holm 較差 0.049）、standalone 0.368／−47.4%；全輸 ×0.85（0.840）與 const_scale（0.837）。Brier：hmm_pup IS 0.25258 vs 0.25202（變差）、OOS 0.25157 vs 0.25228（DM p 0.509）；**hmm_pup_raw IS 0.25136、OOS 0.25070 vs 0.25228（DM p 0.440，Holm 0.660）、WF 0.25097 vs 0.25217**——三段都略好但不顯著、仍輸 50% → 觀察。WF bear_cut 0.770 vs 0.791（容忍內），其餘不合格。t−1、門檻 0.6、每季重估結論相同；截斷（到 2025-10-08，抽 4 個月從頭重估）差 0；冠軍＝WF 快取（< 5e−7）、凍結模型差 0。判定 rejected，不註冊。詳見 `forecast/proposals/P-regime-hmm.md`。
+- 描述：K=2 是平靜（年化波動約 33%／49%）vs 動盪（約 105%／137%），兩狀態均值都近 0 → standalone 幾乎天天持有；K=3 的 bear 是崩盤狀態（波動 120–150%），只占 1–4% 的日子，之後下一週 BTC −0.28%、ETH +1.92%（2019→，方向不穩）。濾波狀態每年切換 32–134 次，約為平滑（偷看）版的 1.7–2 倍；「動盪」大多和冠軍已用的 30 日波動重疊，再減半＝重複減碼＋多付成本（4.7% vs 3.2%／年）。
+- 今天（日K 11-12，參數 11-01）：BTC 動盪 0.31／空頭 0.03／多頭 0.64、raw p_up 0.526；ETH 0.14／0.07／0.53、0.519；冠軍兩幣空手。bull_reentry 會亮（BTC 0.208、ETH 0.153，已否決不採用）。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 新增白話列 `regime_hmm`（tweak；試算 32 項 0 錯誤，11/16 weekly.sh 發布）。App 沒改（仍 v25，verify_live LIVE CHECK OK）。19 個核心檔 sha256 前後相同、沒有註冊模型。node 146/146、test_forecast 10/10、test_events 5/5、test_verify_live 11/11、test_refresh_xsrc 4/4、ledger verify OK；commit 1eaf51f（＋changelog 補 commit／Drive id、時間更正）。
+
+## 提案 P-etf-flows（2026-11-13，不是 App 版本）：美國現貨 BTC／ETH ETF 每日淨流量（Farside，疊在冠軍上；ETF 期間內另切 IS／OOS）→ rejected
+
+- 2026-11-13 13:39 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1339-etf-flows.md`，Drive 1OR5FGf_jQdMLwMKWfiokXQ1GuOjxXFGX）。問題：ETF 大量流出／連續流出時要不要減碼、大量流入時要不要加碼或提早買回？與 events/analysis.md、P-events-B（凍結的 ETF 再檢定，約 2028 年初觸發、達標前不做挑戰者）重疊，已在提案檔誠實聲明；本提案不動 P-events-B、不能產生挑戰者。coin-signal 沒有動。
+- 資料（公開免金鑰）：Farside `bitcoin-etf-flow-all-data`／`ethereum-etf-flow-all-data` HTML，2026-11-13 05:40 UTC 抓取存 `forecast/proposals/data_etf/`（BTC 729、ETH 591 個美國交易日，2024-01-11／2024-07-23～2026-11-12）；與 events 快取（00:32 UTC）只有 11-12 不同（BTC +3.3→−47.7、ETH −6.7→−8.0，最新一天會修訂）→ 主設定只用美國日期 ≤ t−1，另跑 t−2。**樣本很短**。
+- `forecast/proposals/proto_etf_flows.py`：事先登記（13:41 台北，`--is-only` 13:43 先跑）IS 2024-01-12～2025-06-30、OOS 2025-07-01～、ALL 2024-01-12～；etf_out_cut（3 日流量 < 擴張 q10 減半）、etf_persist_cut（連續 ≥ 5 天流出減半）、etf_in_boost（> q90 ×1.25）、etf_in_reentry（> q90 且空手／減碼 +0.25vt）、etf_pup／etf_lead_pup。
+- IS 四版都不合格（冠軍 0.982；0.920／0.960／0.935／0.942），無領先；const_scale c＝0.9587。**OOS 規則代表 etf_out_cut 0.291／年化 3.5%／DD −19.0% vs 冠軍 0.413／6.0%／−18.4%（P 0.164）**；in_boost 0.408、in_reentry 0.362（Holm 較差 0.066）；etf_persist_cut 0.542（P 0.983，Holm 0.102，勝 ×0.85 P 0.976、const_scale 0.979）但 IS 較差、事前不會選、只動 3% 日子 → 觀察。etf_pup Brier IS 0.25203 vs 0.25225、OOS 0.25408 vs 0.25217（變差，DM p 0.321）。ALL persist 0.775 vs 0.729、out 0.645。t−2、固定 IS 分位門檻結論相同；截斷（到 2025-10-08）差 0；冠軍＝WF 快取（< 5e−7）、凍結模型差 0。判定 rejected，不註冊。詳見 `forecast/proposals/P-etf-flows.md`。
+- 描述：3 日流量 vs 下一週 Spearman −0.03～+0.11；單日大流出之後下一週 BTC IS +1.03%／OOS −1.52%／ALL −0.32%（t −0.80）、ETH +0.73%／−1.08%／−0.62%，方向不穩、不顯著；大流出時冠軍多半已空手。
+- 今天（用美國 11-11）：BTC 3 日 −595.8 百萬美元、連續 5 天流出 → persist 亮；ETH 3 日 −330.7（破 q10）、連續 5 天 → out＋persist 亮；冠軍兩幣空手，所有版本投入 0。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 新增白話列 `etf_flows`（news），`portfolio_row` 改為可讀結果檔的 `oos_label_zh`（本列顯示「2025 年 7 月起」，其他列不變）；試算 31 項 0 錯誤，11/16 weekly.sh 發布。App 沒改（仍 v25，verify_live LIVE CHECK OK）。19 個核心檔 sha256 前後相同、沒有註冊模型。node 146/146、test_forecast 10/10、test_events 5/5、test_verify_live 11/11、test_refresh_xsrc 4/4、ledger verify OK；commit 0114062（＋changelog 補 commit）。
+
+## 提案 P-fear-greed（2026-11-13，不是 App 版本）：加密貨幣恐懼貪婪指數（alternative.me，疊在冠軍上；反向與順勢各兩版）→ rejected
+
+- 2026-11-13 12:35 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1235-fear-greed.md`，Drive 1N3NZAVLGPwa03Yo2VhrW_CGXvl1fJ7Yj）。問題：極度恐懼時冠軍空手／減碼要不要先小量買回、極度貪婪時持有要不要減碼（或反過來順勢）？與 v1 `fng` 訊號、P-events-C「Fear & Greed contrarian」部分重疊，已在提案檔誠實聲明。coin-signal 沒有動。
+- 資料（公開免金鑰）：`https://api.alternative.me/fng/?limit=0&format=json`，2026-11-13 04:35 UTC 抓取存 `forecast/proposals/data_fng/fng_full.json`（3,204 天、2018-02-01～2026-11-13、時間戳全 00:00 UTC、缺 4 天沿用前值，與 `backtest/data/fng.json` 完全相同）。`time_until_update` 顯示 d 的值在 d 00:00 UTC 公布（早於 d 收盤），但歷史回補無法驗證 → 主設定 t−1。指數是 BTC 專用，ETH 用同一值；官方成分約一半是 BTC 波動與動能。
+- `forecast/proposals/proto_fear_greed.py`：事先登記（12:36 台北，`--is-only` 12:37 先跑）固定官方分類（極度恐懼 ≤ 25、極度貪婪 ≥ 76）：fg_greed_cut（極度貪婪且持有 → 減半）、fg_fear_reentry（極度恐懼且空手／減碼 → +0.25vt，上限 vt）、fg_fear_cut（極度恐懼 → 減半）、fg_greed_boost（極度貪婪且有投入 → ×1.25）、fg_pup／fg_lead_pup（三桶調 p_up）。
+- IS 2022–23 **從未出現極度貪婪**（貪婪兩版＝冠軍），四版都不合格（冠軍 0.723；greed_cut 0.723、fear_reentry 0.528、fear_cut 0.723、greed_boost 0.723），無領先；const_scale c＝1.000。**OOS 2024→ 規則代表 fg_greed_cut 0.720／年化 12.5%／DD −18.5% vs 冠軍 0.836／15.9%／−18.4%（P 0.081）**；fear_reentry 0.815（−20.8%，P 0.421）、fear_cut 0.808、greed_boost 0.813，全輸 ×0.85（0.840）；Holm 較好全 1.000、較差 greed_cut 0.414／其餘 0.940。fg_pup Brier IS 0.25145 vs 0.25202、OOS 0.25175 vs 0.25228（DM p 0.581，Holm 0.581），仍輸 50%。WF 2022→ 四版 0.702–0.778 vs 0.791。L0（t 當天）／L2 結論相同；改用 IS 分位門檻（19.9／65）fear_reentry OOS 0.895 但 IS 0.639（非事先選，僅觀察）。截斷（到 2025-10-08）差 0；冠軍＝WF 快取（< 5e−7）、凍結模型差 0。判定 rejected，不註冊。詳見 `forecast/proposals/P-fear-greed.md`。
+- 描述（不重疊週、t−1）：Spearman 指數 vs 下週 +0.04～+0.07；極度恐懼後下一週 BTC 2024→ −1.60%（上漲 33%，27 週，t −2.06）、2018-03→ +0.80%（109 週），ETH −1.68%／+0.85%——**方向在不同期間相反**；極度貪婪後 BTC 2018→ +4.44%（t 2.14，主要 2020–21）、2024→ −0.09%（11 週）。極度恐懼時冠軍幾乎都已空手（93／109 週）、極度貪婪時幾乎都持有（39／40），能額外動作的日子很少。
+- 今天：主設定用 11/11 的值 29（恐懼，第 32 百分位）→ **沒有旗標亮**；最新值（11/13 00:00 UTC）20 極度恐懼——L0 會亮（fear_reentry 會是 BTC ≈0.21、ETH ≈0.15），已否決不採用。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 新增白話列 `fear_greed`（news；試算 30 項 0 錯誤，11/16 weekly.sh 發布）。App 沒改（仍 v25，verify_live LIVE CHECK OK）。19 個核心檔 sha256 前後相同、沒有註冊模型。node 146/146、test_forecast 10/10、test_events OK、test_verify_live 11/11、test_refresh_xsrc 4/4、ledger verify OK；commit cbc3ebe（＋changelog 補 commit）。
+
+## 提案 P-futures-basis（2026-11-13，不是 App 版本）：交割期貨年化基差（COIN-M 季度合約 vs 現貨，內插成固定 90 天）→ rejected
+
+- 2026-11-13 11:32 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1132-futures-basis.md`，Drive 19oITsHSMVF-IUzTt8hirOwGR69I9OY1N）。問題：季度期貨比現貨貴很多（過熱）、變便宜或倒掛（恐慌）、一週內急升，能不能事前提醒冠軍減碼／加碼？與 P-perp-positioning 的 basis_hi_cut（USDⓈ-M 最近季度、t 當天）部分重疊，已在提案檔誠實聲明。coin-signal 沒有 `.lock`。
+- 資料（公開免金鑰）：`forecast/proposals/data_basis/fetch_basis.py` 從 data.binance.vision 抓 COIN-M `{BTCUSD,ETHUSD}_{YYMMDD}` 1d（各 26 個合約、2020-06 起、616 個 zip，03:31–03:35 UTC，紀錄 `data_basis/fetch_log.txt`；zip 依 .gitignore 不進 git），USDⓈ-M 只做交叉檢查（相關 0.97／0.98）。資料庫沒有 COIN-M 270326 → 9/26 起只有單一合約（今天 τ 43 天）；2023-08-28～31 缺檔沿用前值。
+- `forecast/proposals/proto_futures_basis.py`：事先登記（11:39 台北，`--is-only` 11:41 先跑）cm90＝(F/S−1)×365/τ 內插到 90 天，只用 t−1（另跑 t−2）；basis_hi_cut（> IS q90 減半）、basis_lo_cut（< max(q10,0) 減半）、basis_jump_cut（7 日變化 > q90 減半）、basis_lo_boost（×1.25 上限 1）、bs_pup／bs_lead_pup（基差三桶調 p_up）。
+- IS 2022–23 四版都不合格（冠軍 0.723；hi 0.611、lo 0.723、jump 0.659、boost 0.719），無領先。**OOS 2024→ 規則代表 basis_hi_cut 0.826／年化 11.5%／DD −13.4% vs 冠軍 0.836／15.9%／−18.4%（P 0.541）**，勝 ×0.85（0.840）P 0.537、const_scale（0.839）0.533——跌幅小是因為 2024 年基差整年偏高、等於一直少放一半；basis_jump_cut 0.395（Holm 較差 0.006，WF 不合格）；lo_cut／lo_boost OOS 0 天觸發（＝冠軍）。bs_pup Brier IS 變差（0.25335 vs 0.25202）、OOS 0.25204 vs 0.25228（DM p 0.814），仍輸 50%。WF hi_cut 0.727 vs 0.791。t−2 hi_cut OOS 0.868 但 IS 0.709（觀察，不採用）；USDⓈ-M 最近季度 0.638、COIN-M 不內插 0.686。截斷（到 2025-10-08）差 0；冠軍＝WF 快取（< 5e−7）、凍結模型差 0。判定 rejected，不註冊。詳見 `forecast/proposals/P-futures-basis.md`。
+- 描述：基差 vs 下一週 Spearman BTC +0.007／+0.058／+0.018（IS／OOS／2021-06→）、ETH −0.021／+0.024／+0.007，五分位不單調；基差一週急升且持有時下一週反而偏漲（BTC +3.41%／+2.38%）。與 BIS WP 1087（Schmeling 等，只讀摘要）「高 carry 預告崩跌」在一週、疊加冠軍的設定下沒有重現。
+- 今天（基差用 11/11）：BTC 5.93%（第 54 百分位，7 日 +1.04pp）、ETH 4.97%（第 53 百分位，+1.07pp），USDⓈ-M 內插 90 天 6.26%／4.72%；**沒有任何旗標亮**；建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 新增白話列 `futures_basis`（news；試算 29 項 0 錯誤，11/16 weekly.sh 發布）。App 沒改（仍 v25，verify_live LIVE CHECK OK）。19 個核心檔 sha256 前後相同、沒有註冊模型。node 146/146、test_forecast 10/10、test_events 5/5、test_verify_live 11/11、test_refresh_xsrc 4/4、ledger verify OK；commit 45a574f（＋changelog 補 commit）。
+
+## 提案 P-short-reversal（2026-11-13，不是 App 版本）：大波動後的短線反轉（超跌買回／超買減碼：7 日報酬、Wilder RSI、布林 2.5σ）→ rejected
+
+- 2026-11-13 10:33 台北開始（研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1033-short-reversal.md`，Drive 1i-PCesN_Tr57WomkzuUnEdldn66zsyZM）。問題：大跌一週後會不會反彈、大漲一週後會不會回檔？冠軍空手／減碼時要不要先小量買回、持有時要不要先減碼？也是「只用事前訊號研究大波動」的一項。coin-signal 沒有 `.lock`。
+- `forecast/proposals/proto_short_reversal.py`：只用冠軍自己的 Binance 日K快取收盤（無新下載、免金鑰），特徵用到 t 收盤（另跑 t−1）。事先登記（10:36 台北，`--is-only` 先跑）os_ret7（7 日報酬 < IS q10）、os_rsi14（Wilder RSI14 < 30）、os_bb（z20 < −2.5）：觸發後 7 天內且冠軍空手／減碼 → 加 0.25×vt（上限 vt）；ob_ret7（> IS q90）、ob_rsi14（> 70）：7 天內且持有 → 減半；sr_pup／sr_lead_pup（7 日報酬極端桶調 p_up）。
+- IS 2022–23 唯一合格、領先 os_rsi14 0.755 vs 冠軍 0.723（P 0.689）；**OOS 2024→ 0.789／年化 15.1%／DD −21.2% vs 冠軍 0.836／15.9%／−18.4%（P 0.233）**，輸 ×0.85 0.840（P 0.223）、const_scale 0.841（P 0.197）；os_ret7 0.793、os_bb 0.742、ob_ret7 0.732、ob_rsi14 0.541（P 0.022，Holm 較差 0.158）；Holm 較好全部 1.000。sr_pup Brier OOS 0.25087 vs 0.25228（DM p 0.136，Holm 0.136，聯合 P 0.959 < 0.975），仍輸 50%。WF 2022→ os_rsi14 0.775 vs 0.791；ob 兩版不合格。t−1、3 天窗、加 0.5vt 結論相同；截斷（到 2025-10-08）差 0；冠軍＝WF 快取（< 5e−7）、凍結模型差 0。判定 rejected，不註冊。詳見 `forecast/proposals/P-short-reversal.md`。
+- 大波動描述（2018-03→，去重疊事件）：大跌週（IS 最差 10%）之後下一週 BTC 平均 +0.36%（中位 +1.27%，87 次）、ETH −0.90%（中位 +0.76%，101 次），跟平常週差不多；冠軍空手時 BTC +0.01%、ETH −1.16%，沒有可靠反彈（偶有再跌 −36.6%／−45.3%）。大漲週之後反而續漲 BTC +1.51%、ETH +3.13%（t 2.58）。7 日報酬與下一週 Spearman −0.11～+0.11。與 Fičura（2023）「大型幣是週動能、不是反轉」一致。
+- 今天（日K 11-12）：BTC ret7 −6.1%、RSI14 29.5（今天首次 < 30）、z20 −2.20；ETH ret7 −9.7%（11/11 −15.2% 觸發 q10）、RSI14 28.1、z20 −2.04。亮：BTC os_rsi；ETH os_ret7、os_rsi（皆已否決，不採用；若採用 os_rsi14 會是 BTC 0.208、ETH 0.153）。建議不變 BTC 0、ETH 0。
+- `backtest/tested_signals.py` 新增白話列 `short_reversal`（tweak；試算 28 項 0 錯誤，11/16 weekly.sh 發布）。App 沒改（仍 v25，verify_live LIVE CHECK OK）。19 個核心檔 sha256 前後相同、沒有註冊模型。node 146/146、test_forecast 10/10、test_events 5/5、test_verify_live 11/11、test_refresh_xsrc 4/4、ledger verify OK；commit 59ddae3（＋changelog 補 Drive id）。
 
 ## v25（2026-11-13）：「台幣翻轉價＋別家交易所比對」每週一自動更新
 
