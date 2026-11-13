@@ -12,6 +12,7 @@
 - 帳本、凍結模型、registry、升級規則、`daily.sh`、`weekly.sh` 都沒動。建議不變 BTC 0、ETH 0。
 - 測試：新增 `tests/labels_v28.test.mjs` 3 項（closeVs 正負號／四捨五入／日期，200 個隨機價格＝price/lastClose−1；首頁盤中句各分支都帶收盤比較且日期是決定收盤的前一天、日K過期不比較；app.js 不再有「現在 $」、closeLabel 跨年、版本）；`tests/e2e_v28.mjs`（iPhone 390×844：價格區間標「M/D 早上 8 點收盤」且＝live.json 價格、盤中句的 ±x% 用畫面上的盤中價與預測收盤重算、卡片上每個美元價格都有時間／種類標示、無水平捲動與主控台錯誤；截圖 `screenshots/v28-home.png`）。`intraday.test.mjs`、`e2e_v13.mjs` 的盤中句格式更新為允許新括號。
 - 結果：node 163／163；`test_forecast.py` 10／10；`events/test_events.py` 5／5；`test_refresh_xsrc.py` 4／4；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`～`e2e_v28`、`fallback` 本機全過（`e2e_v13` 第一次因舊格式斷言失敗，更新斷言後通過）。`test_verify_live.py` 部署前照預期因「原始碼≠部署庫」失敗，部署後重跑。
+- 部署後檢查：coin-signal a4689fa 已推送（本機 crypto-predictor a594567）；線上 sw `v28-2026-11-13`；`verify_live.py` LIVE CHECK OK（55 檔；tested_signals.json 照原計畫 11/16 weekly.sh 發布、只警告）；`test_verify_live.py` 11／11；`e2e_v28`、`e2e_v13`、`e2e_v27` 線上也過。研究筆記 `/workspace/trading/research/crypto/CRYPTO-20261113-1736-homepage-price-labels.md`（Drive 1nzFplmW7tVF3h5rOjs2fbnDxtwyKwh_1）。
 
 ## v27（2026-11-13）：這週可能要動手嗎（離翻轉價多近 → 過去 1／7 天內建議改變的比例＋到時要在 MAX 買賣多少）
 
