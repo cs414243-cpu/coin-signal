@@ -9,6 +9,8 @@
 - 結果（11/14 00:40 台北，兩幣空手）：首頁卡**看得到的字 391／1,323（30%）**，「預測成績單」在 iPhone 第一屏底部就看得到。數字全部是原本頁面上就有的，沒有新數字來源。
 - SW `v29-2026-11-14`；`app.js` 版本 v29。帳本、凍結模型、registry、升級規則、`daily.sh`、`weekly.sh` 都沒動。建議不變 BTC 0、ETH 0。
 - 測試：新增 `tests/home_v29.test.mjs` 3 項（triggerLine 空狀態、200 組隨機走勢與 v27 首頁句同價格同距離同動作、週檔備援；接線：ID 都在、收合位置、免責句在外、版本）；新增 `tests/e2e_v29.mjs`（iPhone 390×844：兩個細節區和「更多說明」預設收合、外面只看得到建議／原因／什麼時候會變（＝頁面用 nextmove.js 重算）、看得到的字 ≤ 60%、外面沒有術語、打開後 v13／v18／v26／v27／v28 內容都看得到、無水平捲動與主控台錯誤；截圖 `screenshots/v29-home.png`、`v29-home-open.png`）。`e2e_v26`、`e2e_v27` 的「首頁句看得到」改成先打開「更多說明」再檢查（其他斷言不變）。
+- 結果：node 177／177；`test_forecast.py` 10／10；`events/test_events.py` OK；`test_refresh_xsrc.py` 4／4；`tests/test_cusum_exit.py` 7／7；ledger verify OK；`e2e`、`e2e_v2`～`e2e_v14`、`e2e_v18`～`e2e_v24`、`e2e_v26`～`e2e_v29`、`fallback` 本機全過（`e2e_v26`／`e2e_v27` 第一次因「首頁句看得到」斷言失敗＝預期，改成先打開「更多說明」後通過）。`test_verify_live.py` 部署前照預期因「原始碼≠部署庫」失敗。
+- 部署後檢查：coin-signal d976cfa 已推送（本機 crypto-predictor 6ebda3f）；線上 sw `v29-2026-11-14`；`verify_live.py` LIVE CHECK OK；`test_verify_live.py` 11／11；`e2e_v29`、`e2e_v28`、`e2e_v27` 線上也過。部署庫 `.lock` 00:32 原子建立、完成後移除。研究筆記 Drive 1NAXb3xZtVOR2NUyuefUCobHMhGrW0RGv。
 
 ## v28（2026-11-13）：首頁每個價格都標清楚是「盤中」還是「哪天早上 8 點的收盤」
 
