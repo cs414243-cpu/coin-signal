@@ -26,6 +26,7 @@ import * as FD from './flipdrift.js';
 import * as TP from './trips.js';
 import * as UW from './underwater.js';
 import * as CSN from './costsens.js';
+import * as LD from './ladder.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -166,7 +167,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v38';
+const VERSION = 'v39';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -509,6 +510,8 @@ function updateOuts() {
   set('fc-trig-ETH', () => trigHome('ETH'));
   set('fc-fd-BTC', () => fdDetail('BTC'));
   set('fc-fd-ETH', () => fdDetail('ETH'));
+  set('fc-ld-BTC', () => ldDetail('BTC'));
+  set('fc-ld-ETH', () => ldDetail('ETH'));
   set('nm-wrap', () => FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now()));
   set('fc-money-ETH', () => moneyLine('ETH'));
   set('fc-rel-BTC', () => relLine('BTC'));
@@ -645,7 +648,7 @@ function intraOut() {
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
-let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null;
+let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
   const o = {};
@@ -796,6 +799,14 @@ function fdCur(c) {
   } catch { return null; }
 }
 const fdDetail = c => esc(FD.detailLine(c, fdCur(c), FDRIFT));
+// v39: 明天收盤如果是…，建議會變成多少 — phone's closed bars + frozen rule (must reproduce the card's exposure); not when data is red
+function ldDetail(c) {
+  try {
+    if (!LIVE?.coins?.[c] || !CTX[c]?.live?.candles) return '';
+    const I = relInfo(c); if (!I || I.rel.level === 'red') return '';
+    return LD.detailBlock(c, LD.ladder(LIVE.coins[c], I.bars), LADDER);
+  } catch { return ''; }
+}
 // v36: 照建議進場的每一趟（data/trips.json，2023 年起）— past record, one plain line in the details
 const tpDetail = c => { try { return esc(TP.detailLine(c, TRIPS)); } catch { return ''; } };
 // v37: 照建議的錢跌下來要多久回到新高（data/underwater.json）— past record, one plain line in the details
@@ -819,6 +830,7 @@ function coinBlock(c) {
       <div id="fc-money-${c}"></div>
       <details class="fc-more" data-coin="${c}"><summary>看 ${c} 的細節（盤中價、一週價格範圍、過去紀錄）</summary>
       <div id="fc-live-${c}" class="live">${liveLine(c)}</div>
+      <div id="fc-ld-${c}">${ldDetail(c)}</div>
       <p id="fc-fd-${c}" class="small fd">${fdDetail(c)}</p>
       <p id="fc-tp-${c}" class="small tp">${tpDetail(c)}</p>
       <p id="fc-uw-${c}" class="small uw">${uwDetail(c)}</p>
@@ -953,6 +965,7 @@ async function render(force = false) {
   try { TRIPS = await fetch('data/trips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRIPS; } catch { TRIPS = TRIPS || null; }   // v36
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
+  try { LADDER = await fetch('data/ladder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LADDER; } catch { LADDER = LADDER || null; }   // v39
   try { TBAND = await fetch('data/tradeband.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TBAND; } catch { TBAND = TBAND || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }

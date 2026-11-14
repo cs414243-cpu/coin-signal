@@ -1,0 +1,202 @@
+{
+ "as_of": "2026-11-13",
+ "moves": [
+  -0.1,
+  -0.05,
+  -0.02,
+  0.0,
+  0.02,
+  0.05,
+  0.1
+ ],
+ "oos_start": "2023-01-01",
+ "source": "backtest/price_ladder.py (Binance closed daily bars; frozen trend_vt@1 formula)",
+ "coins": {
+  "BTC": {
+   "last_date": "2026-11-13",
+   "last_close": 68314.0,
+   "flips": {
+    "50": 80553.48,
+    "200": 73075.2435
+   },
+   "ladder": [
+    {
+     "move": -0.1,
+     "price": 61482.6,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": -0.05,
+     "price": 64898.3,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": -0.02,
+     "price": 66947.72,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.0,
+     "price": 68314.0,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.02,
+     "price": 69680.28,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.05,
+     "price": 71729.7,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.1,
+     "price": 75145.4,
+     "trend3": 0.5,
+     "exposure": 0.2879,
+     "level": "reduce"
+    }
+   ],
+   "freq": {
+    "is": {
+     "n": 1763,
+     "le10": 0.0119,
+     "le5": 0.0703,
+     "le2": 0.2099,
+     "flat2": 0.5638,
+     "ge2": 0.2263,
+     "ge5": 0.0709,
+     "ge10": 0.0142
+    },
+    "oos": {
+     "n": 1413,
+     "le10": 0.0007,
+     "le5": 0.0205,
+     "le2": 0.1423,
+     "flat2": 0.7006,
+     "ge2": 0.1571,
+     "ge5": 0.0326,
+     "ge10": 0.0028
+    }
+   },
+   "parity": {
+    "n": 3176,
+    "max_abs_diff": 1.4988010832439613e-14
+   },
+   "oos_vol_dip": {
+    "n": 1107,
+    "share": 1.0
+   },
+   "oos_small_move_changes": {
+    "n": 1413,
+    "share": 0.2279
+   }
+  },
+  "ETH": {
+   "last_date": "2026-11-13",
+   "last_close": 1929.88,
+   "flips": {
+    "50": 2410.4492,
+    "200": 2148.0791
+   },
+   "ladder": [
+    {
+     "move": -0.1,
+     "price": 1736.892,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": -0.05,
+     "price": 1833.386,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": -0.02,
+     "price": 1891.2824,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.0,
+     "price": 1929.88,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.02,
+     "price": 1968.4776,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.05,
+     "price": 2026.374,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    },
+    {
+     "move": 0.1,
+     "price": 2122.868,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
+    }
+   ],
+   "freq": {
+    "is": {
+     "n": 1763,
+     "le10": 0.0278,
+     "le5": 0.11,
+     "le2": 0.274,
+     "flat2": 0.4265,
+     "ge2": 0.2995,
+     "ge5": 0.1231,
+     "ge10": 0.0284
+    },
+    "oos": {
+     "n": 1413,
+     "le10": 0.0057,
+     "le5": 0.0467,
+     "le2": 0.2059,
+     "flat2": 0.5874,
+     "ge2": 0.2067,
+     "ge5": 0.0609,
+     "ge10": 0.0113
+    }
+   },
+   "parity": {
+    "n": 3176,
+    "max_abs_diff": 1.9872992140790302e-14
+   },
+   "oos_vol_dip": {
+    "n": 979,
+    "share": 1.0
+   },
+   "oos_small_move_changes": {
+    "n": 1413,
+    "share": 0.1203
+   }
+  }
+ }
+}
