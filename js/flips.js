@@ -30,6 +30,20 @@ export function recoRows(candles) {
   return out;
 }
 
+/** v40: ONE source of truth for "what the rule says if the next close is x" — used by the v39 price ladder AND the home
+ *  「什麼時候會變」 share (nextmove.stateFrom). Frozen trend_vt@1 (recoRows) on the last RULE_TAIL closes + x; the tail is
+ *  numerically identical to the full history (200-day line needs 200 closes, 30-day volatility 31). closes ascending. */
+export const RULE_TAIL = 260;
+export function ruleAfter(closes, x) {
+  const tail = closes.slice(-RULE_TAIL);
+  if (tail.length < 200 || !Number.isFinite(x) || !(x > 0)) return null;
+  const r = recoRows([...tail, x].map((c, i) => ({ t: i * 86400000, c }))).at(-1);
+  return r ? { trend3: r.trend3, exposure: r.exposure, level: r.level } : null;
+}
+/** v40: the hypothetical close just past a flip line that actually flips it: below the line now → just above the flip
+ *  price; above it now → just below (the rolling window can put the flip price on either side of the last close). */
+export const pastLine = (price, above) => above ? price * (1 - 1e-9) : price * (1 + 1e-9);
+
 /** Recommendation changes ('trend' = MA state changed; 'vol' = same trend, volatility moved the level) and whether
  *  they reversed within 14 later closed bars (null = not 14 bars yet and not reversed so far). No lookahead beyond the bars given. */
 export function recoEvents(rows) {

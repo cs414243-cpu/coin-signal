@@ -4,6 +4,7 @@
 // Today's state is recomputed from the phone's CLOSED daily bars with the same formulas (reliability.flipLevels, vol30 as
 // signals.series). Not a signal, not a forecast of direction; the 08:20 daily forecast stays authoritative.
 import { flipLevels, flipAction } from './reliability.js';
+import { ruleAfter, pastLine } from './flips.js';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ntd = x => Number.isFinite(x) ? `NT$${Math.round(x).toLocaleString('en-US')}` : '—';
 const usd = x => Number.isFinite(x) ? `${x.toLocaleString('en-US', { maximumFractionDigits: x > 1000 ? 0 : 2 })} 美元` : '—';
@@ -33,17 +34,20 @@ export const vtScale = v => Number.isFinite(v) && v ? Math.min(1, 0.30 / v) : 0;
 export function stateFrom(closes, date = null) {
   const F = flipLevels(closes); if (!F) return null;
   const v = vol30(closes), wk = v / Math.sqrt(365) * Math.sqrt(H);
-  const lv = F.levels.map(l => ({ ma: l.ma, price: l.price, dist: l.dist, above: l.above, next: l.next, nextExpo: l.next * vtScale(v) }));
+  // v40: nextExpo = the frozen rule with the next close just past this line (flips.ruleAfter) = the v39 price ladder's flip
+  // row. v31–v39 used next × min(1, 0.30 ÷ TODAY's vol) (kept as nextEst), which overstated it after a big crossing day.
+  const lv = F.levels.map(l => { const r = ruleAfter(closes, pastLine(l.price, l.above)), est = l.next * vtScale(v);
+    return { ma: l.ma, price: l.price, dist: l.dist, above: l.above, next: r ? r.trend3 : l.next, nextExpo: r ? r.exposure : est, nextEst: est, exact: !!r }; });
   const near = lv.reduce((a, b) => Math.abs(Math.log(1 + b.dist)) < Math.abs(Math.log(1 + a.dist)) ? b : a);
   const z = Math.abs(Math.log(1 + near.dist)) / wk;
-  return { date, close: F.close, trend: F.trend, vol30: v, exposure: F.trend * vtScale(v), z, bucket: bucketOf(z), levels: lv, near, src: 'phone' };
+  return { date, close: F.close, trend: F.trend, vol30: v, exposure: F.trend * vtScale(v), z, bucket: bucketOf(z), levels: lv, near, src: 'phone', exact: near.exact };
 }
 /** Same shape from the weekly file (used only when the phone has no bars and the file is for the forecast's date). */
 export function fileState(N, coin) {
   const c = N?.coins?.[coin]?.current; if (!c) return null;
   const lv = c.levels.map(l => ({ ma: l.ma, price: l.price, dist: l.dist, above: l.above, next: l.next_trend, nextExpo: l.next_exposure }));
   const near = lv.find(l => l.ma === c.nearest_ma) || lv[0];
-  return { date: c.date, close: c.close, trend: c.trend3, vol30: c.vol30, exposure: c.exposure, z: c.z, bucket: c.bucket, levels: lv, near, src: 'file' };
+  return { date: c.date, close: c.close, trend: c.trend3, vol30: c.vol30, exposure: c.exposure, z: c.z, bucket: c.bucket, levels: lv, near, src: 'file', exact: false };   // weekly file = today's-vol estimate
 }
 /** closes/date from the phone if available; else the file when it matches the forecast's candle date (asof); else undefined. */
 export function pickState(N, coin, closes, date, asof) {
@@ -69,7 +73,7 @@ export function homeSentence(N, st, plan = {}) {
   for (const c of ['BTC', 'ETH']) {
     const s = st?.[c]; if (!s || !s.bucket) continue;
     const r = rateFor(N, c, s.bucket); if (!r || r.p7 === null) continue;
-    const first = !parts.length, hl = s.near.dist > 0 ? '高於' : '低於';
+    const first = !parts.length, hl = s.near.above ? '低於' : '高於';   // v40: side that flips the line (not the sign of dist)
     parts.push(first
       ? `${c} 收盤${hl} ${usd0(s.near.price)} 美元（比上次收盤${sgn(s.near.dist)}）就會轉為${actionAfter(s)}，過去類似距離 7 天內發生約 ${pc0(r.p7)}${plan[c] ? `（${plan[c]}）` : ''}`
       : `${c} ${hl} ${usd0(s.near.price)} 美元（${sgn(s.near.dist)}）轉為${actionAfter(s)}，約 ${pc0(r.p7)}${plan[c] ? `（${plan[c]}）` : ''}`);
@@ -81,17 +85,17 @@ export function homeSentence(N, st, plan = {}) {
  *  suggestion becomes. s: state from pickState (null/undefined → ''). Same numbers as homeSentence (which moved under 細節). */
 export function triggerLine(c, s) {
   if (!s || !s.near || !Number.isFinite(s.near.price) || !Number.isFinite(s.near.dist)) return '';
-  const hl = s.near.dist > 0 ? '高於' : '低於';
+  const hl = s.near.above ? '低於' : '高於';   // v40: side that flips the line (not the sign of dist)
   const sh = shareAfter(s);
   return `什麼時候會變：${c} 早上 8 點收盤${hl} ${usd0(s.near.price)} 美元（比上次收盤${sgn(s.near.dist)}），建議就會轉為${actionAfter(s)}${sh ? `（${sh}）` : ''}；盤中碰到不算。`;
 }
 /** v31: how much the suggestion becomes after the flip, in the same words as the top card's 「建議：」 line.
- *  nextExpo = next trend × min(1, 30% ÷ today's 30-day vol) (same estimate as the v27 card's 「建議比例約」).
- *  backtest/flip_size_check.py: on 431 one-step flips since 2018 the estimate was within 5 points of the real share on
- *  the flip close 93% of the time (median error 0.3 points); a very big move on the flip day raises vol and lowers it. */
+ *  v40: nextExpo = frozen rule with the next close just past the line (flips.ruleAfter) = the v39 ladder's flip row;
+ *  backtest/flip_share_exact.py: within 5 points of the real share on 97% of 431 one-step flips (old today's-vol estimate
+ *  93%, flip_size_check.py); a close far past the line still raises vol and lowers it. Weekly-file states → ''. */
 export function shareAfter(s) {
   const e = s?.near?.nextExpo;
-  if (!Number.isFinite(e)) return '';
+  if (!Number.isFinite(e) || s.exact === false) return '';   // v40: only the exact rule number (phone bars), never the weekly-file estimate
   if (e < 0.005) return '先不要放';
   const pct = Math.round(e * 100);
   return s.near.next < s.trend ? `降到約 ${pct}%` : `放約 ${pct}%`;
@@ -116,7 +120,7 @@ function coinBlock(N, c, s, P, twd) {
   else {
     const r = rateFor(N, c, s.bucket), act = actionAfter(s);
     const lv = s.levels.map(l => `${l.ma} 日線 ${usd(l.price)}${twd ? `（約 ${ntd(twd(l.price))}）` : ''}，${l.dist > 0 ? '要漲' : '要跌'} ${p1(Math.abs(l.dist))}`).join('；');
-    now = `<p class="nm-now">依 ${closeMD(s.date)} 早上 8 點收盤 ${usd(s.close)}：最近的翻轉價是 <strong>${s.near.ma} 日線 ${usd(s.near.price)}</strong>${twd ? `（在 MAX 約 ${ntd(twd(s.near.price))}）` : ''}，收盤${s.near.dist > 0 ? '高於' : '低於'}它，建議會從${s.trend === 0 ? '空手' : s.trend === 1 ? '持有' : '減碼'}轉為<strong>${act}</strong>（建議比例約 ${pc0(s.near.nextExpo)}）。距離 ${p1(Math.abs(s.near.dist))}＝${s.z.toFixed(2)} 週的典型波動（${BUCKET_ZH[s.bucket]}）。</p>
+    now = `<p class="nm-now">依 ${closeMD(s.date)} 早上 8 點收盤 ${usd(s.close)}：最近的翻轉價是 <strong>${s.near.ma} 日線 ${usd(s.near.price)}</strong>${twd ? `（在 MAX 約 ${ntd(twd(s.near.price))}）` : ''}，收盤${s.near.above ? '低於' : '高於'}它，建議會從${s.trend === 0 ? '空手' : s.trend === 1 ? '持有' : '減碼'}轉為<strong>${act}</strong>（建議比例約 ${pc0(s.near.nextExpo)}）。距離 ${p1(Math.abs(s.near.dist))}＝${s.z.toFixed(2)} 週的典型波動（${BUCKET_ZH[s.bucket]}）。</p>
       <p class="small">過去${r?.who === 'pooled' ? '（兩個幣合計）' : ''}距離差不多時（2023 年起 ${r?.n ?? '—'} 天）：<strong>隔天早上就變 ${pc0(r?.p1)}</strong>、<strong>7 天內變 ${pc0(r?.p7)}</strong>。兩條線：${lv}。</p>
       ${P ? `<p class="nm-plan">${P}</p>` : '<p class="small muted">想看到時要買賣多少錢：在「我的部位」填總資產和持有數量。</p>'}
       ${s.src === 'file' ? `<p class="small muted">（用每週預先算好的資料，最新 ${esc(C.last_bar)}）</p>` : ''}`;
@@ -135,6 +139,6 @@ export function nextMoveCard(N, st, plans = {}, twd = null) {
     <p id="nm-line">建議只在收盤穿過 50 日或 200 日均線時才會大改（空手⇄減碼⇄持有）。離那個價格越近，越可能這幾天就要動手；這張卡把「離多近」換成過去實際發生的比例，並先算好到時要做什麼。</p>
     ${['BTC', 'ETH'].filter(c => N.coins[c]).map(c => coinBlock(N, c, st?.[c], plans[c], twd)).join('')}
     <p class="small"><strong>重點</strong>：距離不到半週的典型波動時，2023 年起 7 天內建議改變 ${pc0(PB.lt05.p7)}（兩個幣合計）；超過 2 週的典型波動時幾乎不會（${pc0(PB.ge2.p7)}）。用 2022 年以前的比例去猜 2023 年起，7 天內會不會變的準確度（Brier）比只用平均比例好 ${pc0(k.skill)}（${k.brier_bucket} vs ${k.brier_base}，${k.n} 天），隔天會不會變好 ${pc0(k1.skill)}，所以這些比例在樣本外也站得住。<strong>它只說「會不會要動手」，不說會漲還是會跌</strong>；建議變了之後也常在兩週內又變回來（見「建議變化」）。真的變了以 08:20 的每日預測為準，盤中碰到不算。</p>
-    <p class="small muted">算法：<code>backtest/next_move.py</code> → <code>data/nextmove.json</code>（${esc(N.source)}；${esc(N.model)}）。每天只用當天以前的收盤：翻轉價＝讓下一根收盤剛好等於含它的均線的價格（50 日＝最近 49 根平均、200 日＝最近 199 根平均）；${esc(N.z_def)}；距離分 4 組（事先固定）。「變」＝之後 1／7 根收盤中，趨勢狀態和今天不同。2023 年以前是選規則時看過的時期，之後才算樣本外；相鄰日子的 7 天會重疊，天數不是獨立樣本。翻轉後的建議比例用今天的 30 日波動估，收盤時會小幅變動：2018 年起 431 次翻轉（資料到 2026/11/12），估的和翻轉當天實際的比例差 5 個百分點以內 93%（2023 年起 90%）、中位差 0.3 個百分點；翻轉那天如果大漲大跌，30 日波動會跳高、實際比例會低很多（差超過 15 個百分點 4 次，例如 ETH 2026/8/19 估 98%、實際 47%，那天的建議甚至是減碼），所以真的變了以 08:20 的每日預測為準（<code>backtest/flip_size_check.py</code>）。金額用「我的部位」和「差一點要不要動手」同一套算法，成本用「買幣成本」的 MAX 掛單簿快照。只是過去紀錄、不是預測，也不是投資建議。每週一自動重算。</p>
+    <p class="small muted">算法：<code>backtest/next_move.py</code> → <code>data/nextmove.json</code>（${esc(N.source)}；${esc(N.model)}）。每天只用當天以前的收盤：翻轉價＝讓下一根收盤剛好等於含它的均線的價格（50 日＝最近 49 根平均、200 日＝最近 199 根平均）；${esc(N.z_def)}；距離分 4 組（事先固定）。「變」＝之後 1／7 根收盤中，趨勢狀態和今天不同。2023 年以前是選規則時看過的時期，之後才算樣本外；相鄰日子的 7 天會重疊，天數不是獨立樣本。翻轉後的建議比例（v40 起）用同一套規則，把「下一根收盤剛好過翻轉價」接上去算（那一天讓 30 日波動變大也算進去），和「看細節」價格對照表的翻轉價那一列是同一個數字：2018 年起 431 次翻轉（資料到 2026/11/13），和翻轉當天實際的比例差 5 個百分點以內 97%（2023 年起 97%）、中位差 0.1 個百分點；v31–v39 用今天的 30 日波動估，是 93%（2023 年起 90%）。剩下的差距來自收盤衝過翻轉價很多：那天波動跳更高、實際比例更低（差超過 15 個百分點 2 次，例如 ETH 2026/8/19 收在翻轉價上面 12.5%，算的 89%、實際 47%，那天的建議甚至是減碼），所以真的變了以 08:20 的每日預測為準（<code>backtest/flip_share_exact.py</code>）。金額用「我的部位」和「差一點要不要動手」同一套算法，成本用「買幣成本」的 MAX 掛單簿快照。只是過去紀錄、不是預測，也不是投資建議。每週一自動重算。</p>
   </section>`;
 }

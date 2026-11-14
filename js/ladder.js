@@ -2,8 +2,7 @@
 // Each row = the frozen trend_vt@1 rule (flips.js recoRows, parity-tested vs the ledger) run on the phone's closed daily bars
 // with one hypothetical next close appended. Same definitions as backtest/price_ladder.py (pre-registered); history of
 // one-day moves from data/ladder.json (Binance closed daily bars, 2023→). Not a forecast of direction, not a new signal.
-import { recoRows, actionFor, ACTION_ZH } from './flips.js';
-import { vol30, vtScale } from './nextmove.js';
+import { recoRows, actionFor, ACTION_ZH, ruleAfter, pastLine } from './flips.js';
 
 export const MOVES = [0.10, 0.05, 0.02, 0, -0.02, -0.05, -0.10];   // = backtest/price_ladder.py MOVES (shown high → low)
 export const FLIP_RANGE = 0.15;      // also show the exact flip price of a line when it is within ±15 % of the last close
@@ -17,11 +16,7 @@ const fq = x => !Number.isFinite(x) ? '—' : x < 0.01 ? `${+(x * 100).toFixed(1
 const closeMD = s => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 2); return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; };
 
 /** Rule result if the next close is x. bars: CLOSED daily bars [{t, c}] ascending. */
-export function rowAt(bars, x) {
-  const last = bars[bars.length - 1];
-  const r = recoRows([...bars, { t: last.t + DAY, c: x }]).at(-1);
-  return r ? { trend3: r.trend3, exposure: r.exposure, level: r.level } : null;
-}
+export function rowAt(bars, x) { return ruleAfter(bars.map(k => k.c), x); }   // v40: shared with the home line (flips.ruleAfter)
 
 /** f: data/live.json coin (asof, exposure, action, state.trend3). → null (phone not on the card's date / mismatch) | ladder */
 export function ladder(f, bars) {
@@ -35,9 +30,8 @@ export function ladder(f, bars) {
   const rows = MOVES.map(m => ({ kind: 'move', move: m, price: c * (1 + m), ...rowAt(bars, c * (1 + m)) }));
   for (const [L, p] of [[50, sum(49) / 49], [200, sum(199) / 199]]) {
     const d = p / c - 1; if (Math.abs(d) > FLIP_RANGE || Math.abs(d) < 1e-9) continue;
-    const up = p > c, x = up ? p * (1 + 1e-9) : p * (1 - 1e-9);                   // just past the line
-    const r = rowAt(bars, x);
-    rows.push({ kind: 'flip', line: L, up, move: d, price: p, ...r, est: r.trend3 * vtScale(vol30(closes)) });   // est = top card's 「放約」 (today's vol)
+    const above = c > sum(L) / L, up = !above;                                    // v40: side that flips it (= reliability.flipLevels above)
+    rows.push({ kind: 'flip', line: L, up, move: d, price: p, ...rowAt(bars, pastLine(p, above)) });   // = home 「什麼時候會變」 share
   }
   rows.sort((a, b) => b.price - a.price || (a.kind === 'flip' ? -1 : 1));
   for (const r of rows) { r.action = actionFor(r.exposure, f.exposure); r.changed = r.action !== f.action || Math.abs(r.exposure - f.exposure) >= 0.10; }
@@ -64,9 +58,7 @@ export function detailBlock(c, Lx, D) {
   const any = Lx.rows.some(r => r.changed);
   const notes = [];
   notes.push(any ? '藍色粗體＝跟現在的建議不一樣，到時要照新的建議買賣。' : `在這個範圍內（${sg(MOVES.at(-1))}～${sg(MOVES[0])}），明天的建議都跟現在一樣，不用動手。`);
-  const near = Lx.rows.filter(r => r.kind === 'flip').sort((a, b) => Math.abs(Math.log(1 + a.move)) - Math.abs(Math.log(1 + b.move)))[0];   // = the top card's line
-  const gap = near && Number.isFinite(near.est) && near.exposure >= 0.005 && near.est >= 0.005 && Math.abs(near.est - near.exposure) >= 0.03 ? near : null;
-  if (gap) notes.push(`上面「什麼時候會變」寫的約 ${pc(gap.est)} 是用今天的波動估的；真的一天${gap.up ? '漲' : '跌'} ${+(Math.abs(gap.move) * 100).toFixed(1)}% 到 ${usd0(gap.price)}，波動會變大，照規則實際約 ${pc(gap.exposure)}。`);
+  // v40: the top card's 「什麼時候會變」 share is now the same number as the flip row (flips.ruleAfter), so no estimate-gap note
   if (Lx.dip) notes.push(`漲越多不一定放越多：收在 ${usd0(Lx.dip[0].price)} 放約 ${pc(Lx.dip[0].exposure)}，收在 ${usd0(Lx.dip[1].price)} 反而只放約 ${pc(Lx.dip[1].exposure)}——一天大漲會讓波動變大，規則就少放一點。`);
   if (sm?.n) notes.push(`2023 年起 ${c} 有 ${fq(sm.share)} 的日子，收盤只要多漲或多跌 2% 建議就會不一樣。`);
   return `<div class="ladder" id="ld-${c}" data-date="${esc(Lx.date)}"><p class="small"><strong>明天收盤如果是…，建議會變成多少</strong>（先想好「如果…就…」，到時不用臨時判斷）</p>

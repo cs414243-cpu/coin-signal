@@ -167,7 +167,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v39';
+const VERSION = 'v40';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -557,7 +557,7 @@ function relInfo(c) {
   const closes = bars.map(k => k.c);
   return { live, bars, last, chk, a, b, tA, tB, cross, usdt, rel, flips: RL.flipLevels(closes), near: RL.nearFlip(closes) };
 }
-// v31: the near-flip box also says how much the suggestion becomes (same estimate as the trigger line / v27 card)
+// v31: the near-flip box also says how much the suggestion becomes (v40: same exact rule number as the trigger line and the v39 ladder)
 function flipShare(c, near) {
   try { const s = nmCur()[c]; if (!s?.near || s.near.ma !== near.ma || s.near.next !== near.next) return ''; const t = NM.shareAfter(s); return t ? `${t}；` : ''; } catch { return ''; }
 }
