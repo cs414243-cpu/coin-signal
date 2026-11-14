@@ -169,7 +169,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v42';
+const VERSION = 'v43';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -1036,7 +1036,7 @@ async function renderAdv(force = false) {
     el.innerHTML = `
       <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#spells">空手要等多久</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
-      ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
+      ${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
       ${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), NOW)}
       <div id="nm-wrap">${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, NOW)}</div>
@@ -1071,7 +1071,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), Date.now())}${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), Date.now())}${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now())}${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, Date.now())}${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, Date.now())}${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), Date.now())}${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), Date.now())}${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now())}${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, Date.now())}${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, Date.now())}${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
   }
   updateOuts();
 }

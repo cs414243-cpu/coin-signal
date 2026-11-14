@@ -67,13 +67,33 @@ export function conclusion(O) {
   return `<ul class="small">${lines}</ul><p class="small"><strong>白話結論：</strong>建議不能用來猜下週會漲還是會跌——不管是哪種建議，之後一週漲跌大致一半一半。它真正有紀錄支持的用處是「大跌的週少虧」，而這主要是因為投入的比例比較低：跌時少虧，漲時也少賺。所以請把它當作控制風險的工具，不是預測漲跌的工具。</p>`;
 }
 
-export function outcomesCard(O) {
+/** v43: 「現在」 always = the homepage's official recommendation (live.json, same file as the top card), never the
+ *  weekly backtest file's last bar (outcomes.json `now`, which can be days old and say 減碼 while the top card says 空手).
+ *  -> { action, zh, src: 'live'|'file', asof, fileAction, fileLast, differs } */
+const md = s => `${+s.slice(5, 7)}/${+s.slice(8, 10)}`;   // same date as the card's 「回測資料到」 line
+const mdNext = s => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 1); return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; };
+export function nowFor(O, live, c) {
+  const F = O?.coins?.[c]?.now, L = live?.coins?.[c], fileLast = O?.coins?.[c]?.last_bar ?? null;
+  if (L && ACTION_ZH[L.action]) return { action: L.action, zh: ACTION_ZH[L.action], src: 'live', asof: L.asof, fileAction: F?.action ?? null, fileLast,
+    differs: !!F && F.action !== L.action };
+  if (F && ACTION_ZH[F.action]) return { action: F.action, zh: ACTION_ZH[F.action], src: 'file', asof: fileLast, fileAction: F.action, fileLast, differs: false };
+  return null;
+}
+/** Plain label after the coin name in the card. */
+export function nowLabel(n) {
+  if (!n) return '';
+  if (n.src === 'file') return `（表格資料最後一天 ${md(n.asof)} 時：${n.zh}；讀不到首頁的最新建議）`;
+  const note = n.differs ? `；表格資料只到 ${md(n.fileLast)}，那天是「${ACTION_ZH[n.fileAction]}」，下面數字是過去紀錄、不受影響` : '';
+  return `（現在：${n.zh}，跟首頁一樣，依 ${mdNext(n.asof)} 早上 8 點收盤${note}）`;
+}
+
+export function outcomesCard(O, live = null) {
   if (!O?.coins) return '';
   const block = c => {
-    const S = O.coins[c].stats;
-    const rows = ACTS.map(a => `<tr><th>${ACTION_ZH[a]}</th>${['full', 'is', 'oos'].map(p => cell(S[p].actions[a].overlap, S[p].actions[a].weekly)).join('')}</tr>`).join('');
+    const S = O.coins[c].stats, n = nowFor(O, live, c);
+    const rows = ACTS.map(a => `<tr${n && a === n.action ? ' class="hl" data-now="1"' : ''}><th>${ACTION_ZH[a]}${n && a === n.action ? '<div class="muted small">← 現在</div>' : ''}</th>${['full', 'is', 'oos'].map(p => cell(S[p].actions[a].overlap, S[p].actions[a].weekly)).join('')}</tr>`).join('');
     const head = `<tr><th>出現的建議</th>${['full', 'is', 'oos'].map(p => `<th>${P[p]}<div class="muted small">${S[p].start.slice(0, 7)}～${S[p].end.slice(0, 7)}</div></th>`).join('')}</tr>`;
-    return `<h3 class="sub">${c}<span class="muted small">（現在：${esc(O.coins[c].now.action_zh)}）</span></h3>
+    return `<h3 class="sub">${c}<span class="muted small out-now" data-coin="${c}" data-action="${n ? n.action : ''}" data-src="${n ? n.src : ''}">${esc(nowLabel(n))}</span></h3>
       <div class="scroll"><table class="bt out-t"><thead>${head}</thead><tbody>${rows}<tr><th>不分建議</th>${['full', 'is', 'oos'].map(p => cell(S[p].all.overlap, S[p].all.weekly)).join('')}</tr></tbody></table></div>
       <div class="scroll"><table class="bt out-t"><thead><tr><th>照建議 vs 一直抱著<div class="muted small">每週，扣成本</div></th>${['full', 'is', 'oos'].map(p => `<th>${P[p]}</th>`).join('')}</tr></thead><tbody>${fhRow('一週報酬平均', S)}</tbody></table></div>`;
   };
