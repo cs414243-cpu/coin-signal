@@ -21,6 +21,7 @@ import * as SP from './spells.js';
 import * as NM from './nextmove.js';
 import * as SN from './scorenoise.js';
 import * as PL from './paperlog.js';
+import * as PC from './preclose.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -161,7 +162,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v33';
+const VERSION = 'v34';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -502,6 +503,7 @@ function updateOuts() {
   set('nm-wrap', () => FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now()));
   set('fc-money-ETH', () => moneyLine('ETH'));
   set('fc-rel-BTC', () => relLine('BTC'));
+  set('fc-pre-wrap', preHome);
   set('fc-rel-ETH', () => relLine('ETH'));
   set('rel-out', relOut);
   set('fc-live-BTC', () => liveLine('BTC'));
@@ -798,6 +800,19 @@ function coinBlock(c) {
       </details>
     </div>`;
 }
+// v34: 8 點收盤後、正式建議更新前（約 08:00–08:30，或每日預測晚了），手機先照同一套規則算剛收完的那根日K
+function preHome() {
+  if (!LIVE) return '';
+  const P = {};
+  for (const c of ['BTC', 'ETH']) {
+    const f = LIVE.coins[c], I = f && CTX[c] ? relInfo(c) : null; if (!I) continue;
+    let p = PC.preview(f, I.bars);
+    if (p && I.rel.level === 'red') p = { ok: false, why: 'unreliable' };
+    P[c] = p;
+  }
+  const asof = LIVE.coins.BTC?.asof || LIVE.coins.ETH?.asof;
+  return PC.homeLine(P, asof, !!TR.staleness(asof, Date.now()).level);
+}
 function forecastCard() {
   const any = LIVE.coins.BTC || LIVE.coins.ETH; if (!any) return '';
   return `<section class="card forecast" id="forecast">
@@ -805,6 +820,7 @@ function forecastCard() {
     <h2>未來一週預測建議</h2>
     <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
     <div id="fc-stale-wrap">${TR.topLine(LIVE, TRUST, Date.now(), DEV)}</div>
+    <div id="fc-pre-wrap">${preHome()}</div>
     ${coinBlock('BTC')}${coinBlock('ETH')}
     <div id="jr-hint-wrap">${JR.homeHint(JR.load(localStorage), LIVE)}</div>
     <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>

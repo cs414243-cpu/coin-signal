@@ -154,3 +154,6 @@ details.fc-more>summary{font-size:13px;font-weight:500}
 
 /* v33 成績單明細 */
 .pl-box table.bt{font-size:13px}.pl-box table.bt th,.pl-box table.bt td{padding:6px 5px}.pl-box .nw{white-space:nowrap}
+.pre{margin:8px 0;padding:8px 10px;border-radius:6px;font-size:14px;background:#1d2a3a;border-left:3px solid #5b8def}
+.pre p{margin:4px 0}
+.pre-chg{background:#3b3216;border-left-color:var(--warn)}
