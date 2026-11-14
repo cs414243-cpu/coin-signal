@@ -20,6 +20,7 @@ import * as XS from './xsrc.js';
 import * as SP from './spells.js';
 import * as NM from './nextmove.js';
 import * as SN from './scorenoise.js';
+import * as PL from './paperlog.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -160,7 +161,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v32';
+const VERSION = 'v33';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -596,7 +597,7 @@ function relOut() {
 }
 
 // ======================= v13: 盤中離翻轉價多遠 =======================
-let TICK = {}, INTRA = null, TESTED = null, XSRC = null, SNOISE = null;
+let TICK = {}, INTRA = null, TESTED = null, XSRC = null, SNOISE = null, PLOG = null;
 function liveInfo(c) {
   const ctx = CTX[c], t = TICK[c]; if (!ctx || !t || t.status !== 'ok') return null;
   const bars = RL.closedBars(ctx.live.candles, t.at), last = bars[bars.length - 1]; if (!last) return null;
@@ -832,6 +833,7 @@ function trackCard() {
       <div><div class="label">虛擬投資：一直抱著</div><div class="num sm">${ret(b)}</div></div>
     </div>
     ${SN.paperLine(SNOISE, T)}${ns ? SN.hitLine(SNOISE, ns, ch.scores.hit) : ''}
+    ${PL.box(PLOG, T, LIVE.champion.key, LIVE.baseline)}
     <p class="small muted">各用虛擬 NT$100 萬（BTC、ETH 各半）、每天照建議調整，已扣手續費和台幣買 USDT 的溢價。不是真的錢。</p>
     ${hist}
     <p class="warn">實際紀錄才剛開始（${since}）。至少要累積 8 週，系統才會開始比較不同的預測方法，表現更好的才會換上來；在那之前，請把建議當參考就好。</p>
@@ -908,6 +910,7 @@ async function render(force = false) {
   try { TESTED = await fetch('data/tested_signals.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TESTED; } catch { TESTED = TESTED || null; }
   try { INTRA = await fetch('data/intraday.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || INTRA; } catch { INTRA = INTRA || null; }
   try { SNOISE = await fetch('data/scorenoise.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || SNOISE; } catch { SNOISE = SNOISE || null; }
+  try { PLOG = await fetch('ledger/paper.jsonl', { cache: 'no-cache' }).then(r => r.ok ? r.text() : null).then(t => t === null ? PLOG : PL.parse(t)); } catch { PLOG = PLOG || null; }   // v33
   try { XSRC = await fetch('data/xsrc.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XSRC; } catch { XSRC = XSRC || null; }
   TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};

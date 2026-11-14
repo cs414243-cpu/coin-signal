@@ -151,3 +151,6 @@ details.adv .tabs{display:inline-flex;margin:4px 0 10px}
 .fc .trig:empty{display:none}
 details.fc-more{margin-top:6px;padding-top:6px}
 details.fc-more>summary{font-size:13px;font-weight:500}
+
+/* v33 成績單明細 */
+.pl-box table.bt{font-size:13px}.pl-box table.bt th,.pl-box table.bt td{padding:6px 5px}.pl-box .nw{white-space:nowrap}
