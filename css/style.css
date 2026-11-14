@@ -158,3 +158,8 @@ details.fc-more>summary{font-size:13px;font-weight:500}
 .pre p{margin:4px 0}
 .pre-chg{background:#3b3216;border-left-color:var(--warn)}
 .ladder table.ld td{white-space:nowrap}.ladder table.ld tr.hl td{background:#1d2a3a}.ladder{margin:8px 0}
+/* v41: 手機沒連上網路／用存下的資料 */
+.offline{margin:8px 0;padding:8px 10px;border-radius:6px;font-size:14px;line-height:1.5}
+.offline-ok{background:#1b2333;color:var(--fg,#e8ecf3);border-left:3px solid #7aa2ff}
+.offline-yellow{background:#3b3216;color:var(--warn);border-left:3px solid var(--warn);font-weight:700}
+.offline-red{background:#3d1a1f;color:var(--dn);border-left:3px solid var(--dn);font-weight:700}

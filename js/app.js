@@ -27,6 +27,7 @@ import * as TP from './trips.js';
 import * as UW from './underwater.js';
 import * as CSN from './costsens.js';
 import * as LD from './ladder.js';
+import * as OFL from './offline.js';   // v41
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -167,7 +168,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v40';
+const VERSION = 'v41';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -573,7 +574,7 @@ function relLine(c) {
   }
   const f = LIVE?.coins?.[c];
   const edge = f && RL.nearActionEdge(f.exposure) ? `<p class="small">建議比例 ${Math.round(f.exposure * 100)}% 剛好在「持有／減碼」的分界附近，小小的波動就可能改變動作。</p>` : '';
-  return `<p class="rel-line"><span class="rel-badge rel-${rel.level === 'pending' ? 'green' : rel.level}">● ${esc(rel.label)}</span>${why}</p>${flip}${edge}`;
+  return `<p class="rel-line"><span class="rel-badge rel-${rel.level === 'pending' ? 'green' : rel.level}">● ${esc(rel.label)}${OFL.badgeTag(I.live)}</span>${why}</p>${flip}${edge}`;
 }
 // v24: 台幣翻轉價＋別家交易所比對
 function xsrcHtml() {
@@ -854,13 +855,22 @@ function preHome() {
   const asof = LIVE.coins.BTC?.asof || LIVE.coins.ETH?.asof;
   return PC.homeLine(P, asof, !!TR.staleness(asof, Date.now()).level);
 }
+// v41: 手機沒連上網路（或網路太慢、App 用存下的資料）時，最上面說清楚是哪一天的資料、是不是已經舊了。這行取代 v9 的
+// 「預測資料已 N 天沒更新」（原因多半在手機這邊）；預測紀錄檢查沒通過（⛔）照樣顯示。連上網路後自動重新整理。
+let OFFINFO = { saved: false, at: null };
+function staleTop() {
+  const t = TR.topLine(LIVE, TRUST, Date.now(), DEV);
+  const o = OFL.homeLine({ info: OFFINFO, online: navigator.onLine, asof: LIVE?.coins?.BTC?.asof || LIVE?.coins?.ETH?.asof, now: Date.now() });
+  if (!o) return t;
+  return t.includes('預測紀錄檢查沒通過') ? t + o : o;
+}
 function forecastCard() {
   const any = LIVE.coins.BTC || LIVE.coins.ETH; if (!any) return '';
   return `<section class="card forecast" id="forecast">
     <div id="fc-change">${changeBanner()}</div>
     <h2>未來一週預測建議</h2>
     <p class="small muted">${closeMD(any.asof)} → ${closeMD(any.target_date)}（依每天早上 8 點的收盤價，每天更新一次）</p>
-    <div id="fc-stale-wrap">${TR.topLine(LIVE, TRUST, Date.now(), DEV)}</div>
+    <div id="fc-stale-wrap">${staleTop()}</div>
     <div id="fc-pre-wrap">${preHome()}</div>
     ${coinBlock('BTC')}${coinBlock('ETH')}
     <div id="jr-hint-wrap">${JR.homeHint(JR.load(localStorage), LIVE)}</div>
@@ -955,7 +965,7 @@ async function render(force = false) {
   } catch (e) {
     el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p></section>`; return;
   }
-  try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null); } catch { LIVE = LIVE || null; }
+  try { LIVE = await fetch('data/live.json', { cache: 'no-cache' }).then(r => { OFFINFO = OFL.savedInfo(r.headers); return r.ok ? r.json() : null; }); } catch { LIVE = LIVE || null; OFFINFO = { saved: true, at: null }; }   // v41
   try { EV = await fetch('data/events.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EV; } catch { EV = EV || null; }
   try { OUTC = await fetch('data/outcomes.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || OUTC; } catch { OUTC = OUTC || null; }
   try { WRISK = await fetch('data/weekrisk.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || WRISK; } catch { WRISK = WRISK || null; }
@@ -996,7 +1006,7 @@ async function devCheck() {
   DEV = undefined;
   const r = await TR.verifyOnDevice().catch(e => ({ ok: null, why: e.message || String(e) }));
   DEV = r;
-  const w = $('#fc-stale-wrap'); if (w && LIVE) w.innerHTML = TR.topLine(LIVE, TRUST, Date.now(), DEV);
+  const w = $('#fc-stale-wrap'); if (w && LIVE) w.innerHTML = staleTop();
   const c = $('#trust'); if (c) c.outerHTML = TR.trustCard(TRUST, LIVE, Date.now(), DEV);
 }
 
@@ -1082,6 +1092,8 @@ $('#content').addEventListener('click', e => {
   coin = b.dataset.coin; localStorage.setItem('coin', coin); renderAdv();
 });
 $('#refresh').addEventListener('click', () => render(true));
+// v41: 連上網路就自動更新（只在剛才是用手機存的資料時）
+window.addEventListener('online', () => { if (document.getElementById('fc-off')) render(true); });
 if ('serviceWorker' in navigator) {
   const hadController = !!navigator.serviceWorker.controller;
   let reloaded = false;
