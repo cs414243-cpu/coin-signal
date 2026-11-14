@@ -163,3 +163,4 @@ details.fc-more>summary{font-size:13px;font-weight:500}
 .offline-ok{background:#1b2333;color:var(--fg,#e8ecf3);border-left:3px solid #7aa2ff}
 .offline-yellow{background:#3b3216;color:var(--warn);border-left:3px solid var(--warn);font-weight:700}
 .offline-red{background:#3d1a1f;color:var(--dn);border-left:3px solid var(--dn);font-weight:700}
+.answers{margin:8px 0}.answers summary{cursor:pointer;color:#7aa2ff}.answers table.bt{font-size:13px}.answers table.bt th,.answers table.bt td{padding:6px 5px}.answers .ans-below td:last-child{color:var(--dn)}.answers .ans-above td:last-child{color:var(--warn)}
