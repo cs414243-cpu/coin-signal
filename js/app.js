@@ -22,6 +22,7 @@ import * as NM from './nextmove.js';
 import * as SN from './scorenoise.js';
 import * as PL from './paperlog.js';
 import * as PC from './preclose.js';
+import * as FD from './flipdrift.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -162,7 +163,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v34';
+const VERSION = 'v35';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -500,6 +501,8 @@ function updateOuts() {
   set('fc-next', nmHome);
   set('fc-trig-BTC', () => trigHome('BTC'));
   set('fc-trig-ETH', () => trigHome('ETH'));
+  set('fc-fd-BTC', () => fdDetail('BTC'));
+  set('fc-fd-ETH', () => fdDetail('ETH'));
   set('nm-wrap', () => FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now()));
   set('fc-money-ETH', () => moneyLine('ETH'));
   set('fc-rel-BTC', () => relLine('BTC'));
@@ -636,7 +639,7 @@ function intraOut() {
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
-let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null;
+let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
   const o = {};
@@ -689,7 +692,8 @@ function nextMoveHtml() {
   try {
     const st = nmCur(), plans = {}, rate = XS.maxRate(XSRC, PRICES);
     for (const c of ['BTC', 'ETH']) plans[c] = nmPlanHtml(c, st[c]);
-    return NM.nextMoveCard(NMOVE, st, plans, rate ? p => XS.twdOf(p, rate) : null);
+    const html = NM.nextMoveCard(NMOVE, st, plans, rate ? p => XS.twdOf(p, rate) : null), fd = FD.advPara(FDRIFT);   // v35
+    const h = html.trimEnd(); return fd && h.endsWith('</section>') ? h.slice(0, -'</section>'.length) + fd + '</section>' : html;
   } catch (e) { return `<section class="card" id="nextmove"><h2>這週可能要動手嗎</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; }
 }
 function spellsHtml() {
@@ -777,7 +781,15 @@ function closeLabel(f) {
 // everything else from v5–v28 is unchanged but folded into 「看 X 的細節」/「更多說明」 (progressive disclosure, same IDs).
 // v30: when the yellow 「接近翻轉」 box (relLine, < 1% from the flip price) is showing, it already says the same price and
 // action — so the plain trigger line is left empty instead of repeating it.
-function trigHome(c) { try { if (relInfo(c)?.near) return ''; return esc(NM.triggerLine(c, nmCur()[c])); } catch { return ''; } }
+function trigHome(c) { try { if (relInfo(c)?.near) return ''; const t = NM.triggerLine(c, nmCur()[c]); return t ? esc(t + FD.homeClause(fdCur(c))) : ''; } catch { return ''; } }
+// v35: 翻轉價會自己移動 — projection from the phone's closed daily bars only (the same closes that produced the card's price)
+function fdCur(c) {
+  try {
+    const s = nmCur()[c]; if (!s || s.src !== 'phone' || !CTX[c]?.live?.candles) return null;
+    return FD.drift(s, RL.closedBars(CTX[c].live.candles).map(k => k.c));
+  } catch { return null; }
+}
+const fdDetail = c => esc(FD.detailLine(c, fdCur(c), FDRIFT));
 function coinBlock(c) {
   const f = LIVE.coins[c]; if (!f) return '';
   const e = f.exposure, sharePct = Math.round(e * 100), inMkt = e >= 0.005;
@@ -793,6 +805,7 @@ function coinBlock(c) {
       <div id="fc-money-${c}"></div>
       <details class="fc-more" data-coin="${c}"><summary>看 ${c} 的細節（盤中價、一週價格範圍、過去紀錄）</summary>
       <div id="fc-live-${c}" class="live">${liveLine(c)}</div>
+      <p id="fc-fd-${c}" class="small fd">${fdDetail(c)}</p>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；${closeLabel(f)} ${usd(f.price_usd)}）</p>
       ${inMkt ? '' : bad}
@@ -920,6 +933,7 @@ async function render(force = false) {
   try { WRISK = await fetch('data/weekrisk.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || WRISK; } catch { WRISK = WRISK || null; }
   try { SPELLS = await fetch('data/spells.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || SPELLS; } catch { SPELLS = SPELLS || null; }
   try { NMOVE = await fetch('data/nextmove.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || NMOVE; } catch { NMOVE = NMOVE || null; }
+  try { FDRIFT = await fetch('data/flipdrift.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FDRIFT; } catch { FDRIFT = FDRIFT || null; }   // v35
   try { TBAND = await fetch('data/tradeband.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TBAND; } catch { TBAND = TBAND || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
