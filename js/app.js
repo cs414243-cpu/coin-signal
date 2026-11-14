@@ -25,6 +25,7 @@ import * as PC from './preclose.js';
 import * as FD from './flipdrift.js';
 import * as TP from './trips.js';
 import * as UW from './underwater.js';
+import * as CSN from './costsens.js';
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -165,7 +166,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v37';
+const VERSION = 'v38';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -472,6 +473,8 @@ function costOut(coin) {
   const got = fair ? amt * (1 - c.total) / fair : null;
   const snap = fmtTime(Date.parse(DEC.max.fetched_at_utc));
   const lose = 2 * (c.fees + c.slip);
+  let csLine = '';
+  try { const sc = DX.sellCost({ twd: amt, coin, route: S.route === 'twd' ? 'twd' : 'usdt', fee, maker: !!S.maker }, DEC.max.books); csLine = CSN.userLine(coin, CSN.perSide(c, sc), CSENS); } catch { csLine = ''; }   // v38
   return `<table class="bt cost"><tbody>
       <tr><th>USDT 溢價<div class="muted small">${premSrc}</div></th><td>${pctS(c.premium, 2)}</td><td>${ntd(amt * c.premium / (1 + c.premium))}</td></tr>
       <tr><th>價差＋滑價<div class="muted small">${S.maker ? '掛單不吃價差' : `MAX 掛單簿快照 ${snap}`}</div></th><td>${pctS(c.slip, 2)}</td><td>${ntd(amt * c.slip)}</td></tr>
@@ -481,6 +484,7 @@ function costOut(coin) {
     ${got ? `<p>實拿約 <strong>${got.toFixed(coin === 'BTC' ? 6 : 4)} ${coin}</strong>（以國際均價 ${ntd(fair)} 計，等於 ${coin} 要先漲 ${pctS(c.total / (1 - c.total), 2)} 才打平，還沒算賣出）。</p>` : ''}
     ${c.filled ? '' : '<p class="warn">金額超過快照裡的掛單深度，實際滑價會更大，建議分批或改用掛單。</p>'}
     <p class="small">另一條路徑（${S.route === 'twd' ? '經 USDT' : '直接台幣'}）合計 ${pctS(alt.total, 2)}${alt.total < c.total ? '，<strong>比較便宜</strong>' : ''}。賣回台幣時，如果溢價還在，溢價那部分大致拿得回來；一定拿不回來的是手續費和價差，買進加賣出約 ${pctS(lose, 2)}。</p>
+    ${csLine ? `<p class="small" id="cost-cs">${esc(csLine)} <a href="#costsens">看成本表</a></p>` : ''}
     <p class="small muted">溢價＝MAX 的 USDT/TWD 價比「央行匯率 × USDT 美元價」貴多少（C#23；2026 年 5%–95% 落在 ${pctS(y26.p5, 2)}～${pctS(y26.p95, 2)}）。直接用台幣買的市場，價格同樣含這個溢價。手續費來自 MAX 公開 API（${esc(DEC.max.vip_src === 'live' ? '與掛單簿同時抓取' : DEC.max.vip_src)}）。未含提領到自己錢包的手續費和銀行入金費用。MAX API 不允許手機直接讀取，所以價差用快照，不是即時。</p>`;
 }
 
@@ -641,7 +645,7 @@ function intraOut() {
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
-let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null;
+let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
   const o = {};
@@ -796,6 +800,8 @@ const fdDetail = c => esc(FD.detailLine(c, fdCur(c), FDRIFT));
 const tpDetail = c => { try { return esc(TP.detailLine(c, TRIPS)); } catch { return ''; } };
 // v37: 照建議的錢跌下來要多久回到新高（data/underwater.json）— past record, one plain line in the details
 const uwDetail = c => { try { return esc(UW.detailLine(c, UWATER)); } catch { return ''; } };
+// v38: 手續費高一點，照建議還划算嗎（data/costsens.json）— past record, advanced card + one line under 買幣成本
+function csHtml() { try { return CSN.costSensCard(CSENS, DEC?.max?.vip?.[0]); } catch (e) { return `<section class="card" id="costsens"><h2>手續費高一點還划算嗎</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function uwHtml() { try { return UW.underwaterCard(UWATER); } catch (e) { return `<section class="card" id="underwater"><h2>跌下來要多久回來</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function tripsHtml() { try { return TP.tripsCard(TRIPS); } catch (e) { return `<section class="card" id="trips"><h2>每一次進場的結果</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function coinBlock(c) {
@@ -946,6 +952,7 @@ async function render(force = false) {
   try { FDRIFT = await fetch('data/flipdrift.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FDRIFT; } catch { FDRIFT = FDRIFT || null; }   // v35
   try { TRIPS = await fetch('data/trips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRIPS; } catch { TRIPS = TRIPS || null; }   // v36
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
+  try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
   try { TBAND = await fetch('data/tradeband.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TBAND; } catch { TBAND = TBAND || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
   try { FLIPS = await fetch('data/flips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FLIPS; } catch { FLIPS = FLIPS || null; }
@@ -997,7 +1004,7 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#spells">空手要等多久</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#spells">空手要等多久</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
@@ -1019,6 +1026,7 @@ async function renderAdv(force = false) {
       ${eventsCard(EV)}
       ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
       ${costCard(coin)}
+      ${FR.withAsof(csHtml(), CSENS?.as_of ?? null, NOW)}
       ${researchCard()}
       <section class="card" id="signals"><details><summary>訊號細節：綜合預測與 7 個個別訊號</summary>
         ${FR.asofLine(FR.asofOf('backtest', BT), NOW)}
