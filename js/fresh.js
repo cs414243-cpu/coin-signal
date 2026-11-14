@@ -39,3 +39,13 @@ export function withAsof(html, asof, now) {
   const j = html.indexOf('>');
   return j >= 0 ? html.slice(0, j + 1) + line + html.slice(j + 1) : line + html;
 }
+
+// v44: the seven later cards (trips, underwater, costsens, ladder, flipdrift, scorenoise, bandnoise) are now re-run every
+// Monday by backtest/refresh_all.py (forecast/weekly.sh). Their in-text 「資料到」 uses the same date format and the same
+// > 10-day note as the card-top line, so a card whose Monday refresh failed says so in plain words.
+export const WEEKLY_NOTE = '每週一自動重算';
+export function asofInline(asof, now = Date.now()) {
+  const stale = isStale(asof, now);
+  return `<span class="bt-asof-inline" data-asof="${asof || ''}" data-stale="${stale ? 1 : 0}">資料到 ${ymdSlash(asof)}</span>` +
+    (stale ? `<span class="bt-stale">（超過 ${STALE_DAYS} 天沒更新，先當參考就好）</span>` : '');
+}

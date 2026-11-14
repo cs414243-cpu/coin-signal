@@ -5,6 +5,7 @@
 const p1 = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(1)}%`;
 const dn = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${Math.round(x)}`;
 // candle date D closes at D+1 08:00 Taipei
+import { asofInline, WEEKLY_NOTE } from './fresh.js';   // v44
 export const closeYMD = s => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 1); return `${d.getUTCFullYear()}/${d.getUTCMonth() + 1}/${d.getUTCDate()}`; };
 const down = x => p1(Math.abs(x)).replace('+', '');   // "12.8%" (always written with 少／跌)
 
@@ -43,6 +44,6 @@ export function underwaterCard(U) {
     <p class="small">「回落」＝錢從某天的最高點往下掉，到重新回到那個高點為止。照建議的錢 2018 年起最多少過 −${down(B.follow.max_dd)}（BTC）／−${down(E.follow.max_dd)}（ETH），一直抱著是 −${down(B.hold.max_dd)}／−${down(E.hold.max_dd)}；<strong>但照建議的錢一旦回落，回到新高常常要很久</strong>（跌超過 10% 的回落一般 ${dn(B.follow.days_median)} 天（BTC）／${dn(E.follow.days_median)} 天（ETH））——因為市場轉弱時它多半空手，要等走勢重新轉強才慢慢賺回來。</p>
     ${tbl}
     <p class="small">怎麼用：① 好幾個月沒創新高、甚至超過一年，對這個方法是常見的（BTC 照建議最久 ${dn(B.follow.days_max)} 天）；用「最近幾個月都沒賺」來決定放棄或換方法，正好會在最常見的低潮放棄。② 要判斷方法是不是壞了，看的是「跌得是不是比過去最多的還深」（BTC −${down(B.follow.max_dd)}、ETH −${down(E.follow.max_dd)}），不是「等了多久」。③ 首頁的虛擬投資是 2026/11/11 才開始的，這張卡是同一套算法從 2018 年回測，讓你知道正常的低潮長什麼樣。</p>
-    <p class="small muted">算法：<code>backtest/underwater.py</code> → <code>data/underwater.json</code>（Binance 已收完日K，資料到 ${U.as_of}；定義事先固定在程式說明）。每天照冠軍建議比例調整，買賣各扣 0.15%、買進再扣台幣溢價 0.27%（和虛擬投組相同）；一直抱著＝第一天買進後不動；沒投入的錢不算利息。只看每天早上 8 點的收盤。次數不多（BTC ${B.follow.n_big}、ETH ${E.follow.n_big} 次），「一般幾天」誤差很大；2022 年以前是這套規則設定時看過的期間。這是過去紀錄，不是預測。</p>
+    <p class="small muted">算法：<code>backtest/underwater.py</code> → <code>data/underwater.json</code>（Binance 已收完日K，${asofInline(U.as_of)}，${WEEKLY_NOTE}；定義事先固定在程式說明）。每天照冠軍建議比例調整，買賣各扣 0.15%、買進再扣台幣溢價 0.27%（和虛擬投組相同）；一直抱著＝第一天買進後不動；沒投入的錢不算利息。只看每天早上 8 點的收盤。次數不多（BTC ${B.follow.n_big}、ETH ${E.follow.n_big} 次），「一般幾天」誤差很大；2022 年以前是這套規則設定時看過的期間。這是過去紀錄，不是預測。</p>
   </section>`;
 }

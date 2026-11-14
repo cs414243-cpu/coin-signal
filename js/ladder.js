@@ -3,6 +3,7 @@
 // with one hypothetical next close appended. Same definitions as backtest/price_ladder.py (pre-registered); history of
 // one-day moves from data/ladder.json (Binance closed daily bars, 2023→). Not a forecast of direction, not a new signal.
 import { recoRows, actionFor, ACTION_ZH, ruleAfter, pastLine } from './flips.js';
+import { asofInline, WEEKLY_NOTE } from './fresh.js';   // v44
 
 export const MOVES = [0.10, 0.05, 0.02, 0, -0.02, -0.05, -0.10];   // = backtest/price_ladder.py MOVES (shown high → low)
 export const FLIP_RANGE = 0.15;      // also show the exact flip price of a line when it is within ±15 % of the last close
@@ -64,5 +65,5 @@ export function detailBlock(c, Lx, D) {
   return `<div class="ladder" id="ld-${c}" data-date="${esc(Lx.date)}"><p class="small"><strong>明天收盤如果是…，建議會變成多少</strong>（先想好「如果…就…」，到時不用臨時判斷）</p>
     <div class="scroll"><table class="bt ld">${head}${body}</table></div>
     <p class="small">${esc(notes.join(''))}</p>
-    <p class="small muted">只算下一根收盤（${closeMD(Lx.date)} 早上 8 點），用手機抓到的已收完日K、同一套規則算；之後幾天的收盤會讓這張表跟著變。這不是預測會漲會跌，真的變了以每天 08:20 的正式更新為準。${D?.as_of ? `「漲跌這麼多」＝2023 年起每天收盤比前一天的變動（資料到 ${esc(D.as_of)}）。` : ''}</p></div>`;
+    <p class="small muted">只算下一根收盤（${closeMD(Lx.date)} 早上 8 點），用手機抓到的已收完日K、同一套規則算；之後幾天的收盤會讓這張表跟著變。這不是預測會漲會跌，真的變了以每天 08:20 的正式更新為準。${D?.as_of ? `「漲跌這麼多」＝2023 年起每天收盤比前一天的變動（${asofInline(D.as_of)}，${WEEKLY_NOTE}）。` : ''}</p></div>`;
 }

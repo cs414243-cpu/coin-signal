@@ -1,5 +1,6 @@
 // v32: 成績單現在的差距算不算數 — reads data/scorenoise.json (backtest/score_noise.py: champion trend_vt@1 walk-forward,
 // fresh virtual NT$1M portfolios over windows of exactly N days, costs as the live scorecard). Descriptive only.
+import { asofInline, WEEKLY_NOTE } from './fresh.js';   // v44
 const p0 = x => `${Math.round(x * 100)}%`;
 const pp = x => `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x).toFixed(0)}`;
 
@@ -45,7 +46,7 @@ export function advBlock(SN) {
   const rows = SHOW.map(([d, lab]) => { const r = SN.horizons.find(x => x.days === d); if (!r) return '';
     const O = r.oos, A = r.all, f = x => x == null ? '—' : p0(x);
     return `<tr><th>${lab}</th><td>${f(O?.win)}<div class="muted small">${f(A?.win)}</div></td><td>${f(O?.win_down)}</td><td>${f(O?.win_up)}</td><td>${O ? `${pp(O.diff_p10)}～${pp(O.diff_p90)}` : '—'}</td></tr>`; }).join('');
-  return `<div id="sn-adv"><p class="small"><strong>成績單的差距算不算數</strong>：用冠軍逐日重做的建議（${SN.oos_start.slice(0, 4)} 年起，到 ${SN.as_of}），從每一天開始各開一個新的虛擬 NT$100 萬，照建議 vs 一直抱著，過了同樣天數誰比較多（已扣手續費和台幣買 USDT 溢價，和成績單同一套算法）。</p>
+  return `<div id="sn-adv"><p class="small"><strong>成績單的差距算不算數</strong>：用冠軍逐日重做的建議（${SN.oos_start.slice(0, 4)} 年起，${asofInline(SN.as_of)}，${WEEKLY_NOTE}），從每一天開始各開一個新的虛擬 NT$100 萬，照建議 vs 一直抱著，過了同樣天數誰比較多（已扣手續費和台幣買 USDT 溢價，和成績單同一套算法）。</p>
     <div class="scroll"><table class="bt"><thead><tr><th>期間</th><th>照建議贏的比例<div class="muted small">小字＝${SN.start.slice(0, 4)} 年起</div></th><th>幣價跌時</th><th>幣價漲時</th><th>差距一般範圍（百分點）</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="small muted">「一般範圍」是中間 80% 的期間。期間逐日滑動、彼此重疊，不是獨立的試驗；這只是描述過去，不是新訊號。照建議主要是在跌的時候少虧、漲的時候少賺，所以短期誰贏幾乎由漲跌決定；要看出它值不值得，至少要等系統規定的 8 週實盤紀錄。算法：<code>backtest/score_noise.py</code> → <code>data/scorenoise.json</code>。</p></div>`;
 }

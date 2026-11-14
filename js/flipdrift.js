@@ -3,6 +3,7 @@
 // set today can be wrong a week later. Projection = "if every close stays at the last close" (flat closes), same formula
 // as backtest/flip_drift.py; history from data/flipdrift.json (Binance closed daily bars, 2018→, OOS = 2023→).
 // Not a signal, not a forecast of direction; the 08:20 daily forecast stays authoritative.
+import { asofInline, WEEKLY_NOTE } from './fresh.js';   // v44
 export const K = 7;                 // = backtest/flip_drift.py K
 export const HOME_MIN = 0.02;       // show the short home clause only when the projected one-week move is >= 2% of price
 const usd0 = x => Number.isFinite(x) ? x.toLocaleString('en-US', { maximumFractionDigits: x > 1000 ? 0 : 2 }) : '—';
@@ -43,5 +44,5 @@ export function advPara(D) {
   return `<div id="fd-adv"><h3 class="sub">翻轉價會自己移動</h3>
     <p class="small">翻轉價是用最近 49／199 天的收盤算的，每天早上舊的一天移出、新的一天加入，所以就算價格不動，它也會變。2023 年起兩個幣 <strong>${o.n} 次</strong>趨勢翻轉中，<strong>${pc0(o.not_reached)}</strong>（${o.k_not} 次）的翻轉收盤其實沒到一週前看到的翻轉價——是翻轉價移過來；50 日線 ${pc0(o.l50?.not_reached)}（${o.l50?.n} 次）、200 日線 ${pc0(o.l200?.not_reached)}（${o.l200?.n} 次，200 日線移得慢）。2022 年以前：${pc0(F.is.not_reached)}（${F.is.n} 次）。</p>
     <p class="small">「收盤都不動」的估法：一週後的翻轉價一般差 ${p1(p.med_err_flat)}（10 次有 9 次在 ${p1(p.p90_err_flat)} 以內），當成固定不動則一般差 ${p1(p.med_err_naive)}（${p1(p.p90_err_naive)}）；${pc0(p.flat_closer)} 的日子比較準（${p.n} 天）。一週內翻轉價移動 2% 以上的日子占 ${pc0(p.drift_ge_2pct)}，這時首頁會多一句提醒。</p>
-    <p class="small muted">算法：<code>backtest/flip_drift.py</code> → <code>data/flipdrift.json</code>（Binance 已收完日K，資料到 ${D.as_of}；定義事先固定在程式說明）。只用當天以前的收盤；「一週前看到的」＝翻轉前第 7 根收盤後算的價格，且這 7 天內同一條線沒穿過。它只說翻轉價會怎麼移，不說價格會漲會跌；真的變了以 08:20 的每日預測為準。</p></div>`;
+    <p class="small muted">算法：<code>backtest/flip_drift.py</code> → <code>data/flipdrift.json</code>（Binance 已收完日K，${asofInline(D.as_of)}，${WEEKLY_NOTE}；定義事先固定在程式說明）。只用當天以前的收盤；「一週前看到的」＝翻轉前第 7 根收盤後算的價格，且這 7 天內同一條線沒穿過。它只說翻轉價會怎麼移，不說價格會漲會跌；真的變了以 08:20 的每日預測為準。</p></div>`;
 }

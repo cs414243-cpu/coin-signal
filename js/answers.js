@@ -3,6 +3,7 @@
 // verified separately by trust.js). Backtest context from data/bandnoise.json (backtest/band_noise.py: frozen champion
 // walk-forward, how often the range really held and how much that share jumps around over only K days).
 // Pure functions; no DOM writes. Research only, not investment advice.
+import { asofInline, WEEKLY_NOTE } from './fresh.js';   // v44
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 /** candle date D closes at D+1 08:00 Taipei → "M/D" of that morning (same as trust.js closeMD) */
 export const closeMD = s => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 1); return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; };
@@ -76,6 +77,6 @@ export function block(rows, BN) {
     ${head}
     <div class="scroll"><table class="bt"><thead><tr><th>哪天說的</th><th>說一週後大概在（美元）</th><th>一週後實際</th></tr></thead><tbody>${show.map(rowHtml).join('')}</tbody></table></div>
     ${more}
-    <p class="small muted">${bt}範圍只描述「價格大概會動多大」，不是買賣建議；它包住價格也不代表建議賺錢。資料直接讀這支手機下載的公開預測紀錄（記錄後不能修改）；回測算法 <code>backtest/band_noise.py</code> → <code>data/bandnoise.json</code>${BN?.as_of ? `（資料到 ${esc(BN.as_of)}）` : ''}。</p>
+    <p class="small muted">${bt}範圍只描述「價格大概會動多大」，不是買賣建議；它包住價格也不代表建議賺錢。資料直接讀這支手機下載的公開預測紀錄（記錄後不能修改）；回測算法 <code>backtest/band_noise.py</code> → <code>data/bandnoise.json</code>${BN?.as_of ? `（${asofInline(BN.as_of)}，${WEEKLY_NOTE}）` : ''}。</p>
   </details>`;
 }

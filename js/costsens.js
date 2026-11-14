@@ -2,6 +2,7 @@
 // History: backtest/cost_sens.py → data/costsens.json (champion trend_vt@1 on closed Binance daily bars, the same rule
 // re-run with every per-side cost from 0% to 2%; NT$ premium 0.27% on buys fixed; hold = buy once, pays the cost once).
 // Descriptive past record only (not a signal, not a forecast).
+import { asofInline, WEEKLY_NOTE } from './fresh.js';   // v44
 const pc = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const fc = f => `${+(f * 100).toFixed(2)}%`;   // 0.0015 → "0.15%", 0.005 → "0.5%", 0.01 → "1%"
 const pp = x => x === null || !Number.isFinite(x) ? '—' : `${(x * 100).toFixed(1)} 個百分點`;
@@ -60,6 +61,6 @@ export function costSensCard(CS, vip0) {
     ${tbl}
     <p class="small">兩個幣各一半：每次成本到${be(D.be_cagr)}（差一點不用動：${be(G.be_cagr)}）以上，照建議一年平均就不再比一直抱著多；但最多跌還是淺很多。<strong>只放 BTC 不一樣</strong>：2024 年起一直抱著 BTC 一年平均 ${pc(bt('hold_cagr'))}，照建議（差一點不用動、成本 0.15%）${pc(bt('cagr'))}，本來就差不多（每天照建議調更低：${pc(at(BD.table, ASSUMED, 'cagr'))}）——照建議的好處只剩跌得少（最多 ${pc(bt('maxdd'), 0)} vs ${pc(bt('hold_maxdd'), 0)}），成本越高這個代價越大。ETH 同期一直抱著 ${pc(et('hold_cagr'))}，照建議 ${pc(et('cagr'))}，成本到 1% 也還是照建議比較好。</p>
     <p class="small">怎麼用：① 在下面「台幣買幣成本」填你的金額、手續費等級，算出來的成本下面會直接寫「你的成本在回測裡是什麼結果」。② ${taker ? `MAX 最低等級吃單每筆 ${pc(taker, 2)}；` : ''}從台幣經 USDT 再買幣是兩筆，光手續費就${taker ? ` ${pc(2 * taker, 2)}` : '是兩倍'}，比回測假設高${maker ? `；直接台幣市場只有一筆、或用掛單（${pc(maker, 2)}）會便宜，但台幣市場價差可能比較大，兩條路都算一下再選` : ''}。③ 照首頁「差一點不用動」，差不到 20 個百分點就不調，可以少買賣、省成本；建議變成「先不要放」時還是要當天賣。</p>
-    <p class="small muted">算法：<code>backtest/cost_sens.py</code> → <code>data/costsens.json</code>（Binance 已收完日K，${CS.first_bar}～${CS.as_of}；定義事先固定在程式說明）。同一套冠軍規則，每次買賣成本從 0% 到 2% 每 0.01% 重算一次，買進溢價固定 0.27%；一直抱著＝第一天買進付一次成本、之後不動；沒投入的錢不算利息；沒算稅、提領費、交易所倒閉風險。2024 年起是規則定好之後才有的資料；2018 年起（設定規則時看過的期間）兩幣各半的打平成本是${be(full?.daily?.mix?.be_cagr)}（差一點不用動：${be(full?.gap20?.mix?.be_cagr)}）。「一年平均」是複利年化。這是過去紀錄，不是保證。</p>
+    <p class="small muted">算法：<code>backtest/cost_sens.py</code> → <code>data/costsens.json</code>（Binance 已收完日K，${CS.first_bar} 起，${asofInline(CS.as_of)}，${WEEKLY_NOTE}；定義事先固定在程式說明）。同一套冠軍規則，每次買賣成本從 0% 到 2% 每 0.01% 重算一次，買進溢價固定 0.27%；一直抱著＝第一天買進付一次成本、之後不動；沒投入的錢不算利息；沒算稅、提領費、交易所倒閉風險。2024 年起是規則定好之後才有的資料；2018 年起（設定規則時看過的期間）兩幣各半的打平成本是${be(full?.daily?.mix?.be_cagr)}（差一點不用動：${be(full?.gap20?.mix?.be_cagr)}）。「一年平均」是複利年化。這是過去紀錄，不是保證。</p>
   </section>`;
 }
