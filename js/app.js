@@ -33,6 +33,7 @@ import * as MW from './moveweeks.js';   // v45
 import * as DB from './dipbuy.js';   // v46
 import * as FPM from './fullpath.js';   // v47
 import * as CYM from './cashyield.js';   // v48
+import * as SAM from './startany.js';   // v49
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -173,7 +174,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v48';
+const VERSION = 'v49';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -524,6 +525,9 @@ function updateOuts() {
   set('fc-cy-BTC', () => cyDetail('BTC'));
   set('fc-cy-ETH', () => cyDetail('ETH'));
   set('cy-wrap', () => FR.withAsof(cyHtml(), CYIELD?.as_of ?? null, Date.now()));
+  set('fc-sa-BTC', () => saDetail('BTC'));
+  set('fc-sa-ETH', () => saDetail('ETH'));
+  set('sa-wrap', () => FR.withAsof(saHtml(), STARTA?.as_of ?? null, Date.now()));
   set('nm-wrap', () => FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now()));
   set('fc-money-ETH', () => moneyLine('ETH'));
   set('fc-rel-BTC', () => relLine('BTC'));
@@ -664,6 +668,7 @@ let MOVEW = null;   // v45
 let DIPB = null;   // v46
 let FPATH = null;   // v47
 let CYIELD = null;   // v48
+let STARTA = null;   // v49
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -859,6 +864,9 @@ function fpDetail(c) {
 }
 // v48: 空手的錢放銀行活儲（data/cashyield.json）
 const cyDetail = c => { try { return esc(CYM.detailLine(c, CYIELD, LIVE)); } catch { return ''; } };
+// v49: 如果今天才開始照做（data/startany.json）
+const saDetail = c => { try { return esc(SAM.detailLine(c, STARTA, LIVE)); } catch { return ''; } };
+function saHtml() { try { return SAM.startAnyCard(STARTA, LIVE); } catch (e) { return `<section class="card" id="startany"><h2>如果今天才開始照做，3 個月／1 年後會怎樣</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function cyHtml() { try { return CYM.cashYieldCard(CYIELD, LIVE); } catch (e) { return `<section class="card" id="cashyield"><h2>空手的錢放銀行活儲，會多多少</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function fpHtml() { try { return FPM.fullPathCard(FPATH, fpCur()); } catch (e) { return `<section class="card" id="fullpath"><h2>要放回最多，要漲到哪裡</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function tripsHtml() { try { return TP.tripsCard(TRIPS); } catch (e) { return `<section class="card" id="trips"><h2>每一次進場的結果</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -883,6 +891,7 @@ function coinBlock(c) {
       <p id="fc-tp-${c}" class="small tp">${tpDetail(c)}</p>
       <p id="fc-uw-${c}" class="small uw">${uwDetail(c)}</p>
       <p id="fc-cy-${c}" class="small cy">${cyDetail(c)}</p>
+      <p id="fc-sa-${c}" class="small sa">${saDetail(c)}</p>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；${closeLabel(f)} ${usd(f.price_usd)}）</p>
       ${inMkt ? '' : bad}
@@ -1025,6 +1034,7 @@ async function render(force = false) {
   try { MOVEW = await fetch('data/moveweeks.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || MOVEW; } catch { MOVEW = MOVEW || null; }   // v45
   try { DIPB = await fetch('data/dipbuy.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || DIPB; } catch { DIPB = DIPB || null; }   // v46
   try { CYIELD = await fetch('data/cashyield.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CYIELD; } catch { CYIELD = CYIELD || null; }   // v48
+  try { STARTA = await fetch('data/startany.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || STARTA; } catch { STARTA = STARTA || null; }   // v49
   try { FPATH = await fetch('data/fullpath.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FPATH; } catch { FPATH = FPATH || null; }   // v47
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
@@ -1085,7 +1095,7 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#startany">今天才開始照做</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
@@ -1094,6 +1104,7 @@ async function renderAdv(force = false) {
       <div id="fp-wrap">${FR.withAsof(fpHtml(), FPATH?.as_of ?? null, NOW)}</div>
       ${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, NOW)}
       <div id="cy-wrap">${FR.withAsof(cyHtml(), CYIELD?.as_of ?? null, NOW)}</div>
+      <div id="sa-wrap">${FR.withAsof(saHtml(), STARTA?.as_of ?? null, NOW)}</div>
       ${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, NOW)}
       ${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, NOW)}
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
