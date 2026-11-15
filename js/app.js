@@ -29,6 +29,7 @@ import * as CSN from './costsens.js';
 import * as LD from './ladder.js';
 import * as OFL from './offline.js';   // v41
 import * as AN from './answers.js';   // v42
+import * as MW from './moveweeks.js';   // v45
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -169,7 +170,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v44';
+const VERSION = 'v45';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -650,6 +651,7 @@ function intraOut() {
 }
 
 // ======================= v7: 建議變更提醒＋最近建議變化 =======================
+let MOVEW = null;   // v45
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -816,6 +818,13 @@ const uwDetail = c => { try { return esc(UW.detailLine(c, UWATER)); } catch { re
 // v38: 手續費高一點，照建議還划算嗎（data/costsens.json）— past record, advanced card + one line under 買幣成本
 function csHtml() { try { return CSN.costSensCard(CSENS, DEC?.max?.vip?.[0]); } catch (e) { return `<section class="card" id="costsens"><h2>手續費高一點還划算嗎</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function uwHtml() { try { return UW.underwaterCard(UWATER); } catch (e) { return `<section class="card" id="underwater"><h2>跌下來要多久回來</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
+/** v45: latest 7 days per coin from the phone's closed bars (same frozen rule as flips.recoRows); null → file's own week. */
+function moveRecaps() {
+  const out = {};
+  for (const c of ['BTC', 'ETH']) { try { out[c] = CTX[c]?.live?.candles ? MW.weekRecap(FL.recoRows(RL.closedBars(CTX[c].live.candles))) : null; } catch { out[c] = null; } }
+  return out;
+}
+function moveHtml() { try { return MW.moveCard(MOVEW, moveRecaps()); } catch (e) { return `<section class="card" id="moveweeks"><h2>大跌／大漲的那一週：照建議 vs 一直抱著</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function tripsHtml() { try { return TP.tripsCard(TRIPS); } catch (e) { return `<section class="card" id="trips"><h2>每一次進場的結果</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function coinBlock(c) {
   const f = LIVE.coins[c]; if (!f) return '';
@@ -975,6 +984,7 @@ async function render(force = false) {
   try { NMOVE = await fetch('data/nextmove.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || NMOVE; } catch { NMOVE = NMOVE || null; }
   try { FDRIFT = await fetch('data/flipdrift.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FDRIFT; } catch { FDRIFT = FDRIFT || null; }   // v35
   try { TRIPS = await fetch('data/trips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRIPS; } catch { TRIPS = TRIPS || null; }   // v36
+  try { MOVEW = await fetch('data/moveweeks.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || MOVEW; } catch { MOVEW = MOVEW || null; }   // v45
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
   try { LADDER = await fetch('data/ladder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LADDER; } catch { LADDER = LADDER || null; }   // v39
@@ -1034,7 +1044,7 @@ async function renderAdv(force = false) {
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#spells">空手要等多久</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
+      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#spells">空手要等多久</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#moveweeks">大跌週照建議</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
@@ -1053,6 +1063,7 @@ async function renderAdv(force = false) {
       ${FR.withAsof(planCard(), FR.asofOf('dca', DCA), NOW)}
       ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
       ${TS.testedCard(TESTED)}
+      ${FR.withAsof(moveHtml(), MOVEW?.as_of ?? null, NOW)}
       ${eventsCard(EV)}
       ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
       ${costCard(coin)}
