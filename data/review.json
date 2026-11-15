@@ -1,0 +1,217 @@
+{
+ "schema": 1,
+ "generated_at": "2026-11-16T00:46:27+08:00",
+ "review": {
+  "date": "2026-11-11",
+  "file": "review-2026-11-11.md",
+  "dry_run": false,
+  "champion": "trend_vt@1",
+  "k": 4,
+  "threshold": 0.975,
+  "events_text": [
+   "無（冠軍不變）"
+  ],
+  "candidates": [
+   {
+    "model": "baseline@1",
+    "promote": false,
+    "checks": [
+     {
+      "name": "live_8_weeks",
+      "passed": false,
+      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+     },
+     {
+      "name": "live_brier_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_sharpe_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_dd",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "wf_not_worse",
+      "passed": false,
+      "detail": "回測 Brier 0.2513 vs 0.2522；夏普 0.29 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+     },
+     {
+      "name": "wf_dd",
+      "passed": false,
+      "detail": "回測最大跌幅 -0.689 vs -0.184（最多差 10%）"
+     }
+    ]
+   },
+   {
+    "model": "knn@1",
+    "promote": false,
+    "checks": [
+     {
+      "name": "live_8_weeks",
+      "passed": false,
+      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+     },
+     {
+      "name": "live_brier_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_sharpe_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_dd",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "wf_not_worse",
+      "passed": false,
+      "detail": "回測 Brier 0.2568 vs 0.2522；夏普 -0.14 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+     },
+     {
+      "name": "wf_dd",
+      "passed": false,
+      "detail": "回測最大跌幅 -0.636 vs -0.184（最多差 10%）"
+     }
+    ]
+   },
+   {
+    "model": "tsmom@1",
+    "promote": false,
+    "checks": [
+     {
+      "name": "live_8_weeks",
+      "passed": false,
+      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+     },
+     {
+      "name": "live_brier_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_sharpe_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_dd",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "wf_not_worse",
+      "passed": false,
+      "detail": "回測 Brier 0.2527 vs 0.2522；夏普 0.43 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+     },
+     {
+      "name": "wf_dd",
+      "passed": true,
+      "detail": "回測最大跌幅 -0.242 vs -0.184（最多差 10%）"
+     }
+    ]
+   },
+   {
+    "model": "logit@1",
+    "promote": false,
+    "checks": [
+     {
+      "name": "live_8_weeks",
+      "passed": false,
+      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+     },
+     {
+      "name": "live_brier_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_sharpe_better",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "live_dd",
+      "passed": false,
+      "detail": "還沒有可評分的實盤預測"
+     },
+     {
+      "name": "wf_not_worse",
+      "passed": false,
+      "detail": "回測 Brier 0.2519 vs 0.2522；夏普 0.12 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+     },
+     {
+      "name": "wf_dd",
+      "passed": true,
+      "detail": "回測最大跌幅 -0.268 vs -0.184（最多差 10%）"
+     }
+    ]
+   }
+  ],
+  "written_at": "2026-11-11T12:38+08:00"
+ },
+ "champion_now": "trend_vt@1",
+ "champion_name": "趨勢＋波動調整（v2/v3 的規則）",
+ "champion_since": null,
+ "names": {
+  "baseline@1": "基準：永遠猜平常的上漲率、一直全額持有",
+  "trend_vt@1": "趨勢＋波動調整（v2/v3 的規則）",
+  "knn@1": "相似日子（kNN，v1 綜合預測）",
+  "tsmom@1": "動能混合（30／90／180 天）",
+  "logit@1": "邏輯迴歸（均線距離、30 天動能、波動）"
+ },
+ "status": {
+  "baseline@1": "reference",
+  "trend_vt@1": "champion",
+  "knn@1": "challenger",
+  "tsmom@1": "challenger",
+  "logit@1": "challenger"
+ },
+ "events": [],
+ "rule": {
+  "min_live_days": 56,
+  "min_weeks": 8,
+  "live_dd_margin": 0.05,
+  "wf_dd_margin": 0.1
+ },
+ "live": {
+  "first_asof": "2026-11-10",
+  "days_logged": 5,
+  "scored": {
+   "baseline@1": {
+    "BTC": 0,
+    "ETH": 0
+   },
+   "trend_vt@1": {
+    "BTC": 0,
+    "ETH": 0
+   },
+   "knn@1": {
+    "BTC": 0,
+    "ETH": 0
+   },
+   "tsmom@1": {
+    "BTC": 0,
+    "ETH": 0
+   },
+   "logit@1": {
+    "BTC": 0,
+    "ETH": 0
+   }
+  },
+  "scored_total": 0,
+  "last_needed_asof": "2027-01-04",
+  "scored_by": "2027-01-11",
+  "earliest_change_review": "2027-01-18"
+ },
+ "next_review": "2026-11-16"
+}

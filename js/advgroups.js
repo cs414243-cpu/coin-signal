@@ -13,7 +13,7 @@ export const GROUPS = [
   { id: 'flat', q: '現在空手：要等多久、錢放哪、大跌要不要買？', cards: ['spells', 'cashyield', 'usdtpark', 'startany', 'moveweeks', 'dipbuy', 'events'] },
   { id: 'record', q: '照建議做，過去賺多少、虧多少？', cards: ['outcomes', 'weekrisk', 'tradeband', 'trips', 'underwater'] },
   { id: 'money', q: '我的錢：紀錄、部位、定期定額、買幣成本', cards: ['journal', 'risk', 'plan', 'cost', 'costsens', 'lev'] },
-  { id: 'trust', q: '這些數字可信嗎？資料、紀錄、模型、研究', cards: ['data', 'trust', 'pupcal', 'models', 'tested', 'notes', 'signals'] },
+  { id: 'trust', q: '這些數字可信嗎？資料、紀錄、模型、研究', cards: ['data', 'trust', 'pupcal', 'review', 'models', 'tested', 'notes', 'signals'] },
 ];
 
 export const groupOf = cardId => GROUPS.find(g => g.cards.includes(cardId))?.id ?? null;

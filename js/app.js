@@ -37,6 +37,7 @@ import * as SAM from './startany.js';   // v49
 import * as AG from './advgroups.js';   // v50
 import * as PCM from './pupcal.js';   // v51
 import * as UPM from './usdtpark.js';   // v52
+import * as RVM from './review.js';   // v53
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -177,7 +178,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v52';
+const VERSION = 'v53';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -680,6 +681,7 @@ let CYIELD = null;   // v48
 let STARTA = null;   // v49
 let PUPC = null;   // v51
 let USDTP = null;   // v52
+let REVIEW = null;   // v53
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -883,6 +885,8 @@ function pcHtml() { try { return PCM.pupCalCard(PUPC, ANS ? PCM.liveBuckets(ANS)
 function saHtml() { try { return SAM.startAnyCard(STARTA, LIVE); } catch (e) { return `<section class="card" id="startany"><h2>如果今天才開始照做，3 個月／1 年後會怎樣</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v52: 空手的錢留 USDT 還是換回台幣（data/usdtpark.json）
 const upDetail = c => { try { return esc(UPM.detailLine(c, USDTP, LIVE)); } catch { return ''; } };
+// v53: 每週檢討：這週有沒有換預測方法？（data/review.json ← forecast/review_export.py ← reports/review-*.md）
+function rvHtml() { try { return RVM.reviewCard(REVIEW, Date.now()); } catch (e) { return `<section class="card" id="review"><h2>每週檢討：這週有沒有換預測方法？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function upHtml() { try { return UPM.usdtParkCard(USDTP, LIVE); } catch (e) { return `<section class="card" id="usdtpark"><h2>空手的錢：留在 USDT，還是換回台幣？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function cyHtml() { try { return CYM.cashYieldCard(CYIELD, LIVE); } catch (e) { return `<section class="card" id="cashyield"><h2>空手的錢放銀行活儲，會多多少</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function fpHtml() { try { return FPM.fullPathCard(FPATH, fpCur()); } catch (e) { return `<section class="card" id="fullpath"><h2>要放回最多，要漲到哪裡</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -1068,6 +1072,7 @@ async function render(force = false) {
   try { CYIELD = await fetch('data/cashyield.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CYIELD; } catch { CYIELD = CYIELD || null; }   // v48
   try { STARTA = await fetch('data/startany.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || STARTA; } catch { STARTA = STARTA || null; }   // v49
   try { USDTP = await fetch('data/usdtpark.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || USDTP; } catch { USDTP = USDTP || null; }   // v52
+  try { REVIEW = await fetch('data/review.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || REVIEW; } catch { REVIEW = REVIEW || null; }   // v53
   try { PUPC = await fetch('data/pupcal.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PUPC; } catch { PUPC = PUPC || null; }   // v51
   try { FPATH = await fetch('data/fullpath.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FPATH; } catch { FPATH = FPATH || null; }   // v47
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
@@ -1135,7 +1140,7 @@ async function renderAdv(force = false) {
         <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a></div>
         <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a></div>
-        <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
+        <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#review">每週檢討換了沒</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
       ${AG.wrap('act', `
       ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
       <div id="nm-wrap">${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, NOW)}</div>
@@ -1168,6 +1173,7 @@ async function renderAdv(force = false) {
       ${relCard()}
       ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
       <div id="pc-wrap">${FR.withAsof(pcHtml(), PUPC?.as_of ?? null, NOW)}</div>
+      ${rvHtml()}
       ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
       ${TS.testedCard(TESTED)}
       ${researchCard()}
