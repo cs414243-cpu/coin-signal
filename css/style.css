@@ -164,3 +164,16 @@ details.fc-more>summary{font-size:13px;font-weight:500}
 .offline-yellow{background:#3b3216;color:var(--warn);border-left:3px solid var(--warn);font-weight:700}
 .offline-red{background:#3d1a1f;color:var(--dn);border-left:3px solid var(--dn);font-weight:700}
 .answers{margin:8px 0}.answers summary{cursor:pointer;color:#7aa2ff}.answers table.bt{font-size:13px}.answers table.bt th,.answers table.bt td{padding:6px 5px}.answers .ans-below td:last-child{color:var(--dn)}.answers .ans-above td:last-child{color:var(--warn)}
+/* ---- v50 進階問題索引＋群組 ---- */
+.jump.ix{display:block;overflow:visible;padding:2px 0 6px}
+.ix-head{margin:0 0 6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ix-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.ix-q{flex-basis:100%;font-size:13px;font-weight:600;color:var(--mut)}
+.link-btn{background:none;border:0;color:var(--blue);font-size:13px;padding:4px 0;cursor:pointer;flex:none}
+details.adv-grp{border:1px solid var(--line);border-radius:12px;margin:0 0 10px;padding:0 10px;background:rgba(255,255,255,.015)}
+details.adv-grp>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px;font-size:15px;color:var(--fg)}
+details.adv-grp>summary::-webkit-details-marker{display:none}
+details.adv-grp>summary .grp-n{flex:none;font-size:12.5px;font-weight:500;color:var(--blue)}
+details.adv-grp>summary .grp-n::after{content:" ▾"}
+details.adv-grp[open]>summary .grp-n::after{content:" ▴"}
+details.adv-grp[open]>summary{border-bottom:1px solid var(--line);margin-bottom:8px}

@@ -34,6 +34,7 @@ import * as DB from './dipbuy.js';   // v46
 import * as FPM from './fullpath.js';   // v47
 import * as CYM from './cashyield.js';   // v48
 import * as SAM from './startany.js';   // v49
+import * as AG from './advgroups.js';   // v50
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -174,7 +175,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v49';
+const VERSION = 'v50';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -1008,10 +1009,23 @@ function journalSave(c) {
   refreshJournal();
   const m = document.querySelector(`.jr-msg[data-coin="${c}"]`); if (m) { m.textContent = '已記下。'; m.className = 'jr-msg small ok-inline'; }
 }
+// v50: open the 進階 group(s) around a card (and remember it) before jumping to it
+function openGroupsAround(target) {
+  if (!target) return;
+  const opened = AG.openAround(target); if (!opened.length && !document.getElementById('adv')?.open) return;
+  if (opened.length) { const s = AG.loadOpen(localStorage); opened.forEach(id => s.add(id)); AG.saveOpen(localStorage, s); }
+  if (document.getElementById('adv')?.open) localStorage.setItem('adv-open', '1');
+  syncAllBtn();
+}
+function syncAllBtn() {
+  const b = document.querySelector('#adv .ix-all'); if (!b) return;
+  b.textContent = [...document.querySelectorAll('#adv details.adv-grp')].every(d => d.open) ? '全部收起' : '全部打開';
+}
 async function goJournal() {
   const adv = $('#adv'); if (!adv) return;
   if (!adv.open) { adv.open = true; localStorage.setItem('adv-open', '1'); }
   for (let i = 0; i < 100 && !document.getElementById('journal'); i++) await new Promise(r => setTimeout(r, 100));
+  openGroupsAround(document.getElementById('journal'));   // v50
   document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1094,42 +1108,53 @@ async function renderAdv(force = false) {
     const pos = rulePositions(ctx.rows);
     const ago = Math.round((Date.now() - live.at) / 60000);
     const NOW = Date.now();
+    const GO = AG.loadOpen(localStorage);   // v50: remembered open groups
     el.innerHTML = `
-      <nav class="jump"><a href="#journal">我的決策紀錄</a><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#startany">今天才開始照做</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#recent">建議變化</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#today">今天</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#lev">槓桿</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></nav>
-      ${LIVE ? journalHtml() : ''}
-      ${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), NOW)}
-      ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
-      ${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), NOW)}
+      <nav class="jump ix" aria-label="問題索引"><p class="ix-head small muted">想知道什麼，點那一張（會自動打開那一組）：<button type="button" class="ix-all link-btn">${AG.GROUPS.every(g => GO.has(g.id)) ? '全部收起' : '全部打開'}</button></p>
+        <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a></div>
+        <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a></div>
+        <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a></div>
+        <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a></div>
+        <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
+      ${AG.wrap('act', `
+      ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
       <div id="nm-wrap">${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, NOW)}</div>
       <div id="fp-wrap">${FR.withAsof(fpHtml(), FPATH?.as_of ?? null, NOW)}</div>
+      ${FR.withAsof(intraCard(), FR.asofOf('intraday', INTRA), NOW)}
+      ${FR.withAsof(xsrcHtml(), XSRC?.as_of ?? null, NOW)}
+      ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}`, GO.has('act'))}
+      ${AG.wrap('flat', `
       ${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, NOW)}
       <div id="cy-wrap">${FR.withAsof(cyHtml(), CYIELD?.as_of ?? null, NOW)}</div>
       <div id="sa-wrap">${FR.withAsof(saHtml(), STARTA?.as_of ?? null, NOW)}</div>
-      ${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, NOW)}
-      ${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, NOW)}
-      ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
-      ${FR.withAsof(intraCard(), FR.asofOf('intraday', INTRA), NOW)}
-      ${relCard()}
-      ${FR.withAsof(xsrcHtml(), XSRC?.as_of ?? null, NOW)}
-      ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
-      ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
-      ${FR.withAsof(riskCard(), FR.asofOf('weekly', DEC), NOW)}
-      ${FR.withAsof(planCard(), FR.asofOf('dca', DCA), NOW)}
-      ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
-      ${TS.testedCard(TESTED)}
       ${FR.withAsof(moveHtml(), MOVEW?.as_of ?? null, NOW)}
       ${FR.withAsof(dipHtml(), DIPB?.as_of ?? null, NOW)}
-      ${eventsCard(EV)}
-      ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
+      ${eventsCard(EV)}`, GO.has('flat'))}
+      ${AG.wrap('record', `
+      ${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), NOW)}
+      ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
+      ${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), NOW)}
+      ${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, NOW)}
+      ${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, NOW)}`, GO.has('record'))}
+      ${AG.wrap('money', `
+      ${LIVE ? journalHtml() : ''}
+      ${FR.withAsof(riskCard(), FR.asofOf('weekly', DEC), NOW)}
+      ${FR.withAsof(planCard(), FR.asofOf('dca', DCA), NOW)}
       ${costCard(coin)}
       ${FR.withAsof(csHtml(), CSENS?.as_of ?? null, NOW)}
+      ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}`, GO.has('money'))}
+      ${AG.wrap('trust', `
+      ${relCard()}
+      ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
+      ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
+      ${TS.testedCard(TESTED)}
       ${researchCard()}
       <section class="card" id="signals"><details><summary>訊號細節：綜合預測與 7 個個別訊號</summary>
         ${FR.asofLine(FR.asofOf('backtest', BT), NOW)}
         <p class="small">這些是 v1 的預測指標。保留在這裡是為了透明：它們在樣本外大多沒有預測力，不建議拿來決定買賣。</p>
         ${outlookCard(c, r, a, live)}
         ${ORDER.map(k => signalCard(k, c.signals[k], r, pos[k])).join('')}
-      </details></section>
+      </details></section>`, GO.has('trust'))}
       <section class="card small muted">
         <p>資料來源：日K ${esc(live.candleSrc || '—')}；資金費率 ${esc(live.fundingSrc || '抓不到')}；恐懼貪婪 ${esc(live.fngSrc || '抓不到')}；台幣價格與匯率 ${PRICES ? 'CoinGecko' : '抓不到（改用 MAX 快照估算）'}。抓取時間：${fmtTime(live.at)}${live.fromCache ? `（${ago < 1 ? '剛剛' : ago + ' 分鐘前'}的暫存${live.stale ? '，目前連不上網路' : ''}）` : ''}。</p>
         <p>決策數字：${esc(DEC.conventions.trend3)}。回測扣每次進出 0.15%，訊號在收盤後才用、隔天才持有。決策資料產生於 ${fmtTime(Date.parse(DEC.generated_at_utc.replace('Z', ':00Z')))}，訊號回測產生於 ${fmtTime(Date.parse(BT.generated_at_utc.replace('Z', ':00Z')))}。括號裡的 C#編號是對應的研究報告。</p>
@@ -1160,11 +1185,20 @@ $('#content').addEventListener('click', e => {
   if (e.target.closest('.jr-go')) { e.preventDefault(); goJournal(); return; }
   const js = e.target.closest('.jr-save'); if (js) { journalSave(js.dataset.coin); return; }
   const jd = e.target.closest('.jr-del'); if (jd) { JR.save(localStorage, JR.remove(JR.load(localStorage), jd.dataset.id)); refreshJournal(); return; }
+  const ia = e.target.closest('#adv .ix-all');   // v50: 全部打開／全部收起
+  if (ia) { const all = [...document.querySelectorAll('#adv details.adv-grp')], open = !all.every(d => d.open); all.forEach(d => { d.open = open; }); AG.saveOpen(localStorage, new Set(open ? AG.GROUPS.map(g => g.id) : [])); syncAllBtn(); return; }
+  const ha = e.target.closest('a[href^="#"]');   // v50: any in-page link to a card inside a closed group opens that group first
+  if (ha) { const t = document.getElementById(decodeURIComponent(ha.getAttribute('href').slice(1))); if (t && t.parentElement?.closest('details:not([open])')) { e.preventDefault(); openGroupsAround(t); t.scrollIntoView({ block: 'start' }); } }
   if (e.target.closest('.jr-clear')) { if (confirm('確定清除這支手機上的全部決策紀錄？')) { JR.save(localStorage, []); refreshJournal(); } return; }
   const b = e.target.closest('#adv .tabs button'); if (!b) return;
   coin = b.dataset.coin; localStorage.setItem('coin', coin); renderAdv();
 });
 $('#refresh').addEventListener('click', () => render(true));
+// v50: remember which 進階 groups are open (toggle does not bubble → capture)
+$('#content').addEventListener('toggle', e => {
+  const d = e.target; if (!d?.classList?.contains('adv-grp')) return;
+  const s = AG.loadOpen(localStorage); if (d.open) s.add(d.dataset.grp); else s.delete(d.dataset.grp); AG.saveOpen(localStorage, s); syncAllBtn();
+}, true);
 // v41: 連上網路就自動更新（只在剛才是用手機存的資料時）
 window.addEventListener('online', () => { if (document.getElementById('fc-off')) render(true); });
 if ('serviceWorker' in navigator) {
