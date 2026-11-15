@@ -35,6 +35,7 @@ import * as FPM from './fullpath.js';   // v47
 import * as CYM from './cashyield.js';   // v48
 import * as SAM from './startany.js';   // v49
 import * as AG from './advgroups.js';   // v50
+import * as PCM from './pupcal.js';   // v51
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -175,7 +176,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v50';
+const VERSION = 'v51';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -528,6 +529,9 @@ function updateOuts() {
   set('cy-wrap', () => FR.withAsof(cyHtml(), CYIELD?.as_of ?? null, Date.now()));
   set('fc-sa-BTC', () => saDetail('BTC'));
   set('fc-sa-ETH', () => saDetail('ETH'));
+  set('fc-pc-BTC', () => pcDetail('BTC'));   // v51
+  set('fc-pc-ETH', () => pcDetail('ETH'));
+  set('pc-wrap', () => FR.withAsof(pcHtml(), PUPC?.as_of ?? null, Date.now()));
   set('sa-wrap', () => FR.withAsof(saHtml(), STARTA?.as_of ?? null, Date.now()));
   set('nm-wrap', () => FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now()));
   set('fc-money-ETH', () => moneyLine('ETH'));
@@ -670,6 +674,7 @@ let DIPB = null;   // v46
 let FPATH = null;   // v47
 let CYIELD = null;   // v48
 let STARTA = null;   // v49
+let PUPC = null;   // v51
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -867,6 +872,9 @@ function fpDetail(c) {
 const cyDetail = c => { try { return esc(CYM.detailLine(c, CYIELD, LIVE)); } catch { return ''; } };
 // v49: 如果今天才開始照做（data/startany.json）
 const saDetail = c => { try { return esc(SAM.detailLine(c, STARTA, LIVE)); } catch { return ''; } };
+// v51: 說「X% 會漲」，實際準不準（data/pupcal.json＋公開帳本已對答案的列）
+const pcDetail = c => { try { return esc(PCM.detailLine(c, PUPC)); } catch { return ''; } };
+function pcHtml() { try { return PCM.pupCalCard(PUPC, ANS ? PCM.liveBuckets(ANS) : null, LIVE); } catch (e) { return `<section class="card" id="pupcal"><h2>說「X% 會漲」，實際準不準？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function saHtml() { try { return SAM.startAnyCard(STARTA, LIVE); } catch (e) { return `<section class="card" id="startany"><h2>如果今天才開始照做，3 個月／1 年後會怎樣</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function cyHtml() { try { return CYM.cashYieldCard(CYIELD, LIVE); } catch (e) { return `<section class="card" id="cashyield"><h2>空手的錢放銀行活儲，會多多少</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function fpHtml() { try { return FPM.fullPathCard(FPATH, fpCur()); } catch (e) { return `<section class="card" id="fullpath"><h2>要放回最多，要漲到哪裡</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -894,6 +902,7 @@ function coinBlock(c) {
       <p id="fc-cy-${c}" class="small cy">${cyDetail(c)}</p>
       <p id="fc-sa-${c}" class="small sa">${saDetail(c)}</p>
       <p class="up">${esc(PU.DIR_TEXT)}</p>
+      <p id="fc-pc-${c}" class="small pc">${pcDetail(c)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；${closeLabel(f)} ${usd(f.price_usd)}）</p>
       ${inMkt ? '' : bad}
       ${OUTC ? `<p class="past small muted" data-coin="${c}">${esc(OC.homeLine(OUTC, c, f.action))}</p>` : ''}
@@ -1049,6 +1058,7 @@ async function render(force = false) {
   try { DIPB = await fetch('data/dipbuy.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || DIPB; } catch { DIPB = DIPB || null; }   // v46
   try { CYIELD = await fetch('data/cashyield.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CYIELD; } catch { CYIELD = CYIELD || null; }   // v48
   try { STARTA = await fetch('data/startany.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || STARTA; } catch { STARTA = STARTA || null; }   // v49
+  try { PUPC = await fetch('data/pupcal.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PUPC; } catch { PUPC = PUPC || null; }   // v51
   try { FPATH = await fetch('data/fullpath.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FPATH; } catch { FPATH = FPATH || null; }   // v47
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
@@ -1115,7 +1125,7 @@ async function renderAdv(force = false) {
         <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a></div>
         <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a></div>
-        <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
+        <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
       ${AG.wrap('act', `
       ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
       <div id="nm-wrap">${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, NOW)}</div>
@@ -1146,6 +1156,7 @@ async function renderAdv(force = false) {
       ${AG.wrap('trust', `
       ${relCard()}
       ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
+      <div id="pc-wrap">${FR.withAsof(pcHtml(), PUPC?.as_of ?? null, NOW)}</div>
       ${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), NOW)}
       ${TS.testedCard(TESTED)}
       ${researchCard()}
