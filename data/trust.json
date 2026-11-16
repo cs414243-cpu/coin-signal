@@ -1,12 +1,12 @@
 {
- "generated_at": "2026-11-15T00:28:54Z",
+ "generated_at": "2026-11-16T00:33:05Z",
  "schema": 1,
  "files": {
   "forecasts.jsonl": {
-   "rows": 50,
+   "rows": 60,
    "ok": true,
    "error": null,
-   "last_hash": "94617044efe778e0c2f2ae1a0b528b707c289ba4ebd8b20242af63fa0188506d"
+   "last_hash": "71813f54e97a829ff08b1abeb27ae949c55d80481c03064fcba3155f273b9ae8"
   },
   "scores.jsonl": {
    "rows": 0,
@@ -15,10 +15,10 @@
    "last_hash": null
   },
   "paper.jsonl": {
-   "rows": 25,
+   "rows": 30,
    "ok": true,
    "error": null,
-   "last_hash": "aa609d2b3dc1eef6fd262179d3d16df474698ce877ceff0b690c7b9803371f0a"
+   "last_hash": "0f37b47f59f9cbdaf793d8afcc1c3be458105ba95e699548fa0fb6ffc3467545"
   },
   "events.jsonl": {
    "rows": 6,
@@ -65,24 +65,24 @@
  "champion": "trend_vt@1",
  "chain_ok": true,
  "forecasts": {
-  "n": 50,
-  "n_champion": 10,
+  "n": 60,
+  "n_champion": 12,
   "by_model": {
-   "baseline@1": 10,
-   "trend_vt@1": 10,
-   "knn@1": 10,
-   "tsmom@1": 10,
-   "logit@1": 10
+   "baseline@1": 12,
+   "trend_vt@1": 12,
+   "knn@1": 12,
+   "tsmom@1": 12,
+   "logit@1": 12
   },
   "coins": [
    "BTC",
    "ETH"
   ],
-  "n_days": 5,
+  "n_days": 6,
   "first_asof": "2026-11-10",
-  "last_asof": "2026-11-14",
+  "last_asof": "2026-11-15",
   "first_created_at": "2026-11-11T04:37:28Z",
-  "last_created_at": "2026-11-15T00:28:31Z",
+  "last_created_at": "2026-11-16T00:32:42Z",
   "missing_days": []
  },
  "scores": {
@@ -96,50 +96,50 @@
   "first_score_due": "2026-11-17",
   "last_needed_asof": "2027-01-04",
   "scored_by": "2027-01-11",
-  "days_logged": 5
+  "days_logged": 6
  },
  "paper": {
   "start_twd": 1000000,
   "models": {
    "baseline@1": {
     "start": "2026-11-10",
-    "rows": 5,
-    "end": "2026-11-14",
-    "equity": 861861.55,
+    "rows": 6,
+    "end": "2026-11-15",
+    "equity": 886006.69,
     "cum_cost": 4182.43,
-    "ret": -0.138138
+    "ret": -0.113993
    },
    "knn@1": {
     "start": "2026-11-10",
-    "rows": 5,
-    "end": "2026-11-14",
-    "equity": 861861.55,
+    "rows": 6,
+    "end": "2026-11-15",
+    "equity": 886006.69,
     "cum_cost": 4182.43,
-    "ret": -0.138138
+    "ret": -0.113993
    },
    "logit@1": {
     "start": "2026-11-10",
-    "rows": 5,
-    "end": "2026-11-14",
-    "equity": 968685.42,
-    "cum_cost": 1127.35,
-    "ret": -0.031315
+    "rows": 6,
+    "end": "2026-11-15",
+    "equity": 973707.43,
+    "cum_cost": 1143.97,
+    "ret": -0.026293
    },
    "trend_vt@1": {
     "start": "2026-11-10",
-    "rows": 5,
-    "end": "2026-11-14",
+    "rows": 6,
+    "end": "2026-11-15",
     "equity": 992047.62,
     "cum_cost": 1203.47,
     "ret": -0.007952
    },
    "tsmom@1": {
     "start": "2026-11-10",
-    "rows": 5,
-    "end": "2026-11-14",
-    "equity": 966202.34,
-    "cum_cost": 1187.04,
-    "ret": -0.033798
+    "rows": 6,
+    "end": "2026-11-15",
+    "equity": 968293.09,
+    "cum_cost": 1193.32,
+    "ret": -0.031707
    }
   }
  }
