@@ -1,0 +1,3058 @@
+{
+ "as_of": "2026-11-15",
+ "generated_at": "2026-11-16T20:42:57Z",
+ "is_only": false,
+ "source": "forecast/proposals/proto_*_results.json signal_study（各提案自己的 IS 三分位）＋ Binance 已收完日K（30 天波動對照）",
+ "periods": {
+  "IS": [
+   "2022-01-01",
+   "2023-12-31"
+  ],
+  "OOS_start": "2024-01-01"
+ },
+ "big": 0.1,
+ "min_spread": 0.1,
+ "a_min": 0.6,
+ "min_clues": 2,
+ "n_proposals": 26,
+ "coins": {
+  "BTC": {
+   "chance_expected": 0.6,
+   "share_big_is": 0.204,
+   "share_big_oos": 0.122,
+   "n_features": 49,
+   "n_both": 40,
+   "agree": 23,
+   "agree_share": 0.575,
+   "agree_p": 0.2148,
+   "spearman": -0.045,
+   "replicated": [],
+   "n_rep": 0,
+   "n_rep_up": 0,
+   "n_rep_down": 0,
+   "rep_min_median": null,
+   "vol": {
+    "cut": [
+     0.4231,
+     0.5815
+    ],
+    "last_bar": "2026-11-15",
+    "IS": {
+     "low": 0.086,
+     "n": [
+      35,
+      35,
+      35
+     ],
+     "mid": 0.171,
+     "high": 0.229,
+     "all": 0.162,
+     "n_all": 105,
+     "s": 0.143
+    },
+    "OOS": {
+     "low": 0.1,
+     "n": [
+      70,
+      59,
+      21
+     ],
+     "mid": 0.068,
+     "high": 0.048,
+     "all": 0.107,
+     "n_all": 149,
+     "s": -0.052
+    },
+    "now": {
+     "date": "2026-11-15",
+     "vol30": 0.4396,
+     "tercile": "mid"
+    }
+   },
+   "vol_replicated": false,
+   "vol_min": 0.052,
+   "verdict": "none"
+  },
+  "ETH": {
+   "chance_expected": 4.2,
+   "share_big_is": 0.531,
+   "share_big_oos": 0.327,
+   "n_features": 49,
+   "n_both": 47,
+   "agree": 24,
+   "agree_share": 0.511,
+   "agree_p": 0.5,
+   "spearman": -0.041,
+   "replicated": [
+    {
+     "proposal": "margin_positioning",
+     "group": "lsr_z",
+     "IS": {
+      "low": 0.171,
+      "mid": 0.171,
+      "high": 0.343,
+      "n": [
+       35,
+       35,
+       35
+      ],
+      "s": 0.172
+     },
+     "OOS": {
+      "low": 0.206,
+      "mid": 0.318,
+      "high": 0.344,
+      "n": [
+       97,
+       22,
+       32
+      ],
+      "s": 0.138
+     }
+    },
+    {
+     "proposal": "model_disagreement",
+     "group": "disp",
+     "IS": {
+      "low": 0.143,
+      "mid": 0.171,
+      "high": 0.286,
+      "n": [
+       35,
+       35,
+       35
+      ],
+      "s": 0.143
+     },
+     "OOS": {
+      "low": 0.219,
+      "mid": 0.267,
+      "high": 0.357,
+      "n": [
+       64,
+       45,
+       42
+      ],
+      "s": 0.138
+     }
+    },
+    {
+     "proposal": "btc_eth_correlation",
+     "group": "rho90",
+     "IS": {
+      "low": 0.257,
+      "mid": 0.229,
+      "high": 0.114,
+      "n": [
+       35,
+       35,
+       35
+      ],
+      "s": -0.143
+     },
+     "OOS": {
+      "low": 0.286,
+      "mid": 0.265,
+      "high": 0.154,
+      "n": [
+       91,
+       34,
+       26
+      ],
+      "s": -0.132
+     }
+    }
+   ],
+   "n_rep": 3,
+   "n_rep_up": 2,
+   "n_rep_down": 1,
+   "rep_min_median": 0.138,
+   "vol": {
+    "cut": [
+     0.5019,
+     0.7675
+    ],
+    "last_bar": "2026-11-15",
+    "IS": {
+     "low": 0.114,
+     "n": [
+      35,
+      35,
+      35
+     ],
+     "mid": 0.143,
+     "high": 0.457,
+     "all": 0.229,
+     "n_all": 105,
+     "s": 0.343
+    },
+    "OOS": {
+     "low": 0.324,
+     "n": [
+      37,
+      78,
+      35
+     ],
+     "mid": 0.269,
+     "high": 0.143,
+     "all": 0.242,
+     "n_all": 149,
+     "s": -0.181
+    },
+    "now": {
+     "date": "2026-11-15",
+     "vol30": 0.5934,
+     "tercile": "mid"
+    }
+   },
+   "vol_replicated": false,
+   "vol_min": 0.181,
+   "verdict": "none"
+  }
+ },
+ "features": [
+  {
+   "proposal": "bar_shape",
+   "group": "clv7",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_bar_shape_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.086,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.057
+   },
+   "OOS": {
+    "low": 0.109,
+    "mid": 0.136,
+    "high": 0.085,
+    "n": [
+     46,
+     44,
+     59
+    ],
+    "s": -0.024
+   }
+  },
+  {
+   "proposal": "bar_shape",
+   "group": "lw7",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_bar_shape_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.171,
+    "high": 0.229,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.029
+   },
+   "OOS": {
+    "low": 0.192,
+    "mid": 0.145,
+    "high": 0.093,
+    "n": [
+     52,
+     55,
+     43
+    ],
+    "s": -0.099
+   }
+  },
+  {
+   "proposal": "bar_shape",
+   "group": "uw7",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_bar_shape_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.229,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.086
+   },
+   "OOS": {
+    "low": 0.076,
+    "mid": 0.111,
+    "high": 0.154,
+    "n": [
+     66,
+     45,
+     39
+    ],
+    "s": 0.078
+   }
+  },
+  {
+   "proposal": "bar_shape",
+   "group": "clv7",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_bar_shape_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.2,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.233,
+    "mid": 0.22,
+    "high": 0.246,
+    "n": [
+     43,
+     50,
+     57
+    ],
+    "s": 0.013
+   }
+  },
+  {
+   "proposal": "bar_shape",
+   "group": "lw7",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_bar_shape_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.314,
+    "mid": 0.314,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.143
+   },
+   "OOS": {
+    "low": 0.282,
+    "mid": 0.228,
+    "high": 0.2,
+    "n": [
+     39,
+     57,
+     55
+    ],
+    "s": -0.082
+   }
+  },
+  {
+   "proposal": "bar_shape",
+   "group": "uw7",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_bar_shape_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.286,
+    "mid": 0.2,
+    "high": 0.314,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.028
+   },
+   "OOS": {
+    "low": 0.18,
+    "mid": 0.312,
+    "high": 0.365,
+    "n": [
+     50,
+     48,
+     52
+    ],
+    "s": 0.185
+   }
+  },
+  {
+   "proposal": "btc_dominance",
+   "group": "dd30",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_btc_dominance_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.229,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.086
+   },
+   "OOS": {
+    "low": 0.061,
+    "mid": 0.113,
+    "high": 0.085,
+    "n": [
+     49,
+     53,
+     47
+    ],
+    "s": 0.024
+   }
+  },
+  {
+   "proposal": "btc_dominance",
+   "group": "dd30",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_btc_dominance_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.257,
+    "mid": 0.229,
+    "high": 0.257,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.163,
+    "mid": 0.245,
+    "high": 0.277,
+    "n": [
+     49,
+     53,
+     47
+    ],
+    "s": 0.114
+   }
+  },
+  {
+   "proposal": "btc_eth_correlation",
+   "group": "dispz",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_btc_eth_correlation_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.171,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.086
+   },
+   "OOS": {
+    "low": 0.212,
+    "mid": 0.102,
+    "high": 0.1,
+    "n": [
+     52,
+     49,
+     50
+    ],
+    "s": -0.112
+   }
+  },
+  {
+   "proposal": "btc_eth_correlation",
+   "group": "rho90",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_btc_eth_correlation_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.143,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.029
+   },
+   "OOS": {
+    "low": 0.11,
+    "mid": 0.176,
+    "high": 0.077,
+    "n": [
+     91,
+     34,
+     26
+    ],
+    "s": -0.033
+   }
+  },
+  {
+   "proposal": "btc_eth_correlation",
+   "group": "dispz",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_btc_eth_correlation_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.229,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.058
+   },
+   "OOS": {
+    "low": 0.288,
+    "mid": 0.245,
+    "high": 0.22,
+    "n": [
+     52,
+     49,
+     50
+    ],
+    "s": -0.068
+   }
+  },
+  {
+   "proposal": "btc_eth_correlation",
+   "group": "rho90",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_btc_eth_correlation_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.257,
+    "mid": 0.229,
+    "high": 0.114,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.143
+   },
+   "OOS": {
+    "low": 0.286,
+    "mid": 0.265,
+    "high": 0.154,
+    "n": [
+     91,
+     34,
+     26
+    ],
+    "s": -0.132
+   }
+  },
+  {
+   "proposal": "cftc_cot",
+   "group": "am_d4",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_cftc_cot_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.088,
+    "mid": 0.167,
+    "high": 0.171,
+    "n": [
+     34,
+     36,
+     35
+    ],
+    "s": 0.083
+   },
+   "OOS": {
+    "low": 0.102,
+    "mid": 0.068,
+    "high": 0.105,
+    "n": [
+     49,
+     73,
+     19
+    ],
+    "s": 0.003
+   }
+  },
+  {
+   "proposal": "cftc_cot",
+   "group": "lev_d4",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_cftc_cot_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.2,
+    "high": 0.114,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.057
+   },
+   "OOS": {
+    "low": 0.128,
+    "mid": 0.13,
+    "high": 0.061,
+    "n": [
+     39,
+     69,
+     33
+    ],
+    "s": -0.067
+   }
+  },
+  {
+   "proposal": "cftc_cot",
+   "group": "am_d4",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_cftc_cot_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.294,
+    "mid": 0.167,
+    "high": 0.278,
+    "n": [
+     34,
+     36,
+     36
+    ],
+    "s": -0.016
+   },
+   "OOS": {
+    "low": 0.273,
+    "mid": 0.19,
+    "high": 0.179,
+    "n": [
+     55,
+     58,
+     28
+    ],
+    "s": -0.094
+   }
+  },
+  {
+   "proposal": "cftc_cot",
+   "group": "lev_d4",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_cftc_cot_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.147,
+    "mid": 0.286,
+    "high": 0.25,
+    "n": [
+     34,
+     35,
+     36
+    ],
+    "s": 0.103
+   },
+   "OOS": {
+    "low": 0.186,
+    "mid": 0.262,
+    "high": 0.27,
+    "n": [
+     43,
+     61,
+     37
+    ],
+    "s": 0.084
+   }
+  },
+  {
+   "proposal": "copper_gold",
+   "group": "cg_d20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_copper_gold_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.171,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.029
+   },
+   "OOS": {
+    "low": 0.122,
+    "mid": 0.125,
+    "high": 0.049,
+    "n": [
+     49,
+     40,
+     61
+    ],
+    "s": -0.073
+   }
+  },
+  {
+   "proposal": "copper_gold",
+   "group": "gold_r20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_copper_gold_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.171,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.029
+   },
+   "OOS": {
+    "low": 0.083,
+    "mid": 0.225,
+    "high": 0.095,
+    "n": [
+     36,
+     40,
+     74
+    ],
+    "s": 0.012
+   }
+  },
+  {
+   "proposal": "copper_gold",
+   "group": "cg_d20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_copper_gold_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.343,
+    "mid": 0.2,
+    "high": 0.229,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.114
+   },
+   "OOS": {
+    "low": 0.204,
+    "mid": 0.25,
+    "high": 0.18,
+    "n": [
+     49,
+     40,
+     61
+    ],
+    "s": -0.024
+   }
+  },
+  {
+   "proposal": "copper_gold",
+   "group": "gold_r20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_copper_gold_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.286,
+    "mid": 0.229,
+    "high": 0.229,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.057
+   },
+   "OOS": {
+    "low": 0.139,
+    "mid": 0.325,
+    "high": 0.27,
+    "n": [
+     36,
+     40,
+     74
+    ],
+    "s": 0.131
+   }
+  },
+  {
+   "proposal": "credit_spread",
+   "group": "baa_w20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_credit_spread_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.147,
+    "high": 0.194,
+    "n": [
+     35,
+     34,
+     36
+    ],
+    "s": 0.051
+   },
+   "OOS": {
+    "low": 0.25,
+    "mid": 0.026,
+    "high": 0.13,
+    "n": [
+     28,
+     76,
+     46
+    ],
+    "s": -0.12
+   }
+  },
+  {
+   "proposal": "credit_spread",
+   "group": "hy_r20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_credit_spread_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.171,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.069,
+    "mid": 0.154,
+    "high": 0.111,
+    "n": [
+     58,
+     65,
+     27
+    ],
+    "s": 0.042
+   }
+  },
+  {
+   "proposal": "credit_spread",
+   "group": "baa_w20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_credit_spread_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.176,
+    "high": 0.278,
+    "n": [
+     35,
+     34,
+     36
+    ],
+    "s": 0.049
+   },
+   "OOS": {
+    "low": 0.321,
+    "mid": 0.224,
+    "high": 0.239,
+    "n": [
+     28,
+     76,
+     46
+    ],
+    "s": -0.082
+   }
+  },
+  {
+   "proposal": "credit_spread",
+   "group": "hy_r20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_credit_spread_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.143,
+    "high": 0.314,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.114
+   },
+   "OOS": {
+    "low": 0.259,
+    "mid": 0.277,
+    "high": 0.111,
+    "n": [
+     58,
+     65,
+     27
+    ],
+    "s": -0.148
+   }
+  },
+  {
+   "proposal": "equity_coupling",
+   "group": "dbeta",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_equity_coupling_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.257,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.091,
+    "mid": 0.121,
+    "high": 0.097,
+    "n": [
+     55,
+     33,
+     62
+    ],
+    "s": 0.006
+   }
+  },
+  {
+   "proposal": "equity_coupling",
+   "group": "rho60",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_equity_coupling_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.086,
+    "mid": 0.257,
+    "high": 0.25,
+    "n": [
+     35,
+     35,
+     36
+    ],
+    "s": 0.164
+   },
+   "OOS": {
+    "low": 0.143,
+    "mid": 0.085,
+    "high": 0.069,
+    "n": [
+     28,
+     94,
+     29
+    ],
+    "s": -0.074
+   }
+  },
+  {
+   "proposal": "equity_coupling",
+   "group": "dbeta",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_equity_coupling_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.257,
+    "high": 0.278,
+    "n": [
+     35,
+     35,
+     36
+    ],
+    "s": 0.078
+   },
+   "OOS": {
+    "low": 0.341,
+    "mid": 0.222,
+    "high": 0.171,
+    "n": [
+     41,
+     27,
+     82
+    ],
+    "s": -0.17
+   }
+  },
+  {
+   "proposal": "equity_coupling",
+   "group": "rho60",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_equity_coupling_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.057,
+    "mid": 0.286,
+    "high": 0.286,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.229
+   },
+   "OOS": {
+    "low": 0.258,
+    "mid": 0.214,
+    "high": 0.143,
+    "n": [
+     31,
+     70,
+     49
+    ],
+    "s": -0.115
+   }
+  },
+  {
+   "proposal": "eth_issuance",
+   "group": "dg90",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_eth_issuance_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.118,
+    "mid": 0.176,
+    "high": 0.176,
+    "n": [
+     17,
+     17,
+     17
+    ],
+    "s": 0.058
+   },
+   "OOS": {
+    "low": 0.111,
+    "mid": 0.079,
+    "high": 0.111,
+    "n": [
+     9,
+     114,
+     27
+    ],
+    "s": 0.0
+   }
+  },
+  {
+   "proposal": "eth_issuance",
+   "group": "g30",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_eth_issuance_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.091,
+    "n": [
+     21,
+     21,
+     22
+    ],
+    "s": -0.052
+   },
+   "OOS": {
+    "low": 0.222,
+    "mid": 0.0,
+    "high": 0.088,
+    "n": [
+     9,
+     6,
+     136
+    ],
+    "s": -0.134
+   }
+  },
+  {
+   "proposal": "eth_issuance",
+   "group": "dg90",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_eth_issuance_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.0,
+    "mid": 0.118,
+    "high": 0.059,
+    "n": [
+     17,
+     17,
+     17
+    ],
+    "s": 0.059
+   },
+   "OOS": {
+    "low": 0.222,
+    "mid": 0.193,
+    "high": 0.333,
+    "n": [
+     9,
+     114,
+     27
+    ],
+    "s": 0.111
+   }
+  },
+  {
+   "proposal": "eth_issuance",
+   "group": "g30",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_eth_issuance_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.048,
+    "mid": 0.19,
+    "high": 0.136,
+    "n": [
+     21,
+     21,
+     22
+    ],
+    "s": 0.088
+   },
+   "OOS": {
+    "low": 0.333,
+    "mid": 0.333,
+    "high": 0.199,
+    "n": [
+     9,
+     6,
+     136
+    ],
+    "s": -0.134
+   }
+  },
+  {
+   "proposal": "exchange_netflow",
+   "group": "nf30",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_exchange_netflow_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.086,
+    "mid": 0.257,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.085
+   },
+   "OOS": {
+    "low": 0.107,
+    "mid": 0.111,
+    "high": 0.103,
+    "n": [
+     75,
+     36,
+     39
+    ],
+    "s": -0.004
+   }
+  },
+  {
+   "proposal": "exchange_netflow",
+   "group": "spike",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_exchange_netflow_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.114,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.19,
+    "mid": 0.072,
+    "high": 0.103,
+    "n": [
+     42,
+     69,
+     39
+    ],
+    "s": -0.087
+   }
+  },
+  {
+   "proposal": "exchange_netflow",
+   "group": "nf30",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_exchange_netflow_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.143,
+    "high": 0.257,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.028
+   },
+   "OOS": {
+    "low": 0.306,
+    "mid": 0.16,
+    "high": 0.281,
+    "n": [
+     36,
+     50,
+     64
+    ],
+    "s": -0.025
+   }
+  },
+  {
+   "proposal": "exchange_netflow",
+   "group": "spike",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_exchange_netflow_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.257,
+    "mid": 0.2,
+    "high": 0.286,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.029
+   },
+   "OOS": {
+    "low": 0.222,
+    "mid": 0.2,
+    "high": 0.235,
+    "n": [
+     9,
+     60,
+     81
+    ],
+    "s": 0.013
+   }
+  },
+  {
+   "proposal": "fee_pressure",
+   "group": "fr7",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_fee_pressure_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.086,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.057
+   },
+   "OOS": {
+    "low": 0.127,
+    "mid": 0.089,
+    "high": 0.0,
+    "n": [
+     79,
+     56,
+     15
+    ],
+    "s": -0.127
+   }
+  },
+  {
+   "proposal": "fee_pressure",
+   "group": "fr7",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_fee_pressure_results.json",
+   "last_closed_bar": "2026-11-13",
+   "IS": {
+    "low": 0.314,
+    "mid": 0.171,
+    "high": 0.229,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.085
+   },
+   "OOS": {
+    "low": 0.328,
+    "mid": 0.239,
+    "high": 0.2,
+    "n": [
+     64,
+     46,
+     40
+    ],
+    "s": -0.128
+   }
+  },
+  {
+   "proposal": "frog_pan",
+   "group": "id",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_frog_pan_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.125,
+    "mid": 0.226,
+    "high": 0.216,
+    "n": [
+     24,
+     31,
+     51
+    ],
+    "s": 0.091
+   },
+   "OOS": {
+    "low": 0.096,
+    "mid": 0.105,
+    "high": 0.122,
+    "n": [
+     52,
+     57,
+     41
+    ],
+    "s": 0.026
+   }
+  },
+  {
+   "proposal": "frog_pan",
+   "group": "pos",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_frog_pan_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.192,
+    "mid": 0.25,
+    "high": 0.125,
+    "n": [
+     26,
+     40,
+     40
+    ],
+    "s": -0.067
+   },
+   "OOS": {
+    "low": 0.045,
+    "mid": 0.132,
+    "high": 0.133,
+    "n": [
+     22,
+     38,
+     90
+    ],
+    "s": 0.088
+   }
+  },
+  {
+   "proposal": "frog_pan",
+   "group": "id",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_frog_pan_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.088,
+    "mid": 0.25,
+    "high": 0.227,
+    "n": [
+     34,
+     28,
+     44
+    ],
+    "s": 0.139
+   },
+   "OOS": {
+    "low": 0.255,
+    "mid": 0.224,
+    "high": 0.222,
+    "n": [
+     47,
+     49,
+     54
+    ],
+    "s": -0.033
+   }
+  },
+  {
+   "proposal": "frog_pan",
+   "group": "pos",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_frog_pan_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.371,
+    "mid": 0.261,
+    "high": 0.319,
+    "n": [
+     35,
+     23,
+     47
+    ],
+    "s": -0.052
+   },
+   "OOS": {
+    "low": 0.185,
+    "mid": 0.241,
+    "high": 0.247,
+    "n": [
+     27,
+     29,
+     93
+    ],
+    "s": 0.062
+   }
+  },
+  {
+   "proposal": "margin_positioning",
+   "group": "long_r",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_margin_positioning_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.075,
+    "mid": 0.038,
+    "high": 0.108,
+    "n": [
+     40,
+     26,
+     83
+    ],
+    "s": 0.033
+   }
+  },
+  {
+   "proposal": "margin_positioning",
+   "group": "lsr_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_margin_positioning_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.2,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.057
+   },
+   "OOS": {
+    "low": 0.096,
+    "mid": 0.217,
+    "high": 0.077,
+    "n": [
+     52,
+     46,
+     52
+    ],
+    "s": -0.019
+   }
+  },
+  {
+   "proposal": "margin_positioning",
+   "group": "short_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_margin_positioning_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.229,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.028
+   },
+   "OOS": {
+    "low": 0.047,
+    "mid": 0.098,
+    "high": 0.12,
+    "n": [
+     64,
+     61,
+     25
+    ],
+    "s": 0.073
+   }
+  },
+  {
+   "proposal": "margin_positioning",
+   "group": "long_r",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_margin_positioning_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.2,
+    "high": 0.257,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.028
+   },
+   "OOS": {
+    "low": 0.22,
+    "mid": 0.23,
+    "high": 0.233,
+    "n": [
+     59,
+     61,
+     30
+    ],
+    "s": 0.013
+   }
+  },
+  {
+   "proposal": "margin_positioning",
+   "group": "lsr_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_margin_positioning_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.171,
+    "high": 0.343,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.172
+   },
+   "OOS": {
+    "low": 0.206,
+    "mid": 0.318,
+    "high": 0.344,
+    "n": [
+     97,
+     22,
+     32
+    ],
+    "s": 0.138
+   }
+  },
+  {
+   "proposal": "margin_positioning",
+   "group": "short_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_margin_positioning_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.286,
+    "mid": 0.143,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.143
+   },
+   "OOS": {
+    "low": 0.158,
+    "mid": 0.2,
+    "high": 0.231,
+    "n": [
+     19,
+     40,
+     91
+    ],
+    "s": 0.073
+   }
+  },
+  {
+   "proposal": "model_disagreement",
+   "group": "disp",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_model_disagreement_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.286,
+    "high": 0.114,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.086
+   },
+   "OOS": {
+    "low": 0.065,
+    "mid": 0.065,
+    "high": 0.095,
+    "n": [
+     62,
+     46,
+     42
+    ],
+    "s": 0.03
+   }
+  },
+  {
+   "proposal": "model_disagreement",
+   "group": "vote",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_model_disagreement_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.19,
+    "mid": 0.143,
+    "high": 0.103,
+    "n": [
+     21,
+     56,
+     29
+    ],
+    "s": -0.087
+   },
+   "OOS": {
+    "low": 0.1,
+    "mid": 0.095,
+    "high": 0.141,
+    "n": [
+     10,
+     63,
+     78
+    ],
+    "s": 0.041
+   }
+  },
+  {
+   "proposal": "model_disagreement",
+   "group": "disp",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_model_disagreement_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.171,
+    "high": 0.286,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.143
+   },
+   "OOS": {
+    "low": 0.219,
+    "mid": 0.267,
+    "high": 0.357,
+    "n": [
+     64,
+     45,
+     42
+    ],
+    "s": 0.138
+   }
+  },
+  {
+   "proposal": "model_disagreement",
+   "group": "vote",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_model_disagreement_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.3,
+    "mid": 0.256,
+    "high": 0.179,
+    "n": [
+     10,
+     39,
+     56
+    ],
+    "s": -0.121
+   },
+   "OOS": {
+    "low": 0.235,
+    "mid": 0.17,
+    "high": 0.314,
+    "n": [
+     17,
+     47,
+     86
+    ],
+    "s": 0.079
+   }
+  },
+  {
+   "proposal": "news_tone",
+   "group": "terc",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_news_tone_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.207,
+    "mid": 0.276,
+    "high": 0.069,
+    "n": [
+     29,
+     29,
+     29
+    ],
+    "s": -0.138
+   },
+   "OOS": {
+    "low": 0.127,
+    "mid": 0.147,
+    "high": 0.214,
+    "n": [
+     55,
+     34,
+     14
+    ],
+    "s": 0.087
+   }
+  },
+  {
+   "proposal": "news_tone",
+   "group": "vterc",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_news_tone_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.276,
+    "mid": 0.207,
+    "high": 0.069,
+    "n": [
+     29,
+     29,
+     29
+    ],
+    "s": -0.207
+   },
+   "OOS": {
+    "low": 0.093,
+    "mid": 0.162,
+    "high": 0.045,
+    "n": [
+     43,
+     37,
+     22
+    ],
+    "s": -0.048
+   }
+  },
+  {
+   "proposal": "news_tone",
+   "group": "terc",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_news_tone_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.257,
+    "mid": 0.229,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.057
+   },
+   "OOS": {
+    "low": 0.227,
+    "mid": 0.258,
+    "high": 0.333,
+    "n": [
+     88,
+     31,
+     24
+    ],
+    "s": 0.106
+   }
+  },
+  {
+   "proposal": "news_tone",
+   "group": "vterc",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_news_tone_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.314,
+    "mid": 0.143,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.143
+   },
+   "OOS": {
+    "low": 0.224,
+    "mid": 0.281,
+    "high": 0.143,
+    "n": [
+     58,
+     57,
+     28
+    ],
+    "s": -0.081
+   }
+  },
+  {
+   "proposal": "oil",
+   "group": "ovx_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_oil_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.114,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.057
+   },
+   "OOS": {
+    "low": 0.133,
+    "mid": 0.082,
+    "high": 0.157,
+    "n": [
+     15,
+     85,
+     51
+    ],
+    "s": 0.024
+   }
+  },
+  {
+   "proposal": "oil",
+   "group": "wti_r",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_oil_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.257,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.114
+   },
+   "OOS": {
+    "low": 0.081,
+    "mid": 0.1,
+    "high": 0.14,
+    "n": [
+     37,
+     70,
+     43
+    ],
+    "s": 0.059
+   }
+  },
+  {
+   "proposal": "oil",
+   "group": "ovx_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_oil_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.2,
+    "high": 0.343,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.172
+   },
+   "OOS": {
+    "low": 0.267,
+    "mid": 0.259,
+    "high": 0.216,
+    "n": [
+     15,
+     85,
+     51
+    ],
+    "s": -0.051
+   }
+  },
+  {
+   "proposal": "oil",
+   "group": "wti_r",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_oil_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.257,
+    "mid": 0.2,
+    "high": 0.343,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.086
+   },
+   "OOS": {
+    "low": 0.189,
+    "mid": 0.229,
+    "high": 0.256,
+    "n": [
+     37,
+     70,
+     43
+    ],
+    "s": 0.067
+   }
+  },
+  {
+   "proposal": "perp_spot_volume",
+   "group": "psr_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_perp_spot_volume_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.214,
+    "mid": 0.357,
+    "high": 0.143,
+    "n": [
+     14,
+     14,
+     14
+    ],
+    "s": -0.071
+   },
+   "OOS": {
+    "low": 0.159,
+    "mid": 0.139,
+    "high": 0.114,
+    "n": [
+     44,
+     36,
+     70
+    ],
+    "s": -0.045
+   }
+  },
+  {
+   "proposal": "perp_spot_volume",
+   "group": "ptk_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_perp_spot_volume_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.357,
+    "high": 0.143,
+    "n": [
+     14,
+     14,
+     14
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.086,
+    "mid": 0.154,
+    "high": 0.049,
+    "n": [
+     70,
+     39,
+     41
+    ],
+    "s": -0.037
+   }
+  },
+  {
+   "proposal": "perp_spot_volume",
+   "group": "psr_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_perp_spot_volume_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.306,
+    "high": 0.286,
+    "n": [
+     35,
+     36,
+     35
+    ],
+    "s": 0.172
+   },
+   "OOS": {
+    "low": 0.265,
+    "mid": 0.2,
+    "high": 0.258,
+    "n": [
+     49,
+     35,
+     66
+    ],
+    "s": -0.007
+   }
+  },
+  {
+   "proposal": "perp_spot_volume",
+   "group": "ptk_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_perp_spot_volume_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.486,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.343
+   },
+   "OOS": {
+    "low": 0.208,
+    "mid": 0.239,
+    "high": 0.25,
+    "n": [
+     53,
+     46,
+     52
+    ],
+    "s": 0.042
+   }
+  },
+  {
+   "proposal": "real_yields",
+   "group": "ry_d20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_real_yields_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.086,
+    "mid": 0.229,
+    "high": 0.167,
+    "n": [
+     35,
+     35,
+     36
+    ],
+    "s": 0.081
+   },
+   "OOS": {
+    "low": 0.033,
+    "mid": 0.13,
+    "high": 0.077,
+    "n": [
+     60,
+     77,
+     13
+    ],
+    "s": 0.044
+   }
+  },
+  {
+   "proposal": "real_yields",
+   "group": "ry_d20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_real_yields_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.171,
+    "high": 0.25,
+    "n": [
+     35,
+     35,
+     36
+    ],
+    "s": 0.05
+   },
+   "OOS": {
+    "low": 0.25,
+    "mid": 0.208,
+    "high": 0.231,
+    "n": [
+     60,
+     77,
+     13
+    ],
+    "s": -0.019
+   }
+  },
+  {
+   "proposal": "round_numbers",
+   "group": "low52",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_round_numbers_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.371,
+    "high": 0.114,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.043,
+    "mid": 0.163,
+    "high": 0.119,
+    "n": [
+     23,
+     43,
+     84
+    ],
+    "s": 0.076
+   }
+  },
+  {
+   "proposal": "round_numbers",
+   "group": "rnd_dist",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_round_numbers_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.257,
+    "high": 0.086,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.114
+   },
+   "OOS": {
+    "low": 0.083,
+    "mid": 0.18,
+    "high": 0.0,
+    "n": [
+     84,
+     61,
+     5
+    ],
+    "s": -0.083
+   }
+  },
+  {
+   "proposal": "round_numbers",
+   "group": "low52",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_round_numbers_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.486,
+    "mid": 0.229,
+    "high": 0.086,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.4
+   },
+   "OOS": {
+    "low": 0.188,
+    "mid": 0.2,
+    "high": 0.261,
+    "n": [
+     64,
+     40,
+     46
+    ],
+    "s": 0.073
+   }
+  },
+  {
+   "proposal": "round_numbers",
+   "group": "rnd_dist",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_round_numbers_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.429,
+    "mid": 0.229,
+    "high": 0.086,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.343
+   },
+   "OOS": {
+    "low": 0.226,
+    "mid": 0.341,
+    "high": 0.154,
+    "n": [
+     93,
+     44,
+     13
+    ],
+    "s": -0.072
+   }
+  },
+  {
+   "proposal": "trade_size",
+   "group": "ats_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_trade_size_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.429,
+    "mid": 0.357,
+    "high": 0.357,
+    "n": [
+     14,
+     14,
+     14
+    ],
+    "s": -0.072
+   },
+   "OOS": {
+    "low": 0.106,
+    "mid": 0.057,
+    "high": 0.087,
+    "n": [
+     47,
+     35,
+     69
+    ],
+    "s": -0.019
+   }
+  },
+  {
+   "proposal": "trade_size",
+   "group": "ntr_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_trade_size_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.214,
+    "mid": 0.286,
+    "high": 0.071,
+    "n": [
+     14,
+     14,
+     14
+    ],
+    "s": -0.143
+   },
+   "OOS": {
+    "low": 0.08,
+    "mid": 0.103,
+    "high": 0.071,
+    "n": [
+     50,
+     58,
+     42
+    ],
+    "s": -0.009
+   }
+  },
+  {
+   "proposal": "trade_size",
+   "group": "ats_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_trade_size_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.343,
+    "mid": 0.333,
+    "high": 0.114,
+    "n": [
+     35,
+     36,
+     35
+    ],
+    "s": -0.229
+   },
+   "OOS": {
+    "low": 0.271,
+    "mid": 0.213,
+    "high": 0.273,
+    "n": [
+     48,
+     47,
+     55
+    ],
+    "s": 0.002
+   }
+  },
+  {
+   "proposal": "trade_size",
+   "group": "ntr_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_trade_size_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.257,
+    "high": 0.314,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.114
+   },
+   "OOS": {
+    "low": 0.231,
+    "mid": 0.204,
+    "high": 0.28,
+    "n": [
+     26,
+     49,
+     75
+    ],
+    "s": 0.049
+   }
+  },
+  {
+   "proposal": "trend_age",
+   "group": "ext",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_trend_age_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.286,
+    "high": 0.057,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.143
+   },
+   "OOS": {
+    "low": 0.077,
+    "mid": 0.148,
+    "high": 0.111,
+    "n": [
+     26,
+     61,
+     63
+    ],
+    "s": 0.034
+   }
+  },
+  {
+   "proposal": "trend_age",
+   "group": "max30",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_trend_age_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.161,
+    "high": 0.103,
+    "n": [
+     35,
+     31,
+     39
+    ],
+    "s": -0.068
+   },
+   "OOS": {
+    "low": 0.151,
+    "mid": 0.085,
+    "high": 0.133,
+    "n": [
+     73,
+     47,
+     30
+    ],
+    "s": -0.018
+   }
+  },
+  {
+   "proposal": "trend_age",
+   "group": "ext",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_trend_age_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.286,
+    "mid": 0.314,
+    "high": 0.057,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.229
+   },
+   "OOS": {
+    "low": 0.255,
+    "mid": 0.2,
+    "high": 0.25,
+    "n": [
+     51,
+     35,
+     64
+    ],
+    "s": -0.005
+   }
+  },
+  {
+   "proposal": "trend_age",
+   "group": "max30",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_trend_age_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.235,
+    "mid": 0.056,
+    "high": 0.222,
+    "n": [
+     34,
+     36,
+     36
+    ],
+    "s": -0.013
+   },
+   "OOS": {
+    "low": 0.367,
+    "mid": 0.23,
+    "high": 0.186,
+    "n": [
+     30,
+     61,
+     59
+    ],
+    "s": -0.181
+   }
+  },
+  {
+   "proposal": "uncertainty",
+   "group": "epu_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_uncertainty_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.229,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.031,
+    "mid": 0.074,
+    "high": 0.19,
+    "n": [
+     32,
+     54,
+     63
+    ],
+    "s": 0.159
+   }
+  },
+  {
+   "proposal": "uncertainty",
+   "group": "gpr_z",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_uncertainty_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.2,
+    "mid": 0.2,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.0
+   },
+   "OOS": {
+    "low": 0.143,
+    "mid": 0.051,
+    "high": 0.07,
+    "n": [
+     35,
+     59,
+     57
+    ],
+    "s": -0.073
+   }
+  },
+  {
+   "proposal": "uncertainty",
+   "group": "epu_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_uncertainty_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.286,
+    "mid": 0.314,
+    "high": 0.314,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.028
+   },
+   "OOS": {
+    "low": 0.125,
+    "mid": 0.204,
+    "high": 0.317,
+    "n": [
+     32,
+     54,
+     63
+    ],
+    "s": 0.192
+   }
+  },
+  {
+   "proposal": "uncertainty",
+   "group": "gpr_z",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_uncertainty_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.286,
+    "high": 0.286,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.172
+   },
+   "OOS": {
+    "low": 0.229,
+    "mid": 0.136,
+    "high": 0.228,
+    "n": [
+     35,
+     59,
+     57
+    ],
+    "s": -0.001
+   }
+  },
+  {
+   "proposal": "variance_ratio",
+   "group": "dfa",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_variance_ratio_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.2,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.086
+   },
+   "OOS": {
+    "low": 0.082,
+    "mid": 0.17,
+    "high": 0.138,
+    "n": [
+     73,
+     47,
+     29
+    ],
+    "s": 0.056
+   }
+  },
+  {
+   "proposal": "variance_ratio",
+   "group": "vr10",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_variance_ratio_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.171,
+    "high": 0.057,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.172
+   },
+   "OOS": {
+    "low": 0.101,
+    "mid": 0.114,
+    "high": 0.062,
+    "n": [
+     99,
+     35,
+     16
+    ],
+    "s": -0.039
+   }
+  },
+  {
+   "proposal": "variance_ratio",
+   "group": "dfa",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_variance_ratio_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.257,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.028
+   },
+   "OOS": {
+    "low": 0.216,
+    "mid": 0.182,
+    "high": 0.236,
+    "n": [
+     51,
+     44,
+     55
+    ],
+    "s": 0.02
+   }
+  },
+  {
+   "proposal": "variance_ratio",
+   "group": "vr10",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_variance_ratio_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.314,
+    "high": 0.257,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.114
+   },
+   "OOS": {
+    "low": 0.222,
+    "mid": 0.244,
+    "high": 0.217,
+    "n": [
+     27,
+     41,
+     83
+    ],
+    "s": -0.005
+   }
+  },
+  {
+   "proposal": "vix_term",
+   "group": "vts",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_vix_term_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.143,
+    "high": 0.286,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.172
+   },
+   "OOS": {
+    "low": 0.116,
+    "mid": 0.136,
+    "high": 0.108,
+    "n": [
+     69,
+     44,
+     37
+    ],
+    "s": -0.008
+   }
+  },
+  {
+   "proposal": "vix_term",
+   "group": "vts_m20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_vix_term_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.143,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.057
+   },
+   "OOS": {
+    "low": 0.129,
+    "mid": 0.176,
+    "high": 0.133,
+    "n": [
+     70,
+     51,
+     30
+    ],
+    "s": 0.004
+   }
+  },
+  {
+   "proposal": "vix_term",
+   "group": "vts",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_vix_term_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.2,
+    "high": 0.4,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.229
+   },
+   "OOS": {
+    "low": 0.188,
+    "mid": 0.25,
+    "high": 0.162,
+    "n": [
+     69,
+     44,
+     37
+    ],
+    "s": -0.026
+   }
+  },
+  {
+   "proposal": "vix_term",
+   "group": "vts_m20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_vix_term_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.314,
+    "high": 0.343,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.2
+   },
+   "OOS": {
+    "low": 0.229,
+    "mid": 0.294,
+    "high": 0.133,
+    "n": [
+     70,
+     51,
+     30
+    ],
+    "s": -0.096
+   }
+  },
+  {
+   "proposal": "vwap_cost",
+   "group": "gap",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_vwap_cost_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.143,
+    "mid": 0.229,
+    "high": 0.086,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.057
+   },
+   "OOS": {
+    "low": 0.069,
+    "mid": 0.161,
+    "high": 0.119,
+    "n": [
+     29,
+     62,
+     59
+    ],
+    "s": 0.05
+   }
+  },
+  {
+   "proposal": "vwap_cost",
+   "group": "gap",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_vwap_cost_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.229,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.086
+   },
+   "OOS": {
+    "low": 0.229,
+    "mid": 0.298,
+    "high": 0.218,
+    "n": [
+     48,
+     47,
+     55
+    ],
+    "s": -0.011
+   }
+  },
+  {
+   "proposal": "yen_carry",
+   "group": "jpy_r20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_yen_carry_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.114,
+    "mid": 0.257,
+    "high": 0.143,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.029
+   },
+   "OOS": {
+    "low": 0.107,
+    "mid": 0.09,
+    "high": 0.148,
+    "n": [
+     56,
+     67,
+     27
+    ],
+    "s": 0.041
+   }
+  },
+  {
+   "proposal": "yen_carry",
+   "group": "jpy_r5",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_yen_carry_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.086,
+    "mid": 0.2,
+    "high": 0.2,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.114
+   },
+   "OOS": {
+    "low": 0.14,
+    "mid": 0.09,
+    "high": 0.05,
+    "n": [
+     43,
+     67,
+     40
+    ],
+    "s": -0.09
+   }
+  },
+  {
+   "proposal": "yen_carry",
+   "group": "jpy_r20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_yen_carry_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.229,
+    "mid": 0.314,
+    "high": 0.171,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": -0.058
+   },
+   "OOS": {
+    "low": 0.321,
+    "mid": 0.284,
+    "high": 0.259,
+    "n": [
+     56,
+     67,
+     27
+    ],
+    "s": -0.062
+   }
+  },
+  {
+   "proposal": "yen_carry",
+   "group": "jpy_r5",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_yen_carry_results.json",
+   "last_closed_bar": "2026-11-14",
+   "IS": {
+    "low": 0.171,
+    "mid": 0.2,
+    "high": 0.314,
+    "n": [
+     35,
+     35,
+     35
+    ],
+    "s": 0.143
+   },
+   "OOS": {
+    "low": 0.256,
+    "mid": 0.179,
+    "high": 0.25,
+    "n": [
+     43,
+     67,
+     40
+    ],
+    "s": -0.006
+   }
+  },
+  {
+   "proposal": "yield_curve",
+   "group": "yc_d20",
+   "coin": "BTC",
+   "file": "forecast/proposals/proto_yield_curve_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.257,
+    "mid": 0.147,
+    "high": 0.189,
+    "n": [
+     35,
+     34,
+     37
+    ],
+    "s": -0.068
+   },
+   "OOS": {
+    "low": 0.0,
+    "mid": 0.121,
+    "high": 0.141,
+    "n": [
+     6,
+     66,
+     78
+    ],
+    "s": 0.141
+   }
+  },
+  {
+   "proposal": "yield_curve",
+   "group": "yc_d20",
+   "coin": "ETH",
+   "file": "forecast/proposals/proto_yield_curve_results.json",
+   "last_closed_bar": "2026-11-15",
+   "IS": {
+    "low": 0.4,
+    "mid": 0.235,
+    "high": 0.216,
+    "n": [
+     35,
+     34,
+     37
+    ],
+    "s": -0.184
+   },
+   "OOS": {
+    "low": 0.0,
+    "mid": 0.273,
+    "high": 0.269,
+    "n": [
+     6,
+     66,
+     78
+    ],
+    "s": 0.269
+   }
+  }
+ ],
+ "note": "只是過去紀錄的整理，尚未證實、不影響建議；特徵之間互相重疊、用的是同一批週，顯著性偏樂觀。"
+}
