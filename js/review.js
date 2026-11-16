@@ -4,6 +4,7 @@
 // Nothing here decides anything: it only says in plain words what the latest review concluded, why each challenger did not
 // (or did) replace the method behind the homepage recommendation, and when the pre-registered 8-week rule first allows a change.
 // Research only, not investment advice.
+import { reviewLag } from './scoretalk.js';   // v64
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const DAY = 86400000;
 const WD = ['日', '一', '二', '三', '四', '五', '六'];
@@ -74,7 +75,7 @@ export function rows(RV) {
   });
 }
 
-export function reviewCard(RV, now = Date.now()) {
+export function reviewCard(RV, now = Date.now(), liveScored = 0) {   // v64: liveScored = live.json 冠軍已評分筆數
   const title = '每週檢討：這週有沒有換預測方法？';
   if (!RV?.review) return `<section class="card" id="review"><h2>${title}</h2><p class="small muted">還沒有檢討紀錄（每週一 09:00 台北自動檢討）。</p></section>`;
   const R = RV.review, V = verdict(RV), L = RV.live || {}, need = RV.rule?.min_live_days ?? 56;
@@ -93,7 +94,7 @@ export function reviewCard(RV, now = Date.now()) {
   const enough = nB >= need && nE >= need;
   const timeTxt = enough
     ? `每個幣都已有 ≥ ${need} 天對過答案的實際預測，從現在起每週檢討都可能換（還要其他 5 項都通過）。`
-    : `規則要每個方法、每個幣都累積 ${need} 天（${need / 7} 週）對過答案的實際預測。目前已對答案：BTC ${nB} 天、ETH ${nE} 天${L.first_asof && !(nB + nE) ? `（第一批 ${closeMD(addDays(L.first_asof, 7))} 早上 8 點對答案）` : ''}。照每天記錄、不缺日，<strong>最早是 ${L.earliest_change_review ? mdw(L.earliest_change_review) : '—'} 09:00 的檢討</strong>才可能換。在那之前每週的結論都會是「沒換」——這是事先定好的規則，不代表現在用的方法比較好。`;
+    : `規則要每個方法、每個幣都累積 ${need} 天（${need / 7} 週）對過答案的實際預測。目前已對答案：BTC ${nB} 天、ETH ${nE} 天${L.first_asof && !(nB + nE) && !(liveScored > 0) ? `（第一批 ${closeMD(addDays(L.first_asof, 7))} 早上 8 點對答案）` : ''}${reviewLag(mdw(R.date), nB + nE, liveScored)}。照每天記錄、不缺日，<strong>最早是 ${L.earliest_change_review ? mdw(L.earliest_change_review) : '—'} 09:00 的檢討</strong>才可能換。在那之前每週的結論都會是「沒換」——這是事先定好的規則，不代表現在用的方法比較好。`;
   const wfFail = (R.candidates || []).filter(c => c.checks.some(x => x.name === 'wf_not_worse' && !x.passed)).length;
   const wfTxt = !enough && wfFail ? (wfFail === (R.candidates || []).length
     ? `另外，${wfFail} 個候選方法在「用過去資料重算不比現在用的差」這項也都沒過：就算滿 8 週，照這次的回測也還換不上來（回測每週會用新資料重算）。`

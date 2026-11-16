@@ -75,7 +75,7 @@ export function trustCard(T, live, now, dev) {
   const ok = b => b ? '✅ 通過' : '❌ 沒通過';
   const fileRows = Object.entries(files).map(([n, x]) => `<tr><th>${esc(n)}</th><td>${x.rows}</td><td>${ok(x.ok)}${x.error ? `<div class="muted small">${esc(x.error)}</div>` : ''}</td><td>${dev?.files?.[n] ? `${ok(dev.files[n].ok)}${dev.files[n].ok && dev.files[n].last_hash !== x.last_hash ? '<div class="muted small">最後雜湊和建置時不同（帳本已更新）</div>' : ''}` : '—'}</td><td><code>${x.last_hash ? esc(x.last_hash.slice(0, 12)) + '…' : '—'}</code></td></tr>`).join('');
   const devLine = dev === undefined ? '這支手機正在自己重算一次雜湊鏈…' : dev.ok === true ? '✅ 這支手機剛剛自己重算了公開帳本的雜湊鏈，全部相符。' : dev.ok === false ? '❌ 這支手機重算公開帳本時發現不相符，先別照做。' : `這支手機這次沒辦法自己重算（${esc(dev.why || '讀不到帳本檔')}），只能看建置時的結果。`;
-  const dayN = F.first_asof ? Math.max(0, Math.round(dnum(s.expected) - dnum(F.first_asof)) + 1) : 0;
+  const dayN = F.first_asof ? Math.max(0, Math.round(Math.max(dnum(s.expected), asof ? dnum(asof) : -Infinity) - dnum(F.first_asof)) + 1) : 0;   // v64: 08:20–09:00 新預測已出來時，跟成績單同一天數
   const need = V.min_live_days;
   const verif = F.first_asof
     ? `從 ${esc(F.first_asof)} 收盤開始記錄，今天是第 <strong>${Math.min(dayN, 9999)}</strong> 天／需要 ${need} 天（${V.min_weeks} 週）。帳本實際有 ${F.n_days} 天的預測${F.missing_days.length ? `，中間缺 ${F.missing_days.length} 天（${F.missing_days.map(esc).join('、')}）` : '，中間沒有缺日'}。每個預測 7 天後才能對答案：第一批 ${esc(V.first_score_due)} 收盤到期，目前已評分 ${T.scores.n} 筆。換冠軍的規則要每個幣都有 ≥ ${need} 天「已評分」的預測，照每天記錄、不缺日，最早要等第 ${need} 天（${esc(V.last_needed_asof)}）的預測在 ${esc(V.scored_by)} 收盤（台北 ${closeMD(V.scored_by)} 08:00）到期之後的週檢討。`

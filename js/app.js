@@ -47,6 +47,7 @@ import * as QC from './quitcost.js';   // v60
 import * as LE from './lateentry.js';   // v61
 import * as DS from './dipstop.js';   // v62
 import * as QX from './quickexit.js';   // v63
+import * as ST from './scoretalk.js';   // v64
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -187,7 +188,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v63';
+const VERSION = 'v64';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -937,7 +938,7 @@ function csplitHtml() { try { return CSM.coinSplitCard(CSPLIT); } catch (e) { re
 function seHtml() { try { return SEM.splitCard(SPLITX); } catch (e) { return `<section class="card" id="splitexit"><h2>建議變成 0 時：一次賣完還是分幾天？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function blHtml() { try { return BLM.blendCard(BLEND); } catch (e) { return `<section class="card" id="blend"><h2>留一部分一直抱著？照建議和抱著怎麼分</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function yrHtml() { try { return YRM.yearsCard(YEARS); } catch (e) { return `<section class="card" id="years"><h2>每一年：照建議 vs 一直抱著</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
-function rvHtml() { try { return RVM.reviewCard(REVIEW, Date.now()); } catch (e) { return `<section class="card" id="review"><h2>每週檢討：這週有沒有換預測方法？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
+function rvHtml() { try { return RVM.reviewCard(REVIEW, Date.now(), LIVE?.track?.champion?.scores?.n ?? 0); } catch (e) { return `<section class="card" id="review"><h2>每週檢討：這週有沒有換預測方法？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function upHtml() { try { return UPM.usdtParkCard(USDTP, LIVE); } catch (e) { return `<section class="card" id="usdtpark"><h2>空手的錢：留在 USDT，還是換回台幣？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function cyHtml() { try { return CYM.cashYieldCard(CYIELD, LIVE); } catch (e) { return `<section class="card" id="cashyield"><h2>空手的錢放銀行活儲，會多多少</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function fpHtml() { try { return FPM.fullPathCard(FPATH, fpCur()); } catch (e) { return `<section class="card" id="fullpath"><h2>要放回最多，要漲到哪裡</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -1021,7 +1022,7 @@ function trackCard() {
   const first = ch.first, ns = ch.scores?.n || 0;
   const nDays = Math.ceil((ch.n_forecasts || 0) / 2);
   const since = nDays < 14 ? `第 ${nDays} 天` : `${(nDays / 7).toFixed(0)} 週`;
-  const hit = ns ? `已經有 ${ns} 次到期可以對答案，猜對漲跌 <strong>${pct0(ch.scores.hit)}</strong>（一直猜「會漲」是 ${pct0(b?.scores?.hit)}）。` : `第一批預測要到 ${first ? closeMD(addDays(first, 7)) : '—'} 才能對答案。`;
+  const hit = (ns ? ST.hitIntro(ch.scores, b?.scores) : null) ?? `第一批預測要到 ${first ? closeMD(addDays(first, 7)) : '—'} 才能對答案。`;   // v64: 白話「對答案」句
   const ret = x => x?.paper?.equity ? `${ntd(x.paper.equity)}<div class="muted small">${pct(x.paper.equity / T.paper_start_twd - 1, 2)}</div>` : '—';
   const W = LIVE.walkforward?.models, wc = W?.[LIVE.champion.key], wb = W?.[LIVE.baseline];
   const hist = wc && wb ? `<p class="small">回測（${wc.start.slice(0, 4)} 年起，每天只用當天以前的資料，BTC、ETH 各半）：照建議年化 ${pct(wc.cagr)}、最慘時虧 ${pctS(-wc.maxdd, 0)}；一直抱著年化 ${pct(wb.cagr)}、最慘時虧 ${pctS(-wb.maxdd, 0)}。猜漲跌的準確度 ${pct0(wc.hit)}，跟丟銅板差不多。</p>` : '';
