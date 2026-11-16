@@ -42,6 +42,7 @@ import * as YRM from './years.js';   // v54
 import * as BLM from './blend.js';   // v55
 import * as SEM from './splitexit.js';   // v56
 import * as CSM from './coinsplit.js';   // v58
+import * as SAV from './sameavg.js';   // v59
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -182,7 +183,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v58';
+const VERSION = 'v59';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -544,6 +545,7 @@ function updateOuts() {
   set('bl-wrap', () => FR.withAsof(blHtml(), BLEND?.as_of ?? null, Date.now()));
   set('se-wrap', () => FR.withAsof(seHtml(), SPLITX?.as_of ?? null, Date.now()));   // v56
   set('cs-wrap', () => FR.withAsof(csplitHtml(), CSPLIT?.as_of ?? null, Date.now()));   // v58
+  set('sv-wrap', () => FR.withAsof(savgHtml(), SAVG?.as_of ?? null, Date.now()));   // v59
   set('fc-sa-BTC', () => saDetail('BTC'));
   set('fc-sa-ETH', () => saDetail('ETH'));
   set('fc-pc-BTC', () => pcDetail('BTC'));   // v51
@@ -698,6 +700,7 @@ let YEARS = null;   // v54
 let BLEND = null;   // v55
 let SPLITX = null;   // v56
 let CSPLIT = null;   // v58
+let SAVG = null;   // v59
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -908,6 +911,8 @@ const yrDetail = c => { try { return esc(YRM.detailLine(c, YEARS)); } catch { re
 const blDetail = c => { try { return esc(BLM.detailLine(c, BLEND)); } catch { return ''; } };
 // v56: 建議變成 0 時：一次賣完還是分幾天？（data/splitexit.json ← backtest/split_exit.py）
 // v58: 要放加密幣的錢，BTC 和 ETH 怎麼分？（data/coinsplit.json ← backtest/coin_split.py）
+// v59: 照建議贏一直抱著，是時機還是只是放得少？（data/sameavg.json ← backtest/same_avg.py）
+function savgHtml() { try { return SAV.sameAvgCard(SAVG); } catch (e) { return `<section class="card" id="sameavg"><h2>照建議贏一直抱著，是時機抓得好，還是只是放得比較少？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function csplitHtml() { try { return CSM.coinSplitCard(CSPLIT); } catch (e) { return `<section class="card" id="coinsplit"><h2>要放加密幣的錢，BTC 和 ETH 怎麼分？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function seHtml() { try { return SEM.splitCard(SPLITX); } catch (e) { return `<section class="card" id="splitexit"><h2>建議變成 0 時：一次賣完還是分幾天？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function blHtml() { try { return BLM.blendCard(BLEND); } catch (e) { return `<section class="card" id="blend"><h2>留一部分一直抱著？照建議和抱著怎麼分</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -1104,6 +1109,7 @@ async function render(force = false) {
   try { BLEND = await fetch('data/blend.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BLEND; } catch { BLEND = BLEND || null; }   // v55
   try { SPLITX = await fetch('data/splitexit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || SPLITX; } catch { SPLITX = SPLITX || null; }   // v56
   try { CSPLIT = await fetch('data/coinsplit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSPLIT; } catch { CSPLIT = CSPLIT || null; }   // v58
+  try { SAVG = await fetch('data/sameavg.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || SAVG; } catch { SAVG = SAVG || null; }   // v59
   try { REVIEW = await fetch('data/review.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || REVIEW; } catch { REVIEW = REVIEW || null; }   // v53
   try { PUPC = await fetch('data/pupcal.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PUPC; } catch { PUPC = PUPC || null; }   // v51
   try { FPATH = await fetch('data/fullpath.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FPATH; } catch { FPATH = FPATH || null; }   // v47
@@ -1170,7 +1176,7 @@ async function renderAdv(force = false) {
       <nav class="jump ix" aria-label="問題索引"><p class="ix-head small muted">想知道什麼，點那一張（會自動打開那一組）：<button type="button" class="ix-all link-btn">${AG.GROUPS.every(g => GO.has(g.id)) ? '全部收起' : '全部打開'}</button></p>
         <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a></div>
         <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a></div>
-        <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a></div>
+        <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a><a href="#sameavg">時機還是放得少</a></div>
         <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a></div>
         <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#review">每週檢討換了沒</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
       ${AG.wrap('act', `
@@ -1196,7 +1202,8 @@ async function renderAdv(force = false) {
       ${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, NOW)}
       ${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, NOW)}
       <div id="yr-wrap">${FR.withAsof(yrHtml(), YEARS?.as_of ?? null, NOW)}</div>
-      <div id="bl-wrap">${FR.withAsof(blHtml(), BLEND?.as_of ?? null, NOW)}</div>`, GO.has('record'))}
+      <div id="bl-wrap">${FR.withAsof(blHtml(), BLEND?.as_of ?? null, NOW)}</div>
+      <div id="sv-wrap">${FR.withAsof(savgHtml(), SAVG?.as_of ?? null, NOW)}</div>`, GO.has('record'))}
       ${AG.wrap('money', `
       ${LIVE ? journalHtml() : ''}
       ${FR.withAsof(riskCard(), FR.asofOf('weekly', DEC), NOW)}
