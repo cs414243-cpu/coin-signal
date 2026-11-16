@@ -1,9 +1,9 @@
 {
  "schema": 1,
- "generated_at": "2026-11-16T00:46:27+08:00",
+ "generated_at": "2026-11-16T08:55:46+08:00",
  "review": {
-  "date": "2026-11-11",
-  "file": "review-2026-11-11.md",
+  "date": "2026-11-16",
+  "file": "review-2026-11-16.md",
   "dry_run": false,
   "champion": "trend_vt@1",
   "k": 4,
@@ -39,7 +39,7 @@
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2513 vs 0.2522；夏普 0.29 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2514 vs 0.2521；夏普 0.24 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
@@ -75,7 +75,7 @@
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2568 vs 0.2522；夏普 -0.14 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2569 vs 0.2521；夏普 -0.20 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
@@ -111,12 +111,12 @@
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2527 vs 0.2522；夏普 0.43 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2527 vs 0.2521；夏普 0.39 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
       "passed": true,
-      "detail": "回測最大跌幅 -0.242 vs -0.184（最多差 10%）"
+      "detail": "回測最大跌幅 -0.245 vs -0.184（最多差 10%）"
      }
     ]
    },
@@ -147,7 +147,7 @@
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2519 vs 0.2522；夏普 0.12 vs 0.80（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2518 vs 0.2521；夏普 0.09 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
@@ -157,7 +157,7 @@
     ]
    }
   ],
-  "written_at": "2026-11-11T12:38+08:00"
+  "written_at": "2026-11-16T08:55+08:00"
  },
  "champion_now": "trend_vt@1",
  "champion_name": "趨勢＋波動調整（v2/v3 的規則）",
@@ -185,7 +185,7 @@
  },
  "live": {
   "first_asof": "2026-11-10",
-  "days_logged": 5,
+  "days_logged": 6,
   "scored": {
    "baseline@1": {
     "BTC": 0,
@@ -213,5 +213,5 @@
   "scored_by": "2027-01-11",
   "earliest_change_review": "2027-01-18"
  },
- "next_review": "2026-11-16"
+ "next_review": "2026-11-23"
 }

@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-13",
+ "as_of": "2026-11-15",
  "moves": [
   -0.1,
   -0.05,
@@ -13,61 +13,61 @@
  "source": "backtest/price_ladder.py (Binance closed daily bars; frozen trend_vt@1 formula)",
  "coins": {
   "BTC": {
-   "last_date": "2026-11-13",
-   "last_close": 68314.0,
+   "last_date": "2026-11-15",
+   "last_close": 65351.05,
    "flips": {
-    "50": 80553.48,
-    "200": 73075.2435
+    "50": 79749.3157,
+    "200": 72961.5474
    },
    "ladder": [
     {
      "move": -0.1,
-     "price": 61482.6,
+     "price": 58815.945,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.05,
-     "price": 64898.3,
+     "price": 62083.4975,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.02,
-     "price": 66947.72,
+     "price": 64044.029,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.0,
-     "price": 68314.0,
+     "price": 65351.05,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.02,
-     "price": 69680.28,
+     "price": 66658.071,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.05,
-     "price": 71729.7,
+     "price": 68618.6025,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.1,
-     "price": 75145.4,
-     "trend3": 0.5,
-     "exposure": 0.2879,
-     "level": "reduce"
+     "price": 71886.155,
+     "trend3": 0.0,
+     "exposure": 0.0,
+     "level": "out"
     }
    ],
    "freq": {
@@ -82,18 +82,18 @@
      "ge10": 0.0142
     },
     "oos": {
-     "n": 1413,
+     "n": 1415,
      "le10": 0.0007,
-     "le5": 0.0205,
-     "le2": 0.1423,
-     "flat2": 0.7006,
-     "ge2": 0.1571,
-     "ge5": 0.0326,
+     "le5": 0.0212,
+     "le2": 0.1428,
+     "flat2": 0.7004,
+     "ge2": 0.1569,
+     "ge5": 0.0325,
      "ge10": 0.0028
     }
    },
    "parity": {
-    "n": 3176,
+    "n": 3178,
     "max_abs_diff": 1.4988010832439613e-14
    },
    "oos_vol_dip": {
@@ -101,63 +101,63 @@
     "share": 1.0
    },
    "oos_small_move_changes": {
-    "n": 1413,
-    "share": 0.2279
+    "n": 1415,
+    "share": 0.2276
    }
   },
   "ETH": {
-   "last_date": "2026-11-13",
-   "last_close": 1929.88,
+   "last_date": "2026-11-15",
+   "last_close": 1835.35,
    "flips": {
-    "50": 2410.4492,
-    "200": 2148.0791
+    "50": 2374.1139,
+    "200": 2143.5271
    },
    "ladder": [
     {
      "move": -0.1,
-     "price": 1736.892,
+     "price": 1651.815,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.05,
-     "price": 1833.386,
+     "price": 1743.5825,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.02,
-     "price": 1891.2824,
+     "price": 1798.643,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.0,
-     "price": 1929.88,
+     "price": 1835.35,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.02,
-     "price": 1968.4776,
+     "price": 1872.057,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.05,
-     "price": 2026.374,
+     "price": 1927.1175,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.1,
-     "price": 2122.868,
+     "price": 2018.885,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
@@ -175,18 +175,18 @@
      "ge10": 0.0284
     },
     "oos": {
-     "n": 1413,
+     "n": 1415,
      "le10": 0.0057,
-     "le5": 0.0467,
-     "le2": 0.2059,
-     "flat2": 0.5874,
-     "ge2": 0.2067,
-     "ge5": 0.0609,
+     "le5": 0.0473,
+     "le2": 0.2064,
+     "flat2": 0.5866,
+     "ge2": 0.2071,
+     "ge5": 0.0608,
      "ge10": 0.0113
     }
    },
    "parity": {
-    "n": 3176,
+    "n": 3178,
     "max_abs_diff": 1.9872992140790302e-14
    },
    "oos_vol_dip": {
@@ -194,8 +194,8 @@
     "share": 1.0
    },
    "oos_small_move_changes": {
-    "n": 1413,
-    "share": 0.1203
+    "n": 1415,
+    "share": 0.1201
    }
   }
  }
