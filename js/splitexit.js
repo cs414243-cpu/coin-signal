@@ -4,7 +4,7 @@
 // (commit 3bbf8ed), 2022–23 / 2024+ checked separately. Not a signal; the recommendation itself is unchanged.
 // Why: the suggestion is 0 now; someone still holding coins asks whether to spread the sale "in case it bounces".
 // Research only, not investment advice.
-import { asofInline } from './fresh.js';
+import { asofInline, WEEKLY_NOTE } from './fresh.js';
 const R_EXIT = ['exit2', 'exit3', 'exit5'], R_ENTRY = ['entry2', 'entry3', 'entry5'];
 const SHORT = { now: '一次做完', exit2: '分 2 天賣', exit3: '分 3 天賣', exit5: '分 5 天賣', entry2: '分 2 天買', entry3: '分 3 天買', entry5: '分 5 天買' };
 const pc1 = x => Number.isFinite(x) ? `${x < 0 ? '−' : x > 0 ? '+' : ''}${Math.abs(x * 100).toFixed(1)}%` : '—';
@@ -71,6 +71,6 @@ export function splitCard(D) {
     <p class="small">${entryLine(D)}</p>
     ${table(D, R_ENTRY)}
     <p class="small"><strong>對你來說</strong>：${D.results.exit3.verdict === 'better' ? '回測裡分天賣比較好，但這是過去紀錄。' : '建議變成 0 時，當天全部賣掉最簡單，回測裡也不比分天差；分天賣只是把一部分「再抱幾天」，繼續跌的時候多虧。'}這和「差一點要不要動手」卡裡「隔天才做明顯變差」是同一個道理：這套規則的用處是大跌時少虧，拖延會丟掉這個用處。這是過去紀錄，不保證未來。</p>
-    <p class="small muted">算法：<code>backtest/split_exit.py</code> → <code>data/splitexit.json</code>（冠軍 trend_vt@1 凍結 walk-forward，Binance 已收完日K，${asofInline(D.as_of)}；這張卡不會每週自動重算）。分 N 天賣＝建議變成 0 那天起每天賣掉 1/N（第一份當天賣），期間規則又變成要放就照規則；分 N 天買同理。每次買賣 0.15%、買進再加台幣溢價 0.27%（和虛擬投組相同），沒放的錢不計利息；兩幣各一半。「每 NT$100 萬的幣」＝建議變 0 前一天放在幣裡的金額，比到分天做完的那天收盤。報酬／波動比＝年化 Sharpe；把握＝28 天區塊拔靴法 2,000 次。2022–23 年用來事先定判斷標準，2024 年起是之後檢查。</p>
+    <p class="small muted">算法：<code>backtest/split_exit.py</code> → <code>data/splitexit.json</code>（冠軍 trend_vt@1 凍結 walk-forward，Binance 已收完日K，${asofInline(D.as_of)}，${WEEKLY_NOTE}）。分 N 天賣＝建議變成 0 那天起每天賣掉 1/N（第一份當天賣），期間規則又變成要放就照規則；分 N 天買同理。每次買賣 0.15%、買進再加台幣溢價 0.27%（和虛擬投組相同），沒放的錢不計利息；兩幣各一半。「每 NT$100 萬的幣」＝建議變 0 前一天放在幣裡的金額，比到分天做完的那天收盤。報酬／波動比＝年化 Sharpe；把握＝28 天區塊拔靴法 2,000 次。2022–23 年用來事先定判斷標準，2024 年起是之後檢查。</p>
   </section>`;
 }
