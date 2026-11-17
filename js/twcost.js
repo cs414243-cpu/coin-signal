@@ -33,3 +33,25 @@ export function costFreshLine(f) {
   if (f.high) h += `<p class="small" id="cost-high">最近一天（${md(f.premDate)}）溢價 ${pct2(f.premLast)}，比 2026 年 95% 的日子都高（平常最高約 ${pct2(f.p95)}）：這時候用台幣買，溢價這部分比平常貴一些；不急的話可以在 MAX 看一下當下的 USDT 價，填進上面「USDT 賣價」重算。</p>`;
   return h;
 }
+
+// v76: 溢價偏高時，要不要等幾天再用台幣換？ — data/premwait.json ← backtest/prem_wait.py (definitions committed before the
+// first run aae9c92; IS-only result before any 2024+ number). Not a signal; the recommendation is unchanged.
+const pp = x => `${(x * 100).toFixed(1)}%`;
+const sgn = x => `${x < 0 ? '−' : '+'}${(Math.abs(x) * 100).toFixed(1)}%`;
+export const WAIT_HEAD = { no_fallback: '溢價高的時候，過幾天通常也沒有比較低：不用等。', wait: '等 3 天省下的溢價，平均比幣價變動帶來的差別還多。',
+  dont_wait: '溢價會回落一點，但等的這幾天幣價平均漲更多，等不划算。', unclear: '溢價通常會回落一點，但省下的錢比這幾天幣價的上下波動小很多——等不等，主要是在賭這 3 天的漲跌，說不準。' };
+
+export function premWaitValid(D) {
+  const ok = p => Number.isFinite(D?.part_a?.[p]?.q95?.k3?.mean) && Number.isFinite(D?.part_a?.[p]?.q95?.k3?.share_pos) && Number.isFinite(D?.part_a?.[p]?.q95?.k3?.n)
+    && Number.isFinite(D?.part_b?.[p]?.D3?.mean) && Number.isFinite(D?.part_b?.[p]?.absD3_median) && Number.isFinite(D?.part_b?.[p]?.n);
+  return !!D && !D.is_only && D.k === 3 && D.verdict?.overall in WAIT_HEAD && ok('is_') && ok('oos');
+}
+
+/** One small paragraph under the cost card (inside 進階). Every number comes from data/premwait.json. */
+export function premWaitLine(D) {
+  if (!premWaitValid(D)) return '';
+  const a = p => D.part_a[p].q95.k3, b = p => D.part_b[p];
+  const per = (p, lab) => `${lab}：溢價偏高的 ${a(p).n} 天，3 個營業日後平均低 ${pp(a(p).mean)}（${Math.round(a(p).share_pos * 100)}% 的時候比較低）；同樣 3 天，冠軍剛轉加碼後幣價平均 ${sgn(b(p).D3.mean)}、一般上下 ${pp(b(p).absD3_median)}（${b(p).n} 次）`;
+  return `<p class="small" id="cost-wait"><strong>溢價偏高時要不要等幾天再換？</strong>${WAIT_HEAD[D.verdict.overall]}${per('oos', '2024 年起')}；${per('is_', '2018–2023 年')}。`
+    + `溢價偏高＝比之前一年 95% 的日子都高（只用當天以前的資料）。資料到 ${ymd(D.as_of)}，每週一重算；回測結果，不是保證。</p>`;
+}

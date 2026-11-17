@@ -198,7 +198,8 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
+const VERSION = 'v76';   // v76: 台幣買幣成本卡「溢價偏高時要不要等幾天再換？」（溢價回落 vs 冠軍剛加碼後 3 天幣價變動）
+// was: const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -517,6 +518,7 @@ function costOut(coin) {
     ${c.filled ? '' : '<p class="warn">金額超過快照裡的掛單深度，實際滑價會更大，建議分批或改用掛單。</p>'}
     <p class="small">另一條路徑（${S.route === 'twd' ? '經 USDT' : '直接台幣'}）合計 ${pctS(alt.total, 2)}${alt.total < c.total ? '，<strong>比較便宜</strong>' : ''}。賣回台幣時，如果溢價還在，溢價那部分大致拿得回來；一定拿不回來的是手續費和價差，買進加賣出約 ${pctS(lose, 2)}。</p>
     ${TWC.costFreshLine(TWC.costFresh(DEC, Date.now()))}
+    ${(() => { try { return TWC.premWaitLine(PWAIT); } catch { return ''; } })()}
     ${csLine ? `<p class="small" id="cost-cs">${esc(csLine)} <a href="#costsens">看成本表</a></p>` : ''}
     <p class="small muted">溢價＝MAX 的 USDT/TWD 價比「央行匯率 × USDT 美元價」貴多少（C#23；2026 年 5%–95% 落在 ${pctS(y26.p5, 2)}～${pctS(y26.p95, 2)}）。直接用台幣買的市場，價格同樣含這個溢價。手續費來自 MAX 公開 API（${esc(DEC.max.vip_src === 'live' ? '與掛單簿同時抓取' : DEC.max.vip_src)}）。未含提領到自己錢包的手續費和銀行入金費用。MAX API 不允許手機直接讀取，所以價差用每週一更新的快照，不是即時。</p>`;
 }
@@ -846,7 +848,7 @@ function recentCard() {
 }
 
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
-let LIVE = null, EV = null, TRUST = null, DEV, FROWS = null, PEERS = null;   // v75: FROWS, PEERS
+let LIVE = null, EV = null, TRUST = null, DEV, FROWS = null, PEERS = null, PWAIT = null;   // v75: FROWS, PEERS; v76: PWAIT
 const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
 const ACT_HINT = { add: '比前一天建議多放一些', hold: '維持建議的比例', reduce: '比全部放進去少', out: '先不要放' };
 const STATUS_ZH = { champion: '冠軍（目前採用）', challenger: '挑戰者', reference: '基準（一直抱著）', retired: '退休' };
@@ -1203,6 +1205,7 @@ async function render(force = false) {
     if (ft !== null) FROWS = AN.parse(ft, 'forecast');   // v75: every model's forecast rows (今天每個方法怎麼說)
     if (ft !== null && st !== null) ANS = AN.answerKey(AN.parse(ft, 'forecast'), AN.parse(st, 'score'), LIVE?.champion?.key || 'trend_vt@1');
   } catch { ANS = ANS || null; }
+  try { PWAIT = await fetch('data/premwait.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PWAIT; } catch { PWAIT = PWAIT || null; }   // v76
   try { PEERS = await fetch('data/peers.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PEERS; } catch { PEERS = PEERS || null; }   // v75
   try { BNOISE = await fetch('data/bandnoise.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BNOISE; } catch { BNOISE = BNOISE || null; }
   try { XSRC = await fetch('data/xsrc.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XSRC; } catch { XSRC = XSRC || null; }
