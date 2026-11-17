@@ -1,0 +1,61 @@
+{
+ "source": "forecast/proposals/proto_model_disagreement_results.json (P-model-disagreement, rejected)",
+ "tested_at": "2026-11-17 02:46 Taipei",
+ "as_of": "2026-11-15",
+ "periods": {
+  "IS": [
+   "2022-01-01",
+   "2023-12-31"
+  ],
+  "OOS": [
+   "2024-01-01",
+   "2026-11-15"
+  ],
+  "WF": [
+   "2022-01-01",
+   "2026-11-15"
+  ]
+ },
+ "rule": "e==0 & vote==3 → 0.5·min(1,0.30/vol30)",
+ "champion": "trend_vt@1",
+ "challengers": [
+  "knn@1",
+  "tsmom@1",
+  "logit@1"
+ ],
+ "vote_floor": {
+  "IS": {
+   "cagr": 0.0973,
+   "maxdd": -0.1828,
+   "sharpe": 0.584,
+   "mean_expo": 0.289
+  },
+  "OOS": {
+   "cagr": 0.1235,
+   "maxdd": -0.2154,
+   "sharpe": 0.662,
+   "mean_expo": 0.36
+  }
+ },
+ "champ": {
+  "IS": {
+   "cagr": 0.1251,
+   "maxdd": -0.1639,
+   "sharpe": 0.723,
+   "mean_expo": 0.277
+  },
+  "OOS": {
+   "cagr": 0.1589,
+   "maxdd": -0.1842,
+   "sharpe": 0.835,
+   "mean_expo": 0.339
+  }
+ },
+ "flag_share_oos": {
+  "BTC": 0.065,
+  "ETH": 0.09
+ },
+ "p_better_oos": 0.1515,
+ "verdict": "rejected",
+ "generated_at": "2026-11-17T18:39:33Z"
+}

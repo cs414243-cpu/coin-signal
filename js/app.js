@@ -57,6 +57,7 @@ import * as XL from './execlag.js';   // v66
 import * as TWV from './twdview.js';   // v70
 import * as CAL from './calendar.js';   // v67
 import * as BRG from './bandregime.js';   // v68
+import * as PEER from './peers.js';   // v75
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -197,7 +198,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v74';   // v74: 台幣買幣成本的掛單簿＋USDT 溢價每週一自動更新（原本停在 11/11、11/10）
+const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -845,7 +846,7 @@ function recentCard() {
 }
 
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
-let LIVE = null, EV = null, TRUST = null, DEV;
+let LIVE = null, EV = null, TRUST = null, DEV, FROWS = null, PEERS = null;   // v75: FROWS, PEERS
 const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
 const ACT_HINT = { add: '比前一天建議多放一些', hold: '維持建議的比例', reduce: '比全部放進去少', out: '先不要放' };
 const STATUS_ZH = { champion: '冠軍（目前採用）', challenger: '挑戰者', reference: '基準（一直抱著）', retired: '退休' };
@@ -1092,6 +1093,7 @@ function modelsCard() {
   return `<section class="card" id="models"><h2>預測模型與自我改善機制</h2>
     <p class="small">每天早上 8 點收盤後，所有登記的模型各自預測 BTC、ETH 未來 7 天（上漲機率、價格區間、建議部位），寫進只能新增、不能改的帳本（每筆都有雜湊鏈，並推到公開 GitHub）。7 天到期就自動評分，每個模型也各自跑一個虛擬 NT$100 萬的投資組合。每週檢討一次：挑戰者要實際累積 ≥ 8 週，而且「預測分數（Brier）」和「虛擬投資的風險調整報酬」都顯著比冠軍好、歷史回測不更差、最大跌幅不多跌 5 個百分點以上，才會取代冠軍。模型程式碼一登記就凍結；想改參數只能登記新版本、從零開始累積紀錄。</p>
     <div class="scroll"><table class="bt"><thead><tr><th>模型</th><th>實盤預測／已評分</th><th>實盤 Brier</th><th>虛擬投資</th><th>回測 Brier</th><th>回測年化</th><th>回測最大跌幅</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${(() => { try { return PEER.block(FROWS, LIVE, PEERS); } catch { return ''; } })()}
     <p class="small muted" id="pup-note">${esc(PU.advNote(LIVE))}</p>
     ${RB.robustLine()}
     ${CH.closeHourLine()}
@@ -1198,8 +1200,10 @@ async function render(force = false) {
   try { PLOG = await fetch('ledger/paper.jsonl', { cache: 'no-cache' }).then(r => r.ok ? r.text() : null).then(t => t === null ? PLOG : PL.parse(t)); } catch { PLOG = PLOG || null; }   // v33
   try {   // v42: 每一筆預測對答案 (public ledger; keep the last good copy when a download fails)
     const [ft, st] = await Promise.all(['forecasts', 'scores'].map(n => fetch(`ledger/${n}.jsonl`, { cache: 'no-cache' }).then(r => r.ok ? r.text() : null)));
+    if (ft !== null) FROWS = AN.parse(ft, 'forecast');   // v75: every model's forecast rows (今天每個方法怎麼說)
     if (ft !== null && st !== null) ANS = AN.answerKey(AN.parse(ft, 'forecast'), AN.parse(st, 'score'), LIVE?.champion?.key || 'trend_vt@1');
   } catch { ANS = ANS || null; }
+  try { PEERS = await fetch('data/peers.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PEERS; } catch { PEERS = PEERS || null; }   // v75
   try { BNOISE = await fetch('data/bandnoise.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BNOISE; } catch { BNOISE = BNOISE || null; }
   try { XSRC = await fetch('data/xsrc.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XSRC; } catch { XSRC = XSRC || null; }
   TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
