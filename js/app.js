@@ -47,6 +47,7 @@ import * as SAV from './sameavg.js';   // v59
 import * as QC from './quitcost.js';   // v60
 import * as LE from './lateentry.js';   // v61
 import * as DS from './dipstop.js';   // v62
+import * as TPF from './takeprofit.js';   // v71
 import * as QX from './quickexit.js';   // v63
 import * as ST from './scoretalk.js';   // v64
 import * as BC from './bigclues.js';   // v65
@@ -194,7 +195,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v70';
+const VERSION = 'v71';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -560,6 +561,7 @@ function updateOuts() {
   set('qc-wrap', () => FR.withAsof(qcHtml(), QCOST?.as_of ?? null, Date.now()));   // v60
   set('le-wrap', () => FR.withAsof(leHtml(), LENTRY?.as_of ?? null, Date.now()));   // v61
   set('ds-wrap', () => FR.withAsof(dsHtml(), DSTOP?.as_of ?? null, Date.now()));   // v62
+  set('tp-wrap', () => FR.withAsof(tpHtml(), TPROF?.as_of ?? null, Date.now()));   // v71
   set('qx-wrap', () => FR.withAsof(qxHtml(), QEXIT?.as_of ?? null, Date.now()));   // v63
   set('xl-wrap', () => FR.withAsof(xlHtml(), XLAG?.as_of ?? null, Date.now()));   // v66
   set('tw-wrap', () => FR.withAsof(twHtml(), TWDV?.as_of ?? null, Date.now()));   // v70
@@ -724,6 +726,7 @@ let SAVG = null;   // v59
 let QCOST = null;   // v60
 let LENTRY = null;   // v61
 let DSTOP = null;   // v62
+let TPROF = null;   // v71
 let QEXIT = null;   // v63
 let XLAG = null;   // v66
 let TWDV = null;   // v70
@@ -948,6 +951,8 @@ function twHtml() { try { return TWV.twdViewCard(TWDV); } catch (e) { return `<s
 // v66: 建議變了，我晚幾天才照做，會差多少？（data/execlag.json ← backtest/exec_lag.py）
 function xlHtml() { try { return XL.execLagCard(XLAG); } catch (e) { return `<section class="card" id="execlag"><h2>建議變了，我晚幾天才照做，會差多少？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v62: 加碼之後價格跌破買進價，要不要自己先全賣？（data/dipstop.json ← backtest/dip_stop.py）
+// v71: 加碼之後已經賺了，要不要自己先賣掉落袋？（data/takeprofit.json ← backtest/take_profit.py）
+function tpHtml() { try { return TPF.takeProfitCard(TPROF); } catch (e) { return `<section class="card" id="takeprofit"><h2>加碼之後已經賺了，要不要自己先賣掉落袋？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function dsHtml() { try { return DS.dipStopCard(DSTOP); } catch (e) { return `<section class="card" id="dipstop"><h2>加碼之後價格跌破買進價，要不要自己先全賣？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v61: 轉成加碼時已經漲很多了，還要跟嗎？（data/lateentry.json ← backtest/late_entry.py）
 function leHtml() { try { return LE.lateEntryCard(LENTRY); } catch (e) { return `<section class="card" id="lateentry"><h2>轉成加碼時已經漲很多了，還要跟嗎？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -1165,6 +1170,7 @@ async function render(force = false) {
   try { QCOST = await fetch('data/quitcost.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || QCOST; } catch { QCOST = QCOST || null; }   // v60
   try { LENTRY = await fetch('data/lateentry.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LENTRY; } catch { LENTRY = LENTRY || null; }   // v61
   try { DSTOP = await fetch('data/dipstop.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || DSTOP; } catch { DSTOP = DSTOP || null; }   // v62
+  try { TPROF = await fetch('data/takeprofit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TPROF; } catch { TPROF = TPROF || null; }   // v71
   try { BCLUE = await fetch('data/bigclues.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BCLUE; } catch { BCLUE = BCLUE || null; }   // v65
   try { QEXIT = await fetch('data/quickexit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || QEXIT; } catch { QEXIT = QEXIT || null; }   // v63
   try { XLAG = await fetch('data/execlag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XLAG; } catch { XLAG = XLAG || null; }   // v66
@@ -1233,7 +1239,7 @@ async function renderAdv(force = false) {
     const GO = AG.loadOpen(localStorage);   // v50: remembered open groups
     el.innerHTML = `
       <nav class="jump ix" aria-label="問題索引"><p class="ix-head small muted">想知道什麼，點那一張（會自動打開那一組）：<button type="button" class="ix-all link-btn">${AG.GROUPS.every(g => GO.has(g.id)) ? '全部收起' : '全部打開'}</button></p>
-        <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a><a href="#dipstop">跌破買進價要先賣嗎</a><a href="#quickexit">會不會很快又賣掉</a></div>
+        <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a><a href="#dipstop">跌破買進價要先賣嗎</a><a href="#takeprofit">賺了要先落袋嗎</a><a href="#quickexit">會不會很快又賣掉</a></div>
         <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a><a href="#sameavg">時機還是放得少</a><a href="#quitcost">連賠想放棄</a></div>
         <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a></div>
@@ -1247,6 +1253,7 @@ async function renderAdv(force = false) {
       ${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), NOW)}
       <div id="se-wrap">${FR.withAsof(seHtml(), SPLITX?.as_of ?? null, NOW)}</div>
       <div id="ds-wrap">${FR.withAsof(dsHtml(), DSTOP?.as_of ?? null, NOW)}</div>
+      <div id="tp-wrap">${FR.withAsof(tpHtml(), TPROF?.as_of ?? null, NOW)}</div>
       <div id="qx-wrap">${FR.withAsof(qxHtml(), QEXIT?.as_of ?? null, NOW)}</div>`, GO.has('act'))}
       ${AG.wrap('flat', `
       ${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, NOW)}
