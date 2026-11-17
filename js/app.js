@@ -51,6 +51,7 @@ import * as ST from './scoretalk.js';   // v64
 import * as BC from './bigclues.js';   // v65
 import * as XL from './execlag.js';   // v66
 import * as CAL from './calendar.js';   // v67
+import * as BRG from './bandregime.js';   // v68
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -191,7 +192,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v67';
+const VERSION = 'v68';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -559,6 +560,8 @@ function updateOuts() {
   set('ds-wrap', () => FR.withAsof(dsHtml(), DSTOP?.as_of ?? null, Date.now()));   // v62
   set('qx-wrap', () => FR.withAsof(qxHtml(), QEXIT?.as_of ?? null, Date.now()));   // v63
   set('xl-wrap', () => FR.withAsof(xlHtml(), XLAG?.as_of ?? null, Date.now()));   // v66
+  set('fc-br-BTC', () => brDetail('BTC'));   // v68
+  set('fc-br-ETH', () => brDetail('ETH'));
   set('fc-sa-BTC', () => saDetail('BTC'));
   set('fc-sa-ETH', () => saDetail('ETH'));
   set('fc-pc-BTC', () => pcDetail('BTC'));   // v51
@@ -981,10 +984,18 @@ function coinBlock(c) {
       <p class="up">${esc(PU.DIR_TEXT)}</p>
       <p id="fc-pc-${c}" class="small pc">${pcDetail(c)}</p>
       <p class="small">一週後價格大概在 ${usd(f.price_usd * (1 + f.q10))}～${usd(f.price_usd * (1 + f.q90))} 之間（10 次有 8 次落在這裡；${closeLabel(f)} ${usd(f.price_usd)}）</p>
+      <p id="fc-br-${c}" class="small br">${brDetail(c)}</p>
       ${inMkt ? '' : bad}
       ${OUTC ? `<p class="past small muted" data-coin="${c}">${esc(OC.homeLine(OUTC, c, f.action))}</p>` : ''}
       </details>
     </div>`;
+}
+// v68: 剛大漲／大跌一週之後，一週價格範圍還準嗎（phone's closed daily bars for the forecast's own candle date）
+function brDetail(c) {
+  const f = LIVE?.coins?.[c]; if (!f || !BNOISE) return '';
+  let r = null;
+  try { if (CTX[c]?.live?.candles) r = BRG.r7(RL.closedBars(CTX[c].live.candles), f.asof); } catch { r = null; }
+  return BRG.line(BNOISE, c, r);
 }
 // v34: 8 點收盤後、正式建議更新前（約 08:00–08:30，或每日預測晚了），手機先照同一套規則算剛收完的那根日K
 function preHome() {
