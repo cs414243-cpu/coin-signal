@@ -56,6 +56,7 @@ import * as ST from './scoretalk.js';   // v64
 import * as BC from './bigclues.js';   // v65
 import * as XL from './execlag.js';   // v66
 import * as TWV from './twdview.js';   // v70
+import * as PPW from './promopower.js';   // v78
 import * as CAL from './calendar.js';   // v67
 import * as BRG from './bandregime.js';   // v68
 import * as PEER from './peers.js';   // v75
@@ -199,7 +200,8 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v77';   // v77: 盤中已經漲過翻轉價，要不要先買？（事先登記 3 種盤中先買 vs 等 8 點收盤）
+const VERSION = 'v78';   // v78: 每週檢討卡「8 週的實際對答案，分得出哪個方法比較好嗎？」（事先登記，歷史重演換方法規則）
+// was: const VERSION = 'v77';   // v77: 盤中已經漲過翻轉價，要不要先買？（事先登記 3 種盤中先買 vs 等 8 點收盤）
 // was: const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
@@ -741,6 +743,7 @@ let RLAG = null;   // v72
 let QEXIT = null;   // v63
 let XLAG = null;   // v66
 let TWDV = null;   // v70
+let PPOW = null;   // v78
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -944,6 +947,8 @@ function pcHtml() { try { return PCM.pupCalCard(PUPC, ANS ? PCM.liveBuckets(ANS)
 function saHtml() { try { return SAM.startAnyCard(STARTA, LIVE); } catch (e) { return `<section class="card" id="startany"><h2>如果今天才開始照做，3 個月／1 年後會怎樣</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v52: 空手的錢留 USDT 還是換回台幣（data/usdtpark.json）
 const upDetail = c => { try { return esc(UPM.detailLine(c, USDTP, LIVE)); } catch { return ''; } };
+// v78: 8 週的實際對答案分得出好壞嗎？（data/promopower.json ← backtest/promo_power.py），放在每週檢討卡最後
+function ppInto(html) { let b = ''; try { b = PPW.block(PPOW); } catch { b = ''; } return b ? html.replace(/<\/section>\s*$/, `${b}</section>`) : html; }
 // v53: 每週檢討：這週有沒有換預測方法？（data/review.json ← forecast/review_export.py ← reports/review-*.md）
 // v54: 每一年：照建議 vs 一直抱著（data/years.json ← backtest/year_by_year.py）
 const yrDetail = c => { try { return esc(YRM.detailLine(c, YEARS)); } catch { return ''; } };
@@ -975,7 +980,7 @@ function csplitHtml() { try { return CSM.coinSplitCard(CSPLIT); } catch (e) { re
 function seHtml() { try { return SEM.splitCard(SPLITX); } catch (e) { return `<section class="card" id="splitexit"><h2>建議變成 0 時：一次賣完還是分幾天？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function blHtml() { try { return BLM.blendCard(BLEND); } catch (e) { return `<section class="card" id="blend"><h2>留一部分一直抱著？照建議和抱著怎麼分</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function yrHtml() { try { return YRM.yearsCard(YEARS); } catch (e) { return `<section class="card" id="years"><h2>每一年：照建議 vs 一直抱著</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
-function rvHtml() { try { return RVM.reviewCard(REVIEW, Date.now(), LIVE?.track?.champion?.scores?.n ?? 0); } catch (e) { return `<section class="card" id="review"><h2>每週檢討：這週有沒有換預測方法？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
+function rvHtml() { try { return ppInto(RVM.reviewCard(REVIEW, Date.now(), LIVE?.track?.champion?.scores?.n ?? 0)); } catch (e) { return `<section class="card" id="review"><h2>每週檢討：這週有沒有換預測方法？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function upHtml() { try { return UPM.usdtParkCard(USDTP, LIVE); } catch (e) { return `<section class="card" id="usdtpark"><h2>空手的錢：留在 USDT，還是換回台幣？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function cyHtml() { try { return CYM.cashYieldCard(CYIELD, LIVE); } catch (e) { return `<section class="card" id="cashyield"><h2>空手的錢放銀行活儲，會多多少</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function fpHtml() { try { return FPM.fullPathCard(FPATH, fpCur()); } catch (e) { return `<section class="card" id="fullpath"><h2>要放回最多，要漲到哪裡</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
@@ -1189,6 +1194,7 @@ async function render(force = false) {
   try { BCLUE = await fetch('data/bigclues.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BCLUE; } catch { BCLUE = BCLUE || null; }   // v65
   try { QEXIT = await fetch('data/quickexit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || QEXIT; } catch { QEXIT = QEXIT || null; }   // v63
   try { XLAG = await fetch('data/execlag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XLAG; } catch { XLAG = XLAG || null; }   // v66
+  try { PPOW = await fetch('data/promopower.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PPOW; } catch { PPOW = PPOW || null; }   // v78
   try { TWDV = await fetch('data/twdview.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TWDV; } catch { TWDV = TWDV || null; }   // v70
   try { REVIEW = await fetch('data/review.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || REVIEW; } catch { REVIEW = REVIEW || null; }   // v53
   try { PUPC = await fetch('data/pupcal.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PUPC; } catch { PUPC = PUPC || null; }   // v51

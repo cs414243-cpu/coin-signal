@@ -1,0 +1,2148 @@
+{
+ "schema": 1,
+ "as_of": "2026-11-09",
+ "first": "2022-01-01",
+ "n_windows": 246,
+ "n_nonoverlap": 31,
+ "threshold": 0.975,
+ "rules": {
+  "min_live_days": 56,
+  "alpha": 0.1,
+  "k": 4,
+  "boot_block": 7,
+  "boot_reps": 2000,
+  "live_dd_margin": 0.05
+ },
+ "full": {
+  "trend_vt@1": {
+   "brier": 0.252135,
+   "days": 1780,
+   "ret": 0.934244,
+   "sharpe": 0.790278,
+   "maxdd": -0.184215,
+   "cagr": 0.144856
+  },
+  "baseline@1": {
+   "brier": 0.251403,
+   "days": 1780,
+   "ret": -0.078455,
+   "sharpe": 0.241917,
+   "maxdd": -0.688789,
+   "cagr": -0.016614
+  },
+  "knn@1": {
+   "brier": 0.256954,
+   "days": 1780,
+   "ret": -0.540419,
+   "sharpe": -0.199349,
+   "maxdd": -0.636229,
+   "cagr": -0.147361
+  },
+  "tsmom@1": {
+   "brier": 0.252657,
+   "days": 1780,
+   "ret": 0.320585,
+   "sharpe": 0.390556,
+   "maxdd": -0.245412,
+   "cagr": 0.058678
+  },
+  "logit@1": {
+   "brier": 0.251835,
+   "days": 1780,
+   "ret": 0.004789,
+   "sharpe": 0.083642,
+   "maxdd": -0.268033,
+   "cagr": 0.00098
+  }
+ },
+ "wf_pass": {
+  "baseline@1": false,
+  "knn@1": false,
+  "tsmom@1": false,
+  "logit@1": false
+ },
+ "check": {
+  "trend_vt@1": {
+   "brier_diff": 4.524363072133664e-06,
+   "sharpe_diff": 0.00022299999999997322
+  },
+  "baseline@1": {
+   "brier_diff": 1.1192788387237584e-05,
+   "sharpe_diff": 0.0028549999999999964
+  },
+  "knn@1": {
+   "brier_diff": 2.8486196992416613e-05,
+   "sharpe_diff": 0.003722000000000003
+  },
+  "tsmom@1": {
+   "brier_diff": 5.2758809515052185e-06,
+   "sharpe_diff": 0.0011279999999999624
+  },
+  "logit@1": {
+   "brier_diff": 2.0457050535216403e-06,
+   "sharpe_diff": 0.0018610000000000015
+  }
+ },
+ "cands": {
+  "baseline@1": {
+   "worse_sharpe_full": true,
+   "brier_better_full": true,
+   "full_brier_gap": 0.000732,
+   "brier_lead": 0.5488,
+   "sharpe_lead": 0.7602,
+   "brier_ok": 0.0569,
+   "sharpe_ok": 0.0813,
+   "dd_ok": 0.2073,
+   "live_pass": 0.0081,
+   "n_live_pass": 2,
+   "full_pass": 0.0,
+   "n_full_pass": 0,
+   "live_pass_windows": [
+    "2023-06-10",
+    "2023-06-17"
+   ],
+   "persist_brier": 0.5152,
+   "n_persist_brier": 132,
+   "persist_sharpe": 0.7238,
+   "n_persist_sharpe": 181,
+   "mde_brier": 0.02347,
+   "wf_pass": false
+  },
+  "knn@1": {
+   "worse_sharpe_full": true,
+   "brier_better_full": false,
+   "full_brier_gap": -0.004819,
+   "brier_lead": 0.3496,
+   "sharpe_lead": 0.4715,
+   "brier_ok": 0.0447,
+   "sharpe_ok": 0.0366,
+   "dd_ok": 0.3862,
+   "live_pass": 0.0,
+   "n_live_pass": 0,
+   "full_pass": 0.0,
+   "n_full_pass": 0,
+   "live_pass_windows": [],
+   "persist_brier": 0.2093,
+   "n_persist_brier": 86,
+   "persist_sharpe": 0.4828,
+   "n_persist_sharpe": 116,
+   "mde_brier": 0.0361,
+   "wf_pass": false
+  },
+  "tsmom@1": {
+   "worse_sharpe_full": true,
+   "brier_better_full": false,
+   "full_brier_gap": -0.000521,
+   "brier_lead": 0.4715,
+   "sharpe_lead": 0.3496,
+   "brier_ok": 0.0691,
+   "sharpe_ok": 0.0203,
+   "dd_ok": 0.9715,
+   "live_pass": 0.0,
+   "n_live_pass": 0,
+   "full_pass": 0.0,
+   "n_full_pass": 0,
+   "live_pass_windows": [],
+   "persist_brier": 0.3929,
+   "n_persist_brier": 112,
+   "persist_sharpe": 0.3721,
+   "n_persist_sharpe": 86,
+   "mde_brier": 0.01713,
+   "wf_pass": false
+  },
+  "logit@1": {
+   "worse_sharpe_full": true,
+   "brier_better_full": true,
+   "full_brier_gap": 0.000301,
+   "brier_lead": 0.4797,
+   "sharpe_lead": 0.5772,
+   "brier_ok": 0.0854,
+   "sharpe_ok": 0.0285,
+   "dd_ok": 0.8821,
+   "live_pass": 0.0,
+   "n_live_pass": 0,
+   "full_pass": 0.0,
+   "n_full_pass": 0,
+   "live_pass_windows": [],
+   "persist_brier": 0.4912,
+   "n_persist_brier": 114,
+   "persist_sharpe": 0.5563,
+   "n_persist_sharpe": 142,
+   "mde_brier": 0.02231,
+   "wf_pass": false
+  }
+ },
+ "any_full_pass": 0,
+ "verdict": "strict",
+ "windows": [
+  {
+   "start": "2022-01-01",
+   "champ_ret": -0.0401,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-01-08",
+   "champ_ret": -0.0345,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-01-15",
+   "champ_ret": -0.0403,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-01-22",
+   "champ_ret": -0.0346,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-01-29",
+   "champ_ret": -0.024,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-02-05",
+   "champ_ret": -0.0092,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-02-12",
+   "champ_ret": -0.0285,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-02-19",
+   "champ_ret": -0.0327,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-02-26",
+   "champ_ret": -0.0353,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-03-05",
+   "champ_ret": -0.0237,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-03-12",
+   "champ_ret": -0.0178,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-03-19",
+   "champ_ret": -0.0248,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-03-26",
+   "champ_ret": -0.0359,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-04-02",
+   "champ_ret": -0.047,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-04-09",
+   "champ_ret": -0.0248,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-04-16",
+   "champ_ret": -0.0034,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-04-23",
+   "champ_ret": 0.0,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-04-30",
+   "champ_ret": 0.0,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-05-07",
+   "champ_ret": 0.0,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-05-14",
+   "champ_ret": 0.0,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-05-21",
+   "champ_ret": 0.0,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-05-28",
+   "champ_ret": -0.0081,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-06-04",
+   "champ_ret": -0.0059,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-06-11",
+   "champ_ret": -0.0072,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-06-18",
+   "champ_ret": 0.0077,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-06-25",
+   "champ_ret": -0.0321,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-07-02",
+   "champ_ret": -0.0375,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-07-09",
+   "champ_ret": -0.0375,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-07-16",
+   "champ_ret": -0.0375,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-07-23",
+   "champ_ret": -0.0481,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-07-30",
+   "champ_ret": -0.0497,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-08-06",
+   "champ_ret": -0.0464,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-08-13",
+   "champ_ret": -0.0666,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-08-20",
+   "champ_ret": -0.0253,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-08-27",
+   "champ_ret": -0.0216,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-09-03",
+   "champ_ret": -0.0063,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-09-10",
+   "champ_ret": 0.0067,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-09-17",
+   "champ_ret": -0.0262,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-09-24",
+   "champ_ret": -0.0262,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-10-01",
+   "champ_ret": -0.0262,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-10-08",
+   "champ_ret": -0.0247,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-10-15",
+   "champ_ret": -0.0247,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-10-22",
+   "champ_ret": -0.0247,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-10-29",
+   "champ_ret": -0.0479,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-11-05",
+   "champ_ret": -0.0547,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-11-12",
+   "champ_ret": 0.0014,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-11-19",
+   "champ_ret": 0.0707,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-11-26",
+   "champ_ret": 0.1889,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-12-03",
+   "champ_ret": 0.1806,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-12-10",
+   "champ_ret": 0.2001,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-12-17",
+   "champ_ret": 0.1409,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-12-24",
+   "champ_ret": 0.2291,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2022-12-31",
+   "champ_ret": 0.1918,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-01-07",
+   "champ_ret": 0.1693,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-01-14",
+   "champ_ret": 0.017,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-01-21",
+   "champ_ret": 0.0539,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-01-28",
+   "champ_ret": 0.0581,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-02-04",
+   "champ_ret": 0.0537,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-02-11",
+   "champ_ret": 0.1006,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-02-18",
+   "champ_ret": 0.0905,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-02-25",
+   "champ_ret": 0.0414,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-03-04",
+   "champ_ret": 0.0932,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-03-11",
+   "champ_ret": 0.1265,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-03-18",
+   "champ_ret": -0.0036,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-03-25",
+   "champ_ret": -0.0057,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-04-01",
+   "champ_ret": -0.0233,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-04-08",
+   "champ_ret": -0.0143,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-04-15",
+   "champ_ret": -0.0994,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-04-22",
+   "champ_ret": -0.0528,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-04-29",
+   "champ_ret": -0.0234,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-05-06",
+   "champ_ret": -0.0048,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-05-13",
+   "champ_ret": 0.0092,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-05-20",
+   "champ_ret": 0.0186,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-05-27",
+   "champ_ret": 0.0056,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-06-03",
+   "champ_ret": -0.0134,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-06-10",
+   "champ_ret": 0.009,
+   "baseline": 1,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-06-17",
+   "champ_ret": 0.0129,
+   "baseline": 1,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-06-24",
+   "champ_ret": -0.0798,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-07-01",
+   "champ_ret": -0.0877,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-07-08",
+   "champ_ret": -0.0792,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-07-15",
+   "champ_ret": -0.0926,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-07-22",
+   "champ_ret": -0.0747,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-07-29",
+   "champ_ret": -0.0705,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-08-05",
+   "champ_ret": -0.0519,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-08-12",
+   "champ_ret": -0.056,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-08-19",
+   "champ_ret": -0.0201,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-08-26",
+   "champ_ret": 0.0145,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-09-02",
+   "champ_ret": 0.1057,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-09-09",
+   "champ_ret": 0.1239,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-09-16",
+   "champ_ret": 0.2237,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-09-23",
+   "champ_ret": 0.1983,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-09-30",
+   "champ_ret": 0.2295,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-10-07",
+   "champ_ret": 0.2434,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-10-14",
+   "champ_ret": 0.358,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-10-21",
+   "champ_ret": 0.2615,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-10-28",
+   "champ_ret": 0.2009,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-11-04",
+   "champ_ret": 0.1524,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-11-11",
+   "champ_ret": 0.0838,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-11-18",
+   "champ_ret": 0.1287,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-11-25",
+   "champ_ret": 0.0875,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-12-02",
+   "champ_ret": 0.0395,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-12-09",
+   "champ_ret": -0.0165,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-12-16",
+   "champ_ret": 0.0517,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-12-23",
+   "champ_ret": 0.1159,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2023-12-30",
+   "champ_ret": 0.1318,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-01-06",
+   "champ_ret": 0.3144,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-01-13",
+   "champ_ret": 0.3676,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-01-20",
+   "champ_ret": 0.3875,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-01-27",
+   "champ_ret": 0.3403,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-02-03",
+   "champ_ret": 0.3809,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-02-10",
+   "champ_ret": 0.2927,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-02-17",
+   "champ_ret": 0.1975,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-02-24",
+   "champ_ret": 0.1539,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-03-02",
+   "champ_ret": 0.0077,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-03-09",
+   "champ_ret": -0.0704,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-03-16",
+   "champ_ret": -0.0426,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-03-23",
+   "champ_ret": -0.0003,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-03-30",
+   "champ_ret": 0.013,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-04-06",
+   "champ_ret": 0.0226,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-04-13",
+   "champ_ret": 0.0564,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-04-20",
+   "champ_ret": 0.02,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-04-27",
+   "champ_ret": 0.0087,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-05-04",
+   "champ_ret": -0.0175,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-05-11",
+   "champ_ret": -0.0348,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-05-18",
+   "champ_ret": -0.0607,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-05-25",
+   "champ_ret": -0.0624,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-06-01",
+   "champ_ret": -0.0735,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-06-08",
+   "champ_ret": -0.1059,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-06-15",
+   "champ_ret": -0.0882,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-06-22",
+   "champ_ret": -0.0703,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-06-29",
+   "champ_ret": -0.0477,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-07-06",
+   "champ_ret": -0.0246,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-07-13",
+   "champ_ret": -0.0253,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-07-20",
+   "champ_ret": -0.0656,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-07-27",
+   "champ_ret": -0.044,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-08-03",
+   "champ_ret": 0.0007,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-08-10",
+   "champ_ret": -0.03,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-08-17",
+   "champ_ret": -0.0359,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-08-24",
+   "champ_ret": -0.0014,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-08-31",
+   "champ_ret": -0.0134,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-09-07",
+   "champ_ret": 0.0032,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-09-14",
+   "champ_ret": 0.0549,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-09-21",
+   "champ_ret": 0.1247,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-09-28",
+   "champ_ret": 0.1607,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-10-05",
+   "champ_ret": 0.2094,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-10-12",
+   "champ_ret": 0.2467,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-10-19",
+   "champ_ret": 0.2048,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-10-26",
+   "champ_ret": 0.1867,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-11-02",
+   "champ_ret": 0.1399,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-11-09",
+   "champ_ret": 0.0893,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-11-16",
+   "champ_ret": 0.002,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-11-23",
+   "champ_ret": -0.0068,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-11-30",
+   "champ_ret": -0.0225,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-12-07",
+   "champ_ret": -0.0538,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-12-14",
+   "champ_ret": -0.0896,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-12-21",
+   "champ_ret": -0.0472,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2024-12-28",
+   "champ_ret": -0.0387,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-01-04",
+   "champ_ret": -0.081,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-01-11",
+   "champ_ret": -0.0433,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-01-18",
+   "champ_ret": -0.0777,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-01-25",
+   "champ_ret": -0.0836,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-02-01",
+   "champ_ret": -0.0667,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-02-08",
+   "champ_ret": -0.0405,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-02-15",
+   "champ_ret": -0.0425,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-02-22",
+   "champ_ret": -0.0464,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-03-01",
+   "champ_ret": -0.0051,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-03-08",
+   "champ_ret": -0.0041,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-03-15",
+   "champ_ret": 0.0532,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-03-22",
+   "champ_ret": 0.0682,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-03-29",
+   "champ_ret": 0.0832,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-04-05",
+   "champ_ret": 0.069,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-04-12",
+   "champ_ret": 0.0684,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-04-19",
+   "champ_ret": 0.085,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-04-26",
+   "champ_ret": 0.0451,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-05-03",
+   "champ_ret": 0.0541,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-05-10",
+   "champ_ret": -0.0192,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-05-17",
+   "champ_ret": 0.0701,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-05-24",
+   "champ_ret": 0.1035,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-05-31",
+   "champ_ret": 0.1291,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-06-07",
+   "champ_ret": 0.0859,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-06-14",
+   "champ_ret": 0.1448,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-06-21",
+   "champ_ret": 0.2035,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-06-28",
+   "champ_ret": 0.1983,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-07-05",
+   "champ_ret": 0.1677,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-07-12",
+   "champ_ret": 0.0853,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-07-19",
+   "champ_ret": 0.0556,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-07-26",
+   "champ_ret": 0.0302,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-08-02",
+   "champ_ret": 0.0346,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-08-09",
+   "champ_ret": 0.0162,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-08-16",
+   "champ_ret": -0.0624,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-08-23",
+   "champ_ret": -0.0728,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-08-30",
+   "champ_ret": -0.0454,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-09-06",
+   "champ_ret": -0.0523,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-09-13",
+   "champ_ret": -0.0998,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-09-20",
+   "champ_ret": -0.097,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-09-27",
+   "champ_ret": -0.0538,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-10-04",
+   "champ_ret": -0.1086,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-10-11",
+   "champ_ret": -0.0438,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-10-18",
+   "champ_ret": -0.0387,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-10-25",
+   "champ_ret": -0.0394,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-11-01",
+   "champ_ret": -0.031,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-11-08",
+   "champ_ret": -0.007,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-11-15",
+   "champ_ret": -0.0016,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-11-22",
+   "champ_ret": 0.0248,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-11-29",
+   "champ_ret": -0.0171,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-12-06",
+   "champ_ret": -0.0171,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-12-13",
+   "champ_ret": -0.0171,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-12-20",
+   "champ_ret": -0.0171,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2025-12-27",
+   "champ_ret": -0.0171,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-01-03",
+   "champ_ret": -0.0173,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-01-10",
+   "champ_ret": -0.0151,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-01-17",
+   "champ_ret": -0.0406,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-01-24",
+   "champ_ret": -0.0086,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-01-31",
+   "champ_ret": -0.0247,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-02-07",
+   "champ_ret": -0.0281,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-02-14",
+   "champ_ret": -0.0065,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-02-21",
+   "champ_ret": 0.0127,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-02-28",
+   "champ_ret": 0.0076,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-03-07",
+   "champ_ret": 0.0082,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-03-14",
+   "champ_ret": 0.014,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-03-21",
+   "champ_ret": 0.0187,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-03-28",
+   "champ_ret": 0.0165,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-04-04",
+   "champ_ret": 0.0152,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-04-11",
+   "champ_ret": -0.0087,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-04-18",
+   "champ_ret": -0.0183,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-04-25",
+   "champ_ret": -0.0207,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-05-02",
+   "champ_ret": -0.0231,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-05-09",
+   "champ_ret": -0.0289,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-05-16",
+   "champ_ret": -0.0134,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-05-23",
+   "champ_ret": -0.0054,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-05-30",
+   "champ_ret": -0.0002,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-06-06",
+   "champ_ret": -0.005,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-06-13",
+   "champ_ret": 0.0043,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-06-20",
+   "champ_ret": -0.0068,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-06-27",
+   "champ_ret": 0.1425,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-07-04",
+   "champ_ret": 0.1325,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-07-11",
+   "champ_ret": 0.1455,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-07-18",
+   "champ_ret": 0.1355,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-07-25",
+   "champ_ret": 0.1609,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-08-01",
+   "champ_ret": 0.202,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-08-08",
+   "champ_ret": 0.1868,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-08-15",
+   "champ_ret": 0.1581,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-08-22",
+   "champ_ret": 0.0109,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-08-29",
+   "champ_ret": -0.0055,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-09-05",
+   "champ_ret": -0.0401,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  },
+  {
+   "start": "2026-09-12",
+   "champ_ret": -0.0347,
+   "baseline": 0,
+   "knn": 0,
+   "tsmom": 0,
+   "logit": 0
+  }
+ ],
+ "generated_at": "2026-11-18T05:43:06+0800"
+}
