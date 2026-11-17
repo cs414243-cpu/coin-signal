@@ -65,6 +65,13 @@ export async function verifyOnDevice(fetchFn = fetch, base = 'ledger/') {
   return { ok: Object.values(out).every(x => x.ok), files: out };
 }
 
+/** v73: 「已評分 N 筆」是所有方法合計；第一次對答案（11/18）起和成績單的「冠軍 n 筆」會不一樣，說清楚兩個數字的關係。 */
+export function scoredSplit(T, F) {
+  const n = T?.scores?.n || 0, nc = T?.scores?.n_champion;
+  if (!n || nc == null) return '';
+  const m = Object.keys(F?.by_model || {}).length, c = (F?.coins || []).length;
+  return `（${m ? `${m} 個方法` : '所有方法'}${c ? `、${c} 個幣` : ''}合計；其中現在用的方法 ${nc} 筆，就是「預測成績單」的那 ${nc} 筆）`;
+}
 const ROLE_ZH = { champion: '照建議（冠軍）', reference: '一直抱著（基準）', challenger: '挑戰者', retired: '已退休' };
 /** 進階 card. T = trust.json, live = live.json, dev = verifyOnDevice() result (or undefined while running). */
 export function trustCard(T, live, now, dev) {
@@ -78,7 +85,7 @@ export function trustCard(T, live, now, dev) {
   const dayN = F.first_asof ? Math.max(0, Math.round(Math.max(dnum(s.expected), asof ? dnum(asof) : -Infinity) - dnum(F.first_asof)) + 1) : 0;   // v64: 08:20–09:00 新預測已出來時，跟成績單同一天數
   const need = V.min_live_days;
   const verif = F.first_asof
-    ? `從 ${esc(F.first_asof)} 收盤開始記錄，今天是第 <strong>${Math.min(dayN, 9999)}</strong> 天／需要 ${need} 天（${V.min_weeks} 週）。帳本實際有 ${F.n_days} 天的預測${F.missing_days.length ? `，中間缺 ${F.missing_days.length} 天（${F.missing_days.map(esc).join('、')}）` : '，中間沒有缺日'}。每個預測 7 天後才能對答案：第一批 ${esc(V.first_score_due)} 收盤到期，目前已評分 ${T.scores.n} 筆。換冠軍的規則要每個幣都有 ≥ ${need} 天「已評分」的預測，照每天記錄、不缺日，最早要等第 ${need} 天（${esc(V.last_needed_asof)}）的預測在 ${esc(V.scored_by)} 收盤（台北 ${closeMD(V.scored_by)} 08:00）到期之後的週檢討。`
+    ? `從 ${esc(F.first_asof)} 收盤開始記錄，今天是第 <strong>${Math.min(dayN, 9999)}</strong> 天／需要 ${need} 天（${V.min_weeks} 週）。帳本實際有 ${F.n_days} 天的預測${F.missing_days.length ? `，中間缺 ${F.missing_days.length} 天（${F.missing_days.map(esc).join('、')}）` : '，中間沒有缺日'}。每個預測 7 天後才能對答案：第一批 ${esc(V.first_score_due)} 收盤到期，目前已評分 ${T.scores.n} 筆${scoredSplit(T, F)}。換冠軍的規則要每個幣都有 ≥ ${need} 天「已評分」的預測，照每天記錄、不缺日，最早要等第 ${need} 天（${esc(V.last_needed_asof)}）的預測在 ${esc(V.scored_by)} 收盤（台北 ${closeMD(V.scored_by)} 08:00）到期之後的週檢討。`
     : '尚無實盤紀錄。';
   const P = T.paper, role = Object.fromEntries((T.models_frozen?.models || []).map(m => [m.key, ROLE_ZH[m.status] || m.status]));
   const paper = P && Object.keys(P.models).length ? `<div class="scroll"><table class="bt"><thead><tr><th>虛擬投資（NT$${(P.start_twd / 1e4).toFixed(0)} 萬起）</th><th>目前</th><th>報酬</th><th>累計成本</th><th>期間</th></tr></thead><tbody>${Object.entries(P.models).map(([k, x]) => `<tr${k === T.champion ? ' class="hl"' : ''}><th>${esc(role[k] || '模型')}<div class="muted small">${esc(k)}</div></th><td>${ntd(x.equity)}</td><td>${spct(x.ret)}</td><td>${ntd(x.cum_cost)}</td><td>${esc(x.start)}～${esc(x.end)}（${x.rows} 天）</td></tr>`).join('')}</tbody></table></div>

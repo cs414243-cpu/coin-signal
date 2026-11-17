@@ -105,7 +105,7 @@ export function reviewCard(RV, now = Date.now(), liveScored = 0) {   // v64: liv
     <div class="scroll"><table class="bt"><thead><tr><th>方法</th><th>通過幾項</th><th>還差什麼</th></tr></thead><tbody>${tr}</tbody></table></div>
     <p class="small"><strong>什麼時候才可能換：</strong>${timeTxt}${wfTxt}下一次檢討：${RV.next_review ? mdw(RV.next_review) : '每週一'} 09:00（台北）。</p>
     <p class="small"><strong>要換掉現在用的，6 項都要過：</strong>${Object.values(CHECK_ZH).join('、')}。這 6 項在 2026-11-11 就寫死，不看結果調整；每次最多換 1 個。檢討不會改過去任何一筆紀錄。</p>
-    <details class="small muted"><summary>原始檢查（技術）</summary><ul>${raw}</ul><p>來源：公開帳本的 <code>ledger/reports/${esc(R.file)}</code>（由 <code>forecast/review_weekly.py</code> 產生，<code>forecast/review_export.py</code> 只轉成白話、不重算）。冠軍目前 ${esc(ch)}；多重檢定門檻 P ≥ ${esc(R.threshold)}（${esc(R.k)} 個候選）。</p></details>
+    <details class="small muted"><summary>原始檢查（技術）</summary>${liveScored > nB + nE ? `<p>以下是 ${mdw(R.date)} 檢討當時的檢查；之後才對答案的預測還沒算進來（例如「還沒有可評分的實盤預測」），下一次週一檢討會重算。</p>` : ''}<ul>${raw}</ul><p>來源：公開帳本的 <code>ledger/reports/${esc(R.file)}</code>（由 <code>forecast/review_weekly.py</code> 產生，<code>forecast/review_export.py</code> 只轉成白話、不重算）。冠軍目前 ${esc(ch)}；多重檢定門檻 P ≥ ${esc(R.threshold)}（${esc(R.k)} 個候選）。</p></details>
     <p class="small muted">這是模型管理紀錄，不是買賣建議，也不保證換上來的方法以後比較好。</p>
   </section>`;
 }
