@@ -38,6 +38,7 @@ import * as SAM from './startany.js';   // v49
 import * as AG from './advgroups.js';   // v50
 import * as PCM from './pupcal.js';   // v51
 import * as UPM from './usdtpark.js';   // v52
+import * as TWC from './twcost.js';   // v74
 import * as RVM from './review.js';   // v53
 import * as YRM from './years.js';   // v54
 import * as BLM from './blend.js';   // v55
@@ -196,7 +197,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v73';   // v73: 對答案前最後預演（紀錄可信度筆數說明、週檢討原始檢查註記）
+const VERSION = 'v74';   // v74: 台幣買幣成本的掛單簿＋USDT 溢價每週一自動更新（原本停在 11/11、11/10）
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -514,8 +515,9 @@ function costOut(coin) {
     ${got ? `<p>實拿約 <strong>${got.toFixed(coin === 'BTC' ? 6 : 4)} ${coin}</strong>（以國際均價 ${ntd(fair)} 計，等於 ${coin} 要先漲 ${pctS(c.total / (1 - c.total), 2)} 才打平，還沒算賣出）。</p>` : ''}
     ${c.filled ? '' : '<p class="warn">金額超過快照裡的掛單深度，實際滑價會更大，建議分批或改用掛單。</p>'}
     <p class="small">另一條路徑（${S.route === 'twd' ? '經 USDT' : '直接台幣'}）合計 ${pctS(alt.total, 2)}${alt.total < c.total ? '，<strong>比較便宜</strong>' : ''}。賣回台幣時，如果溢價還在，溢價那部分大致拿得回來；一定拿不回來的是手續費和價差，買進加賣出約 ${pctS(lose, 2)}。</p>
+    ${TWC.costFreshLine(TWC.costFresh(DEC, Date.now()))}
     ${csLine ? `<p class="small" id="cost-cs">${esc(csLine)} <a href="#costsens">看成本表</a></p>` : ''}
-    <p class="small muted">溢價＝MAX 的 USDT/TWD 價比「央行匯率 × USDT 美元價」貴多少（C#23；2026 年 5%–95% 落在 ${pctS(y26.p5, 2)}～${pctS(y26.p95, 2)}）。直接用台幣買的市場，價格同樣含這個溢價。手續費來自 MAX 公開 API（${esc(DEC.max.vip_src === 'live' ? '與掛單簿同時抓取' : DEC.max.vip_src)}）。未含提領到自己錢包的手續費和銀行入金費用。MAX API 不允許手機直接讀取，所以價差用快照，不是即時。</p>`;
+    <p class="small muted">溢價＝MAX 的 USDT/TWD 價比「央行匯率 × USDT 美元價」貴多少（C#23；2026 年 5%–95% 落在 ${pctS(y26.p5, 2)}～${pctS(y26.p95, 2)}）。直接用台幣買的市場，價格同樣含這個溢價。手續費來自 MAX 公開 API（${esc(DEC.max.vip_src === 'live' ? '與掛單簿同時抓取' : DEC.max.vip_src)}）。未含提領到自己錢包的手續費和銀行入金費用。MAX API 不允許手機直接讀取，所以價差用每週一更新的快照，不是即時。</p>`;
 }
 
 // ---------- 研究重點 ----------
