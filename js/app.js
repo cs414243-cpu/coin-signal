@@ -50,6 +50,7 @@ import * as QX from './quickexit.js';   // v63
 import * as ST from './scoretalk.js';   // v64
 import * as BC from './bigclues.js';   // v65
 import * as XL from './execlag.js';   // v66
+import * as CAL from './calendar.js';   // v67
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -190,7 +191,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v66';
+const VERSION = 'v67';
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
 const SKEY = 'cs-v2-settings';
@@ -1007,6 +1008,8 @@ function staleTop() {
   if (!o) return t;
   return t.includes('預測紀錄檢查沒通過') ? t + o : o;
 }
+// v67: iPhone 行事曆訂閱（data/signal.ics ← forecast/calendar_export.py，每天 08:20）
+function calHome() { try { return CAL.homeLine(location); } catch { return ''; } }
 function forecastCard() {
   const any = LIVE.coins.BTC || LIVE.coins.ETH; if (!any) return '';
   return `<section class="card forecast" id="forecast">
@@ -1018,11 +1021,12 @@ function forecastCard() {
     ${coinBlock('BTC')}${coinBlock('ETH')}
     <div id="jr-hint-wrap">${JR.homeHint(JR.load(localStorage), LIVE)}</div>
     <p class="small muted">「打算投入的錢」是你願意放在這個幣的上限。建議只看趨勢和波動，<strong>還沒有證明能贏過一直抱著</strong>；它的主要作用是大跌時少虧。</p>
-    <details class="fc-more" id="fc-more-all"><summary>更多說明（空手多久、這週動手的機率、要不要每天微調）</summary>
+    <details class="fc-more" id="fc-more-all"><summary>更多說明（空手多久、這週動手的機率、要不要每天微調、加到行事曆）</summary>
     <p id="fc-spell" class="small spell-home">${spellHome()}</p>
     <p id="fc-next" class="small next-home">${nmHome()}</p>
     ${holdingsSet() ? '' : '<p class="small muted">想直接看要買賣多少錢：打開下面「進階 → 我的部位」填總資產和持有數量，這裡就會換算成金額。</p>'}
     ${TB.homeNote(TBAND) ? `<p class="small muted tb-note">${esc(TB.homeNote(TBAND))}</p>` : ''}
+    ${calHome()}
     </details>
   </section>`;
 }
