@@ -11,6 +11,7 @@ import * as FR from './fresh.js';
 import * as PU from './pup.js';
 import * as JR from './journal.js';
 import * as ID from './intraday.js';
+import * as EE from './earlyentry.js';   // v77
 import * as TS from './tested.js';
 import * as TB from './tradeband.js';
 import * as RB from './robust.js';
@@ -198,7 +199,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v76';   // v76: 台幣買幣成本卡「溢價偏高時要不要等幾天再換？」（溢價回落 vs 冠軍剛加碼後 3 天幣價變動）
+const VERSION = 'v77';   // v77: 盤中已經漲過翻轉價，要不要先買？（事先登記 3 種盤中先買 vs 等 8 點收盤）
 // was: const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
 const pctS = (x, d = 1) => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(d)}%`;
@@ -689,7 +690,8 @@ function liveInfo(c) {
 function liveLine(c) {
   const t = TICK[c];
   if (t?.status === 'ok' && !CTX[c]) return ID.homeLine(c, ADV === 'error' ? { status: 'ok', price: t.price, at: t.at } : { status: 'loading' }, null, INTRA);
-  return ID.homeLine(c, t, liveInfo(c), INTRA);
+  const L = liveInfo(c);
+  return ID.homeLine(c, t, L, INTRA) + (() => { try { return EE.homeHint(EARLY, L); } catch { return ''; } })();   // v77
 }
 async function loadTickers() {
   TICK = { BTC: { status: 'loading' }, ETH: { status: 'loading' } };
@@ -713,6 +715,7 @@ function intraOut() {
   return `<div class="scroll"><table class="bt"><tbody>${rows}</tbody></table></div>
     <p class="small">規則每天只在早上 8 點收盤時判斷一次；盤中價格穿過翻轉價<strong>不是訊號</strong>，要等收盤才算。首頁那一行就是用這裡的即時價和前一天收盤算出的翻轉價比較。</p>
     ${GD.guardLine()}
+    ${(() => { try { return EE.earlyLine(EARLY); } catch { return ''; } })()}
     ${hist}`;
 }
 
@@ -848,7 +851,7 @@ function recentCard() {
 }
 
 // ======================= v4: 未來一週預測建議（來自每日預測帳本 data/live.json） =======================
-let LIVE = null, EV = null, TRUST = null, DEV, FROWS = null, PEERS = null, PWAIT = null;   // v75: FROWS, PEERS; v76: PWAIT
+let LIVE = null, EV = null, TRUST = null, DEV, FROWS = null, PEERS = null, PWAIT = null, EARLY = null;   // v75: FROWS, PEERS; v76: PWAIT; v77: EARLY
 const ACT_CLS = { add: 'st-hold', hold: 'st-hold', reduce: 'st-reduce', out: 'st-out' };
 const ACT_HINT = { add: '比前一天建議多放一些', hold: '維持建議的比例', reduce: '比全部放進去少', out: '先不要放' };
 const STATUS_ZH = { champion: '冠軍（目前採用）', challenger: '挑戰者', reference: '基準（一直抱著）', retired: '退休' };
@@ -1205,6 +1208,7 @@ async function render(force = false) {
     if (ft !== null) FROWS = AN.parse(ft, 'forecast');   // v75: every model's forecast rows (今天每個方法怎麼說)
     if (ft !== null && st !== null) ANS = AN.answerKey(AN.parse(ft, 'forecast'), AN.parse(st, 'score'), LIVE?.champion?.key || 'trend_vt@1');
   } catch { ANS = ANS || null; }
+  try { EARLY = await fetch('data/earlyentry.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EARLY; } catch { EARLY = EARLY || null; }   // v77
   try { PWAIT = await fetch('data/premwait.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PWAIT; } catch { PWAIT = PWAIT || null; }   // v76
   try { PEERS = await fetch('data/peers.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PEERS; } catch { PEERS = PEERS || null; }   // v75
   try { BNOISE = await fetch('data/bandnoise.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BNOISE; } catch { BNOISE = BNOISE || null; }
