@@ -177,3 +177,6 @@ details.adv-grp>summary .grp-n{flex:none;font-size:12.5px;font-weight:500;color:
 details.adv-grp>summary .grp-n::after{content:" ▾"}
 details.adv-grp[open]>summary .grp-n::after{content:" ▴"}
 details.adv-grp[open]>summary{border-bottom:1px solid var(--line);margin-bottom:8px}
+
+/* v70: keep short row labels on one line (twdview table) */
+.bt th.nw { white-space: nowrap; }
