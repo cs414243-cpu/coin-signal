@@ -11,13 +11,13 @@ export function weekLine(e) {
   return `${e.md} ${hourZh(e.hm)} ${SHORT[e.kind] || e.title_zh}${vol}`;
 }
 
-export function weekCard(EV) {
+export function weekCard(EV, extra = '') {   // v81: extra = PC.weekExtra (only when a 2024+-confirmed precursor is on)
   if (!EV) return '';
   const up = EV.upcoming || [];
   const body = up.length
     ? `<ul class="week-list">${up.map(e => `<li>${esc(weekLine(e))}</li>`).join('')}</ul>`
     : `<p>未來 7 天沒有排定的美國 CPI、聯準會利率決議或非農就業公布。${EV.next_after ? `下一個是 ${esc(weekLine(EV.next_after))}。` : ''}</p>`;
-  return `<section class="card week" id="week"><h2>本週要注意</h2>${body}<p class="small muted">時間為台北時間；來源是美國聯準會和勞工統計局的官方日程。</p></section>`;
+  return `<section class="card week" id="week"><h2>本週要注意</h2>${body}${extra || ''}<p class="small muted">時間為台北時間；來源是美國聯準會和勞工統計局的官方日程。</p></section>`;
 }
 
 function srcLinks(ev) {
@@ -32,7 +32,7 @@ function evItem(ev) {
     <div class="small ev-src">${srcLinks(ev)}</div></li>`;
 }
 
-export function eventsCard(EV) {
+export function eventsCard(EV, note = () => '') {   // v81: note(cond) → 2024+ re-check text for a robust finding
   if (!EV) return '';
   const vol = EV.event_day_vol || {};
   const row = k => { const b = vol[k]?.BTC, e = vol[k]?.ETH; if (!b) return '';
@@ -46,7 +46,7 @@ export function eventsCard(EV) {
     <ul class="evs">${(EV.recent || []).map(evItem).join('')}</ul>
     <details><summary>2020 年以來最大的 ${EV.largest_explained?.length || 0} 次漲跌與原因</summary><ul class="evs">${(EV.largest_explained || []).map(evItem).join('')}</ul></details>
     <h3 class="sub">哪些指標跟大漲跌有關</h3>
-    <ul class="facts">${(EV.findings || []).map(f => `<li>${esc(f.text)} <span class="src">${f.artifact ? '假象，不採用' : f.robust ? '校正後仍成立' : '不顯著'}｜q=${f.q.toFixed(2)}</span></li>`).join('')}</ul>
+    <ul class="facts">${(EV.findings || []).map(f => `<li>${esc(f.text)} <span class="src">${f.artifact ? '假象，不採用' : f.robust ? '校正後仍成立' : '不顯著'}｜q=${f.q.toFixed(2)}</span>${f.robust && note(f.cond) ? `<div class="small pre-note">${esc(note(f.cond))}</div>` : ''}</li>`).join('')}</ul>
     <h4>總經數據公布日的平均漲跌幅（跟其他日子相比）</h4>
     <div class="scroll"><table><thead><tr><th>公布日</th><th>BTC</th><th>ETH</th><th>次數</th></tr></thead><tbody>${['CPI', 'FOMC', 'NFP'].map(row).join('')}</tbody></table></div>
     <p class="small muted">「1.26 倍」表示那天平均漲跌幅是其他日子的 1.26 倍。q 是經過多重檢定校正的顯著性，小於 0.05 才算可信；目前都沒有達到，所以「本週要注意」只列日期，不說「波動會比較大」。</p>

@@ -54,6 +54,7 @@ import * as RLG from './rellag.js';   // v72
 import * as QX from './quickexit.js';   // v63
 import * as ST from './scoretalk.js';   // v64
 import * as BC from './bigclues.js';   // v65
+import * as PRE from './precursors.js';   // v81 (PC is taken)
 import * as XL from './execlag.js';   // v66
 import * as TWV from './twdview.js';   // v70
 import * as PPW from './promopower.js';   // v78
@@ -685,6 +686,7 @@ function relOut() {
 
 // ======================= v13: 盤中離翻轉價多遠 =======================
 let BCLUE = null;   // v65
+let PRECU = null;   // v81
 let TICK = {}, INTRA = null, TESTED = null, XSRC = null, SNOISE = null, PLOG = null, ANS = null, BNOISE = null;
 function liveInfo(c) {
   const ctx = CTX[c], t = TICK[c]; if (!ctx || !t || t.status !== 'ok') return null;
@@ -963,6 +965,10 @@ const blDetail = c => { try { return esc(BLM.detailLine(c, BLEND)); } catch { re
 function savgHtml() { try { return SAV.sameAvgCard(SAVG); } catch (e) { return `<section class="card" id="sameavg"><h2>照建議贏一直抱著，是時機抓得好，還是只是放得比較少？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v63: 剛轉成加碼，會不會很快又變回空手？（data/quickexit.json ← backtest/quick_exit.py）
 // v65: 有沒有辦法事先知道下週會大漲或大跌？（data/bigclues.json ← backtest/bigmove_clues.py）
+// v81: 「大動前兆」現在有沒有出現？2024 年後還準嗎？（data/precursors.json weekly + data/events.json precursors_now daily）
+function pcuHtml() { try { return PRE.precursorsCard(PRECU, EV?.precursors_now); } catch (e) { return `<section class="card" id="precursors"><h2>「大動前兆」現在有沒有出現？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
+const pcuWeek = () => { try { return PRE.weekExtra(PRECU, EV?.precursors_now); } catch { return ''; } };
+const pcuNote = c => { try { return PRE.findingNote(PRECU, c); } catch { return ''; } };
 function bcHtml() { try { return BC.bigCluesCard(BCLUE); } catch (e) { return `<section class="card" id="bigclues"><h2>有沒有辦法事先知道下週會大漲或大跌？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function qxHtml() { try { return QX.quickExitCard(QEXIT); } catch (e) { return `<section class="card" id="quickexit"><h2>剛轉成加碼，會不會很快又變回空手？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v70: 用新台幣算，成績還一樣嗎？（data/twdview.json ← backtest/twd_view.py）
@@ -1195,6 +1201,7 @@ async function render(force = false) {
   try { DSTOP = await fetch('data/dipstop.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || DSTOP; } catch { DSTOP = DSTOP || null; }   // v62
   try { TPROF = await fetch('data/takeprofit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TPROF; } catch { TPROF = TPROF || null; }   // v71
   try { RLAG = await fetch('data/rellag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || RLAG; } catch { RLAG = RLAG || null; }   // v72
+  try { PRECU = await fetch('data/precursors.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PRECU; } catch { PRECU = PRECU || null; }   // v81
   try { BCLUE = await fetch('data/bigclues.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BCLUE; } catch { BCLUE = BCLUE || null; }   // v65
   try { QEXIT = await fetch('data/quickexit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || QEXIT; } catch { QEXIT = QEXIT || null; }   // v63
   try { XLAG = await fetch('data/execlag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XLAG; } catch { XLAG = XLAG || null; }   // v66
@@ -1229,7 +1236,7 @@ async function render(force = false) {
   PENDING = LIVE ? FL.pendingChanges(localStorage, LIVE.coins) : {};
   FL.setBadge(Object.keys(PENDING).length);
   el.innerHTML = `
-    ${LIVE ? forecastCard() + weekCard(EV) + trackCard() : '<section class="card"><p class="warn">⚠️ 預測資料暫時讀不到，請按右上角 ↻ 重試。</p></section>'}
+    ${LIVE ? forecastCard() + weekCard(EV, pcuWeek()) + trackCard() : '<section class="card"><p class="warn">⚠️ 預測資料暫時讀不到，請按右上角 ↻ 重試。</p></section>'}
     <details id="adv" class="card adv"${advOpen() ? ' open' : ''}><summary>進階（可不看）</summary>
       <p class="small muted">技術指標、回測和各種試算工具，給 cs 做決策時參考。</p>
       <nav class="tabs" role="tablist"><button role="tab" data-coin="BTC" aria-selected="${coin === 'BTC'}">BTC</button><button role="tab" data-coin="ETH" aria-selected="${coin === 'ETH'}">ETH</button></nav>
@@ -1271,7 +1278,7 @@ async function renderAdv(force = false) {
     el.innerHTML = `
       <nav class="jump ix" aria-label="問題索引"><p class="ix-head small muted">想知道什麼，點那一張（會自動打開那一組）：<button type="button" class="ix-all link-btn">${AG.GROUPS.every(g => GO.has(g.id)) ? '全部收起' : '全部打開'}</button></p>
         <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a><a href="#dipstop">跌破買進價要先賣嗎</a><a href="#takeprofit">賺了要先落袋嗎</a><a href="#quickexit">會不會很快又賣掉</a></div>
-        <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a></div>
+        <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#precursors">大動前兆現在有沒有</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a><a href="#sameavg">時機還是放得少</a><a href="#quitcost">連賠想放棄</a><a href="#rellag">落後抱著想換</a></div>
         <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a></div>
         <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#review">每週檢討換了沒</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#bigclues">能預告大漲大跌嗎</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
@@ -1294,7 +1301,8 @@ async function renderAdv(force = false) {
       <div id="sa-wrap">${FR.withAsof(saHtml(), STARTA?.as_of ?? null, NOW)}</div>
       ${FR.withAsof(moveHtml(), MOVEW?.as_of ?? null, NOW)}
       ${FR.withAsof(dipHtml(), DIPB?.as_of ?? null, NOW)}
-      ${eventsCard(EV)}`, GO.has('flat'))}
+      ${eventsCard(EV, pcuNote)}
+      ${FR.withAsof(pcuHtml(), PRECU?.as_of ?? null, NOW)}`, GO.has('flat'))}
       ${AG.wrap('record', `
       ${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), NOW)}
       ${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), NOW)}
@@ -1338,7 +1346,7 @@ async function renderAdv(force = false) {
       </section>`;
   } catch (e) {
     ADV = 'error';
-    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), Date.now())}${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), Date.now())}${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now())}${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, Date.now())}${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, Date.now())}${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV)}</section>`;
+    el.innerHTML = `<section class="card"><p class="warn">⚠️ ${esc(e.message || e)}</p><p class="small">請確認網路後按右上角 ↻ 重試。</p>${LIVE ? journalHtml() : ''}${FR.withAsof(OC.outcomesCard(OUTC, LIVE), FR.asofOf('outcomes', OUTC), Date.now())}${FR.withAsof(WR.weekRiskCard(WRISK), FR.asofOf('weekrisk', WRISK), Date.now())}${FR.withAsof(TB.tradeBandCard(TBAND), FR.asofOf('tradeband', TBAND), Date.now())}${FR.withAsof(nextMoveHtml(), NMOVE?.as_of ?? null, Date.now())}${FR.withAsof(spellsHtml(), SPELLS?.as_of ?? null, Date.now())}${FR.withAsof(tripsHtml(), TRIPS?.as_of ?? null, Date.now())}${FR.withAsof(uwHtml(), UWATER?.as_of ?? null, Date.now())}${FR.withAsof(recentCard(), FR.asofOf('flips', FLIPS), Date.now())}${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}${FR.withAsof(modelsCard(), FR.asofOf('walkforward', LIVE), Date.now())}${eventsCard(EV, pcuNote)}</section>`;
   }
   updateOuts();
 }
