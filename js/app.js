@@ -55,6 +55,7 @@ import * as QX from './quickexit.js';   // v63
 import * as ST from './scoretalk.js';   // v64
 import * as BC from './bigclues.js';   // v65
 import * as PRE from './precursors.js';   // v81 (PC is taken)
+import * as TBR from './trackbrief.js';   // v82: 成績單一眼看懂
 import * as XL from './execlag.js';   // v66
 import * as TWV from './twdview.js';   // v70
 import * as PPW from './promopower.js';   // v78
@@ -202,7 +203,8 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v79';   // v79: 預測成績單「已經對答案：5 個方法誰說得比較準？」（公開對答案紀錄＋回測：幾天的分數看不出好壞）
+const VERSION = 'v82';   // v82: 預測成績單一眼看懂（首頁只留紀錄、兩個虛擬投資、一句白話；說明收進「這些數字怎麼看」）
+// was: const VERSION = 'v79';   // v79: 預測成績單「已經對答案：5 個方法誰說得比較準？」（公開對答案紀錄＋回測：幾天的分數看不出好壞）
 // was: const VERSION = 'v78';   // v78: 每週檢討卡「8 週的實際對答案，分得出哪個方法比較好嗎？」（事先登記，歷史重演換方法規則）
 // was: const VERSION = 'v77';   // v77: 盤中已經漲過翻轉價，要不要先買？（事先登記 3 種盤中先買 vs 等 8 點收盤）
 // was: const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
@@ -1090,18 +1092,20 @@ function trackCard() {
   const hist = wc && wb ? `<p class="small">回測（${wc.start.slice(0, 4)} 年起，每天只用當天以前的資料，BTC、ETH 各半）：照建議年化 ${pct(wc.cagr)}、最慘時虧 ${pctS(-wc.maxdd, 0)}；一直抱著年化 ${pct(wb.cagr)}、最慘時虧 ${pctS(-wb.maxdd, 0)}。猜漲跌的準確度 ${pct0(wc.hit)}，跟丟銅板差不多。</p>` : '';
   return `<section class="card track" id="track">
     <h2>預測成績單</h2>
-    <p>從 ${first ? closeMD(first) : '—'} 開始，每天記錄一次預測（目前 ${ch.n_forecasts} 筆，兩個幣合計），記錄後不能修改。${hit}</p>
+    <p class="small" id="track-rec">${TBR.recordLine(ch, first ? closeMD(first) : '', nDays, first ? closeMD(addDays(first, 7)) : '')}</p>
     <div class="kpis two">
       <div><div class="label">虛擬投資：照建議</div><div class="num sm">${ret(ch)}</div></div>
       <div><div class="label">虛擬投資：一直抱著</div><div class="num sm">${ret(b)}</div></div>
     </div>
+    <p class="small track-brief" id="track-brief">${TBR.brief(T)}</p>
+    ${TBR.more(`<p class="small">從 ${first ? closeMD(first) : '—'} 開始，每天記錄一次預測（目前 ${ch.n_forecasts} 筆，兩個幣合計），記錄後不能修改。${hit}</p>
     ${SN.paperLine(SNOISE, T)}${ns ? SN.hitLine(SNOISE, ns, ch.scores.hit) : ''}
+    <p class="small muted">各用虛擬 NT$100 萬（BTC、ETH 各半）、每天照建議調整，已扣手續費和台幣買 USDT 的溢價。不是真的錢。</p>
+    ${hist}
+    <p class="warn">實際紀錄才剛開始（${since}）。至少要累積 8 週，系統才會開始比較不同的預測方法，表現更好的才會換上來；在那之前，請把建議當參考就好。</p>`)}
     ${PL.box(PLOG, T, LIVE.champion.key, LIVE.baseline)}
     ${AN.block(ANS, BNOISE)}
     ${(() => { try { return FW.block(FW.table(SROWS, (LIVE.models || []).map(m => m.key)), BRN, LIVE.champion?.key, LIVE.baseline); } catch { return ''; } })()}
-    <p class="small muted">各用虛擬 NT$100 萬（BTC、ETH 各半）、每天照建議調整，已扣手續費和台幣買 USDT 的溢價。不是真的錢。</p>
-    ${hist}
-    <p class="warn">實際紀錄才剛開始（${since}）。至少要累積 8 週，系統才會開始比較不同的預測方法，表現更好的才會換上來；在那之前，請把建議當參考就好。</p>
   </section>`;
 }
 function modelsCard() {
