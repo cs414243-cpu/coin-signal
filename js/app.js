@@ -57,6 +57,7 @@ import * as BC from './bigclues.js';   // v65
 import * as XL from './execlag.js';   // v66
 import * as TWV from './twdview.js';   // v70
 import * as PPW from './promopower.js';   // v78
+import * as FW from './firstweek.js';   // v79
 import * as CAL from './calendar.js';   // v67
 import * as BRG from './bandregime.js';   // v68
 import * as PEER from './peers.js';   // v75
@@ -200,7 +201,8 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v78';   // v78: 每週檢討卡「8 週的實際對答案，分得出哪個方法比較好嗎？」（事先登記，歷史重演換方法規則）
+const VERSION = 'v79';   // v79: 預測成績單「已經對答案：5 個方法誰說得比較準？」（公開對答案紀錄＋回測：幾天的分數看不出好壞）
+// was: const VERSION = 'v78';   // v78: 每週檢討卡「8 週的實際對答案，分得出哪個方法比較好嗎？」（事先登記，歷史重演換方法規則）
 // was: const VERSION = 'v77';   // v77: 盤中已經漲過翻轉價，要不要先買？（事先登記 3 種盤中先買 vs 等 8 點收盤）
 // was: const VERSION = 'v75';   // v75: 進階「今天每個方法怎麼說」（帳本各模型今天的建議＋跟著挑戰者過去試過比較差）
 const ntd = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : ''}NT$${Math.abs(Math.round(x)).toLocaleString('en-US')}`;
@@ -744,6 +746,7 @@ let QEXIT = null;   // v63
 let XLAG = null;   // v66
 let TWDV = null;   // v70
 let PPOW = null;   // v78
+let SROWS = null, BRN = null;   // v79
 let FLIPS = null, PENDING = {}, OUTC = null, WRISK = null, TBAND = null, SPELLS = null, NMOVE = null, FDRIFT = null, TRIPS = null, UWATER = null, CSENS = null, LADDER = null;
 // v26: 現在空手要等多久 — current spell from the phone's closed daily bars (same rule as flips.js), else the weekly file
 function spellCur() {
@@ -1089,6 +1092,7 @@ function trackCard() {
     ${SN.paperLine(SNOISE, T)}${ns ? SN.hitLine(SNOISE, ns, ch.scores.hit) : ''}
     ${PL.box(PLOG, T, LIVE.champion.key, LIVE.baseline)}
     ${AN.block(ANS, BNOISE)}
+    ${(() => { try { return FW.block(FW.table(SROWS, (LIVE.models || []).map(m => m.key)), BRN, LIVE.champion?.key, LIVE.baseline); } catch { return ''; } })()}
     <p class="small muted">各用虛擬 NT$100 萬（BTC、ETH 各半）、每天照建議調整，已扣手續費和台幣買 USDT 的溢價。不是真的錢。</p>
     ${hist}
     <p class="warn">實際紀錄才剛開始（${since}）。至少要累積 8 週，系統才會開始比較不同的預測方法，表現更好的才會換上來；在那之前，請把建議當參考就好。</p>
@@ -1194,6 +1198,7 @@ async function render(force = false) {
   try { BCLUE = await fetch('data/bigclues.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BCLUE; } catch { BCLUE = BCLUE || null; }   // v65
   try { QEXIT = await fetch('data/quickexit.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || QEXIT; } catch { QEXIT = QEXIT || null; }   // v63
   try { XLAG = await fetch('data/execlag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || XLAG; } catch { XLAG = XLAG || null; }   // v66
+  try { BRN = await fetch('data/briernoise.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || BRN; } catch { BRN = BRN || null; }   // v79
   try { PPOW = await fetch('data/promopower.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || PPOW; } catch { PPOW = PPOW || null; }   // v78
   try { TWDV = await fetch('data/twdview.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TWDV; } catch { TWDV = TWDV || null; }   // v70
   try { REVIEW = await fetch('data/review.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || REVIEW; } catch { REVIEW = REVIEW || null; }   // v53
@@ -1212,6 +1217,7 @@ async function render(force = false) {
   try {   // v42: 每一筆預測對答案 (public ledger; keep the last good copy when a download fails)
     const [ft, st] = await Promise.all(['forecasts', 'scores'].map(n => fetch(`ledger/${n}.jsonl`, { cache: 'no-cache' }).then(r => r.ok ? r.text() : null)));
     if (ft !== null) FROWS = AN.parse(ft, 'forecast');   // v75: every model's forecast rows (今天每個方法怎麼說)
+    if (st !== null) SROWS = AN.parse(st, 'score');   // v79: every model's scores (5 個方法誰說得比較準)
     if (ft !== null && st !== null) ANS = AN.answerKey(AN.parse(ft, 'forecast'), AN.parse(st, 'score'), LIVE?.champion?.key || 'trend_vt@1');
   } catch { ANS = ANS || null; }
   try { EARLY = await fetch('data/earlyentry.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || EARLY; } catch { EARLY = EARLY || null; }   // v77

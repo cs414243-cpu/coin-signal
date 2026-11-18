@@ -1,0 +1,292 @@
+{
+ "about": "第一週對答案能看出什麼：5 個凍結模型 walk-forward（每天只用當天以前的資料）逐日預測，用已收完的 Binance 日K照 engine.score_one 算 Brier（一週後收盤比當天高＝漲），BTC、ETH 平均；再看連續 K 個預測日的平均 Brier 裡，冠軍贏基準、和「長期最好的方法」一樣的比例。視窗逐日滑動、彼此重疊，只是描述，不是新訊號。Brier 是預測分數，不涉及買賣成本。研究用途，不是投資建議。",
+ "source": "forecast/reports/walkforward/{trend_vt,baseline,knn,tsmom,logit}_v1_{BTC,ETH}.csv＋Binance 現貨日K（只用已收完的，forecast/common.frame）；backtest/brier_noise.py",
+ "champion": "trend_vt@1",
+ "baseline": "baseline@1",
+ "models": [
+  "trend_vt@1",
+  "baseline@1",
+  "knn@1",
+  "tsmom@1",
+  "logit@1"
+ ],
+ "generated_at": "2026-11-18T08:37:46+08:00",
+ "last_bar": {
+  "BTC": "2026-11-17",
+  "ETH": "2026-11-17"
+ },
+ "all": {
+  "label": "2022 年起",
+  "start": "2022-01-01",
+  "end": "2026-11-10",
+  "n_days": 1775,
+  "long_brier": {
+   "trend_vt": 0.2521,
+   "baseline": 0.2514,
+   "knn": 0.257,
+   "tsmom": 0.2527,
+   "logit": 0.2518
+  },
+  "long_best": "baseline",
+  "champ_minus_base": 0.0007,
+  "windows": [
+   {
+    "days": 1,
+    "n": 1775,
+    "champ_beats_base": 0.4901,
+    "tie": 0.0,
+    "best_matches_long": 0.2051,
+    "champ_is_best": 0.1927
+   },
+   {
+    "days": 2,
+    "n": 1774,
+    "champ_beats_base": 0.5158,
+    "tie": 0.0,
+    "best_matches_long": 0.2182,
+    "champ_is_best": 0.1928
+   },
+   {
+    "days": 3,
+    "n": 1773,
+    "champ_beats_base": 0.5144,
+    "tie": 0.0,
+    "best_matches_long": 0.2149,
+    "champ_is_best": 0.2059
+   },
+   {
+    "days": 4,
+    "n": 1772,
+    "champ_beats_base": 0.522,
+    "tie": 0.0,
+    "best_matches_long": 0.2173,
+    "champ_is_best": 0.2088
+   },
+   {
+    "days": 5,
+    "n": 1771,
+    "champ_beats_base": 0.5246,
+    "tie": 0.0,
+    "best_matches_long": 0.2168,
+    "champ_is_best": 0.2185
+   },
+   {
+    "days": 6,
+    "n": 1770,
+    "champ_beats_base": 0.5186,
+    "tie": 0.0,
+    "best_matches_long": 0.2254,
+    "champ_is_best": 0.2119
+   },
+   {
+    "days": 7,
+    "n": 1769,
+    "champ_beats_base": 0.5184,
+    "tie": 0.0,
+    "best_matches_long": 0.225,
+    "champ_is_best": 0.212
+   },
+   {
+    "days": 14,
+    "n": 1762,
+    "champ_beats_base": 0.5074,
+    "tie": 0.0,
+    "best_matches_long": 0.2299,
+    "champ_is_best": 0.2208
+   },
+   {
+    "days": 21,
+    "n": 1755,
+    "champ_beats_base": 0.4969,
+    "tie": 0.0,
+    "best_matches_long": 0.2319,
+    "champ_is_best": 0.2536
+   },
+   {
+    "days": 28,
+    "n": 1748,
+    "champ_beats_base": 0.508,
+    "tie": 0.0,
+    "best_matches_long": 0.2426,
+    "champ_is_best": 0.2632
+   },
+   {
+    "days": 42,
+    "n": 1734,
+    "champ_beats_base": 0.4919,
+    "tie": 0.0,
+    "best_matches_long": 0.2537,
+    "champ_is_best": 0.3022
+   },
+   {
+    "days": 56,
+    "n": 1720,
+    "champ_beats_base": 0.468,
+    "tie": 0.0,
+    "best_matches_long": 0.239,
+    "champ_is_best": 0.3169
+   },
+   {
+    "days": 84,
+    "n": 1692,
+    "champ_beats_base": 0.4421,
+    "tie": 0.0,
+    "best_matches_long": 0.2547,
+    "champ_is_best": 0.2819
+   },
+   {
+    "days": 182,
+    "n": 1594,
+    "champ_beats_base": 0.3795,
+    "tie": 0.0,
+    "best_matches_long": 0.3532,
+    "champ_is_best": 0.2861
+   },
+   {
+    "days": 364,
+    "n": 1412,
+    "champ_beats_base": 0.1105,
+    "tie": 0.0,
+    "best_matches_long": 0.6076,
+    "champ_is_best": 0.1041
+   }
+  ]
+ },
+ "oos": {
+  "label": "2024 年起",
+  "start": "2024-01-01",
+  "end": "2026-11-10",
+  "n_days": 1045,
+  "long_brier": {
+   "trend_vt": 0.2522,
+   "baseline": 0.2508,
+   "knn": 0.2548,
+   "tsmom": 0.2523,
+   "logit": 0.2503
+  },
+  "long_best": "logit",
+  "champ_minus_base": 0.0014,
+  "windows": [
+   {
+    "days": 1,
+    "n": 1045,
+    "champ_beats_base": 0.4833,
+    "tie": 0.0,
+    "best_matches_long": 0.1407,
+    "champ_is_best": 0.1933
+   },
+   {
+    "days": 2,
+    "n": 1044,
+    "champ_beats_base": 0.501,
+    "tie": 0.0,
+    "best_matches_long": 0.1446,
+    "champ_is_best": 0.1868
+   },
+   {
+    "days": 3,
+    "n": 1043,
+    "champ_beats_base": 0.5024,
+    "tie": 0.0,
+    "best_matches_long": 0.1361,
+    "champ_is_best": 0.2033
+   },
+   {
+    "days": 4,
+    "n": 1042,
+    "champ_beats_base": 0.5058,
+    "tie": 0.0,
+    "best_matches_long": 0.1315,
+    "champ_is_best": 0.2063
+   },
+   {
+    "days": 5,
+    "n": 1041,
+    "champ_beats_base": 0.511,
+    "tie": 0.0,
+    "best_matches_long": 0.1258,
+    "champ_is_best": 0.2104
+   },
+   {
+    "days": 6,
+    "n": 1040,
+    "champ_beats_base": 0.5048,
+    "tie": 0.0,
+    "best_matches_long": 0.125,
+    "champ_is_best": 0.2067
+   },
+   {
+    "days": 7,
+    "n": 1039,
+    "champ_beats_base": 0.5014,
+    "tie": 0.0,
+    "best_matches_long": 0.1376,
+    "champ_is_best": 0.1992
+   },
+   {
+    "days": 14,
+    "n": 1032,
+    "champ_beats_base": 0.4797,
+    "tie": 0.0,
+    "best_matches_long": 0.1657,
+    "champ_is_best": 0.2006
+   },
+   {
+    "days": 21,
+    "n": 1025,
+    "champ_beats_base": 0.4771,
+    "tie": 0.0,
+    "best_matches_long": 0.1805,
+    "champ_is_best": 0.2039
+   },
+   {
+    "days": 28,
+    "n": 1018,
+    "champ_beats_base": 0.4794,
+    "tie": 0.0,
+    "best_matches_long": 0.2092,
+    "champ_is_best": 0.2112
+   },
+   {
+    "days": 42,
+    "n": 1004,
+    "champ_beats_base": 0.4472,
+    "tie": 0.0,
+    "best_matches_long": 0.1753,
+    "champ_is_best": 0.2251
+   },
+   {
+    "days": 56,
+    "n": 990,
+    "champ_beats_base": 0.4283,
+    "tie": 0.0,
+    "best_matches_long": 0.1667,
+    "champ_is_best": 0.2404
+   },
+   {
+    "days": 84,
+    "n": 962,
+    "champ_beats_base": 0.395,
+    "tie": 0.0,
+    "best_matches_long": 0.2474,
+    "champ_is_best": 0.1965
+   },
+   {
+    "days": 182,
+    "n": 864,
+    "champ_beats_base": 0.2963,
+    "tie": 0.0,
+    "best_matches_long": 0.3704,
+    "champ_is_best": 0.1412
+   },
+   {
+    "days": 364,
+    "n": 682,
+    "champ_beats_base": 0.0968,
+    "tie": 0.0,
+    "best_matches_long": 0.4516,
+    "champ_is_best": 0.0836
+   }
+  ]
+ }
+}
