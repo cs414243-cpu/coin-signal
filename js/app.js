@@ -65,6 +65,7 @@ import * as CAL from './calendar.js';   // v67
 import * as BRG from './bandregime.js';   // v68
 import * as PEER from './peers.js';   // v75
 import * as BK from './backup.js';   // v84
+import * as TXS from './textsize.js';   // v85
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -205,7 +206,8 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v84';   // v84: 進階「我的資料備份」（換手機、主畫面 App 與 Safari 資料不相通；備份碼複製／存檔、貼上還原；請手機不要自動清掉）
+const VERSION = 'v85';   // v85: 右上角「字」按鈕：字的大小 標準／大／特大／超大（只存在這支手機、可備份）
+// was: const VERSION = 'v84';   // v84: 進階「我的資料備份」（換手機、主畫面 App 與 Safari 資料不相通；備份碼複製／存檔、貼上還原；請手機不要自動清掉）
 // was: const VERSION = 'v83';   // v83: 進階「預測方法還正常嗎？」（實盤 vs 過去同樣長度的時期；只有異常才在首頁提醒）
 // was: const VERSION = 'v82';   // v82: 預測成績單一眼看懂
 // was: const VERSION = 'v79';   // v79: 預測成績單「已經對答案：5 個方法誰說得比較準？」（公開對答案紀錄＋回測：幾天的分數看不出好壞）
@@ -1458,6 +1460,9 @@ $('#content').addEventListener('click', e => {
   coin = b.dataset.coin; localStorage.setItem('coin', coin); renderAdv();
 });
 $('#refresh').addEventListener('click', () => render(true));
+// v85: 字的大小（標準 → 大 → 特大 → 超大 → 標準），存在這支手機（cs-text，備份碼會帶著）
+{ const tb = $('#textsize'); if (tb) { TXS.apply(document, TXS.load(localStorage), tb);
+  tb.addEventListener('click', () => { const id = TXS.next(TXS.load(localStorage)); TXS.save(localStorage, id); TXS.apply(document, id, tb); }); } }
 // v50: remember which 進階 groups are open (toggle does not bubble → capture)
 $('#content').addEventListener('toggle', e => {
   const d = e.target; if (!d?.classList?.contains('adv-grp')) return;

@@ -9,7 +9,7 @@
 export const FORMAT = 'coin-signal-backup';
 export const V = 1;
 /** Keys that hold 宗's own data / preferences (all other keys are caches the app rebuilds). */
-export const KEYS = ['cs-v2-settings', 'cs-v12-journal', 'cs-v7-seen', 'coin', 'adv-open', 'adv-grp'];
+export const KEYS = ['cs-v2-settings', 'cs-v12-journal', 'cs-v7-seen', 'coin', 'adv-open', 'adv-grp', 'cs-text'];   // v85: + 字的大小
 const JSON_KEYS = { 'cs-v2-settings': 'object', 'cs-v12-journal': 'array', 'cs-v7-seen': 'object', 'adv-grp': 'array' };
 const MAX_LEN = 500000;
 
