@@ -64,6 +64,7 @@ import * as FW from './firstweek.js';   // v79
 import * as CAL from './calendar.js';   // v67
 import * as BRG from './bandregime.js';   // v68
 import * as PEER from './peers.js';   // v75
+import * as BK from './backup.js';   // v84
 
 const $ = s => document.querySelector(s);
 const TZ = 'Asia/Taipei';
@@ -204,7 +205,8 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v83';   // v83: 進階「預測方法還正常嗎？」（實盤 vs 過去同樣長度的時期；只有異常才在首頁提醒）
+const VERSION = 'v84';   // v84: 進階「我的資料備份」（換手機、主畫面 App 與 Safari 資料不相通；備份碼複製／存檔、貼上還原；請手機不要自動清掉）
+// was: const VERSION = 'v83';   // v83: 進階「預測方法還正常嗎？」（實盤 vs 過去同樣長度的時期；只有異常才在首頁提醒）
 // was: const VERSION = 'v82';   // v82: 預測成績單一眼看懂
 // was: const VERSION = 'v79';   // v79: 預測成績單「已經對答案：5 個方法誰說得比較準？」（公開對答案紀錄＋回測：幾天的分數看不出好壞）
 // was: const VERSION = 'v78';   // v78: 每週檢討卡「8 週的實際對答案，分得出哪個方法比較好嗎？」（事先登記，歷史重演換方法規則）
@@ -1135,6 +1137,68 @@ function modelsCard() {
 }
 const advOpen = () => localStorage.getItem('adv-open') === '1';
 
+// ======================= v84: 我的資料備份（只在這支手機；備份碼由宗自己複製） =======================
+let BK_ENV = { standalone: false, persisted: null };
+async function bkEnv() {
+  const standalone = !!(window.navigator.standalone || window.matchMedia?.('(display-mode: standalone)').matches);
+  let persisted = null;
+  try {
+    if (navigator.storage?.persisted) {
+      persisted = await navigator.storage.persisted();
+      const sum = BK.summary(BK.read(localStorage));
+      if (!persisted && navigator.storage.persist && (sum.journal || sum.position)) persisted = await navigator.storage.persist();   // only once there is something worth keeping
+    }
+  } catch { persisted = null; }
+  BK_ENV = { standalone, persisted };
+}
+function backupCard() {
+  const sum = BK.summary(BK.read(localStorage));
+  const lines = BK.statusLines(sum, BK_ENV);
+  return `<section class="card" id="backup"><h2>我的資料備份（換手機、清除資料前）</h2>
+    <ul class="facts small">${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+    <p class="small">「我的部位」「定期定額」「買幣成本」的設定和「我的決策紀錄」都<strong>只存在這支手機</strong>，不會傳到任何地方。換手機、刪掉主畫面 App、清除網站資料，或從 Safari 改用主畫面 App 之前，先把備份碼存起來。</p>
+    <p class="small"><button type="button" class="bk-make">產生備份碼</button> <button type="button" class="bk-copy" hidden>複製</button> <button type="button" class="bk-file" hidden>存成檔案</button></p>
+    <textarea class="bk-out" rows="3" readonly hidden aria-label="備份碼"></textarea>
+    <p class="bk-msg small" aria-live="polite"></p>
+    <h3 class="sub">還原</h3>
+    <p class="small">在新手機（或另一邊的 App／網頁）打開這張卡，把備份碼整段貼上。設定會換成備份裡的；決策紀錄會合併（同一天同一個幣以備份為準），這支手機原有的紀錄不會被刪掉。</p>
+    <textarea class="bk-in" rows="3" placeholder='貼上備份碼（開頭是 {"format":"coin-signal-backup"）' aria-label="貼上備份碼"></textarea>
+    <p class="small"><button type="button" class="bk-restore">還原</button></p>
+    <p class="bk-rmsg small" aria-live="polite"></p>
+    <p class="small muted">備份碼裡有你填的總資產和持有數量，請存在自己的地方（例如備忘錄或 iCloud 檔案），不要貼給別人。這不是投資建議。</p>
+  </section>`;
+}
+function backupClick(e) {
+  const card = e.target.closest('#backup'); if (!card) return false;
+  const out = card.querySelector('.bk-out'), msg = card.querySelector('.bk-msg');
+  if (e.target.closest('.bk-make')) {
+    out.value = BK.makeBackup(localStorage); out.hidden = false; card.querySelector('.bk-copy').hidden = false; card.querySelector('.bk-file').hidden = false;
+    const s = BK.summary(BK.read(localStorage)); msg.textContent = `已產生（決策紀錄 ${s.journal} 筆、部位${s.position ? '有填' : '沒填'}）。按「複製」貼到備忘錄，或「存成檔案」。`; return true;
+  }
+  if (e.target.closest('.bk-copy')) {
+    const done = () => { msg.textContent = '已複製。'; }, fail = () => { out.select(); msg.textContent = '這支手機不讓 App 直接複製，已幫你選取，請長按 → 拷貝。'; };
+    try { navigator.clipboard?.writeText ? navigator.clipboard.writeText(out.value).then(done, fail) : fail(); } catch { fail(); } return true;
+  }
+  if (e.target.closest('.bk-file')) {
+    try {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out.value], { type: 'application/json' }));
+      a.download = `coin-signal-backup-${BK.taipei(Date.now()).slice(0, 10)}.json`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000); msg.textContent = '已存成檔案（iPhone 會問要存到「檔案」的哪裡）。';
+    } catch { msg.textContent = '這支手機不能直接存檔，請改用「複製」。'; }
+    return true;
+  }
+  if (e.target.closest('.bk-restore')) {
+    const rmsg = card.querySelector('.bk-rmsg'), p = BK.parseBackup(card.querySelector('.bk-in').value);
+    if (p.error) { rmsg.textContent = p.error; rmsg.className = 'bk-rmsg small warn-inline'; return true; }
+    if (!confirm(`要還原${p.made ? ` ${p.made} 的` : ''}備份嗎？（決策紀錄 ${p.summary.journal} 筆、部位${p.summary.position ? '有填' : '沒填'}；設定會換成備份裡的）`)) return true;
+    const r = BK.restore(localStorage, p);
+    if (!r.ok) { rmsg.textContent = r.error; rmsg.className = 'bk-rmsg small warn-inline'; return true; }
+    rmsg.textContent = `已還原：現在決策紀錄 ${r.summary.journal} 筆。重新載入中…`; rmsg.className = 'bk-rmsg small ok-inline';
+    setTimeout(() => location.reload(), 800); return true;
+  }
+  return false;
+}
+
 // ======================= v12: 我的決策紀錄（只存在這支手機） =======================
 function journalHtml() {
   const barsByCoin = {}, srcs = [];
@@ -1258,6 +1322,7 @@ async function render(force = false) {
   updateOuts();
   $('#meta').textContent = `版本 ${VERSION}${LIVE ? `｜預測 ${LIVE.coins.BTC?.asof || ''}｜冠軍模型 ${LIVE.champion.key}` : ''}`;
   devCheck();
+  await bkEnv();   // v84: ask once to keep this phone's data (persistent storage) before the 進階 cards render
   await renderAdv(force);
   await loadTickers();
 }
@@ -1292,7 +1357,7 @@ async function renderAdv(force = false) {
         <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a><a href="#dipstop">跌破買進價要先賣嗎</a><a href="#takeprofit">賺了要先落袋嗎</a><a href="#quickexit">會不會很快又賣掉</a></div>
         <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#precursors">大動前兆現在有沒有</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a><a href="#sameavg">時機還是放得少</a><a href="#quitcost">連賠想放棄</a><a href="#rellag">落後抱著想換</a></div>
-        <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a></div>
+        <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a><a href="#backup">備份／換手機</a></div>
         <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#health">預測方法還正常嗎</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#review">每週檢討換了沒</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#bigclues">能預告大漲大跌嗎</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
       ${AG.wrap('act', `
       ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
@@ -1335,7 +1400,8 @@ async function renderAdv(force = false) {
       ${costCard(coin)}
       ${FR.withAsof(csHtml(), CSENS?.as_of ?? null, NOW)}
       ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
-      <div id="tw-wrap">${FR.withAsof(twHtml(), TWDV?.as_of ?? null, NOW)}</div>`, GO.has('money'))}
+      <div id="tw-wrap">${FR.withAsof(twHtml(), TWDV?.as_of ?? null, NOW)}</div>
+      ${backupCard()}`, GO.has('money'))}
       ${AG.wrap('trust', `
       ${relCard()}
       ${TR.trustCard(TRUST, LIVE, Date.now(), DEV)}
@@ -1379,6 +1445,7 @@ $('#content').addEventListener('change', e => {
 });
 $('#content').addEventListener('click', e => {
   if (e.target.closest('.chg-x')) { dismissChange(); return; }
+  if (backupClick(e)) return;   // v84
   if (e.target.closest('.jr-go')) { e.preventDefault(); goJournal(); return; }
   const js = e.target.closest('.jr-save'); if (js) { journalSave(js.dataset.coin); return; }
   const jd = e.target.closest('.jr-del'); if (jd) { JR.save(localStorage, JR.remove(JR.load(localStorage), jd.dataset.id)); refreshJournal(); return; }
