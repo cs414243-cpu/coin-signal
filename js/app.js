@@ -58,6 +58,7 @@ import * as PRE from './precursors.js';   // v81 (PC is taken)
 import * as TBR from './trackbrief.js';   // v82: 成績單一眼看懂
 import * as HL from './health.js';   // v83: 預測方法還正常嗎
 import * as XL from './execlag.js';   // v66
+import * as TXD from './taxdrag.js';   // v86
 import * as TWV from './twdview.js';   // v70
 import * as PPW from './promopower.js';   // v78
 import * as FW from './firstweek.js';   // v79
@@ -206,7 +207,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v85';   // v85: 右上角「字」按鈕：字的大小 標準／大／特大／超大（只存在這支手機、可備份）
+const VERSION = 'v86';   // v86: 進階「照建議做，在台灣要繳多少稅？稅後還划算嗎？」
 // was: const VERSION = 'v84';   // v84: 進階「我的資料備份」（換手機、主畫面 App 與 Safari 資料不相通；備份碼複製／存檔、貼上還原；請手機不要自動清掉）
 // was: const VERSION = 'v83';   // v83: 進階「預測方法還正常嗎？」（實盤 vs 過去同樣長度的時期；只有異常才在首頁提醒）
 // was: const VERSION = 'v82';   // v82: 預測成績單一眼看懂
@@ -755,6 +756,7 @@ let TPROF = null;   // v71
 let RLAG = null;   // v72
 let QEXIT = null;   // v63
 let XLAG = null;   // v66
+let TAXD = null;   // v86
 let TWDV = null;   // v70
 let PPOW = null;   // v78
 let SROWS = null, BRN = null;   // v79
@@ -922,6 +924,7 @@ const tpDetail = c => { try { return esc(TP.detailLine(c, TRIPS)); } catch { ret
 // v37: 照建議的錢跌下來要多久回到新高（data/underwater.json）— past record, one plain line in the details
 const uwDetail = c => { try { return esc(UW.detailLine(c, UWATER)); } catch { return ''; } };
 // v38: 手續費高一點，照建議還划算嗎（data/costsens.json）— past record, advanced card + one line under 買幣成本
+function txHtml() { try { return TXD.taxDragCard(TAXD); } catch (e) { return `<section class="card" id="taxdrag"><h2>照建議做，在台灣要繳多少稅？稅後還划算嗎？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }   // v86
 function csHtml() { try { return CSN.costSensCard(CSENS, DEC?.max?.vip?.[0]); } catch (e) { return `<section class="card" id="costsens"><h2>手續費高一點還划算嗎</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function uwHtml() { try { return UW.underwaterCard(UWATER); } catch (e) { return `<section class="card" id="underwater"><h2>跌下來要多久回來</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 /** v45: latest 7 days per coin from the phone's closed bars (same frozen rule as flips.recoRows); null → file's own week. */
@@ -1291,6 +1294,7 @@ async function render(force = false) {
   try { FPATH = await fetch('data/fullpath.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FPATH; } catch { FPATH = FPATH || null; }   // v47
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
+  try { TAXD = await fetch('data/taxdrag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TAXD; } catch { TAXD = TAXD || null; }   // v86
   try { LADDER = await fetch('data/ladder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LADDER; } catch { LADDER = LADDER || null; }   // v39
   try { TBAND = await fetch('data/tradeband.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TBAND; } catch { TBAND = TBAND || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
@@ -1359,7 +1363,7 @@ async function renderAdv(force = false) {
         <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a><a href="#dipstop">跌破買進價要先賣嗎</a><a href="#takeprofit">賺了要先落袋嗎</a><a href="#quickexit">會不會很快又賣掉</a></div>
         <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#precursors">大動前兆現在有沒有</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a><a href="#sameavg">時機還是放得少</a><a href="#quitcost">連賠想放棄</a><a href="#rellag">落後抱著想換</a></div>
-        <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a><a href="#backup">備份／換手機</a></div>
+        <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#taxdrag">稅後還划算嗎</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a><a href="#backup">備份／換手機</a></div>
         <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#health">預測方法還正常嗎</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#review">每週檢討換了沒</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#bigclues">能預告大漲大跌嗎</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
       ${AG.wrap('act', `
       ${FR.withAsof(decisionCard(coin), FR.asofOf('decision', DEC), NOW)}
@@ -1401,6 +1405,7 @@ async function renderAdv(force = false) {
       ${FR.withAsof(planCard(), FR.asofOf('dca', DCA), NOW)}
       ${costCard(coin)}
       ${FR.withAsof(csHtml(), CSENS?.as_of ?? null, NOW)}
+      ${FR.withAsof(txHtml(), TAXD?.as_of ?? null, NOW)}
       ${FR.withAsof(levCard(coin), FR.asofOf('decision', DEC), NOW)}
       <div id="tw-wrap">${FR.withAsof(twHtml(), TWDV?.as_of ?? null, NOW)}</div>
       ${backupCard()}`, GO.has('money'))}
