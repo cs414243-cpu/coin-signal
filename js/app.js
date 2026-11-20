@@ -59,6 +59,7 @@ import * as TBR from './trackbrief.js';   // v82: 成績單一眼看懂
 import * as HL from './health.js';   // v83: 預測方法還正常嗎
 import * as XL from './execlag.js';   // v66
 import * as TXD from './taxdrag.js';   // v86
+import * as LOM from './limitorder.js';   // v87
 import * as TWV from './twdview.js';   // v70
 import * as PPW from './promopower.js';   // v78
 import * as FW from './firstweek.js';   // v79
@@ -207,7 +208,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v86';   // v86: 進階「照建議做，在台灣要繳多少稅？稅後還划算嗎？」
+const VERSION = 'v87';   // v87: 台幣買幣成本卡「建議變了那天：掛單還是直接買賣？」   // v86: 進階「照建議做，在台灣要繳多少稅？稅後還划算嗎？」
 // was: const VERSION = 'v84';   // v84: 進階「我的資料備份」（換手機、主畫面 App 與 Safari 資料不相通；備份碼複製／存檔、貼上還原；請手機不要自動清掉）
 // was: const VERSION = 'v83';   // v83: 進階「預測方法還正常嗎？」（實盤 vs 過去同樣長度的時期；只有異常才在首頁提醒）
 // was: const VERSION = 'v82';   // v82: 預測成績單一眼看懂
@@ -501,9 +502,10 @@ function costCard(coin) {
       <label>路徑（台幣→USDT→幣，或直接台幣市場）<select data-k="route"><option value="usdt"${S.route === 'usdt' ? ' selected' : ''}>經 USDT</option><option value="twd"${S.route === 'twd' ? ' selected' : ''}>直接台幣</option></select></label>
       <label>手續費等級（吃單費率）<select data-k="vip">${vip.map(([v, t]) => `<option value="${v}"${String(S.vip) === String(v) ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
       <label>MAX 現在的 USDT 賣價（選填）<input type="text" inputmode="decimal" data-k="quote" value="${esc(S.quote)}" placeholder="例如 32.95"></label>
-      <label class="check"><input type="checkbox" data-k="maker"${S.maker ? ' checked' : ''}> 用掛單（省價差，但不一定成交）</label>
+      <label class="check"><input type="checkbox" data-k="maker"${S.maker ? ' checked' : ''}> 用掛單（省價差，但不一定成交；<a href="#limitorder">掛在哪個價格？</a>）</label>
     </div>
-    <div id="cost-out"></div></section>`;
+    <div id="cost-out"></div>
+    ${(() => { try { return LOM.limitBlock(LORD); } catch (e) { return `<div id="limitorder"><p class="warn">計算失敗：${esc(e.message || e)}</p></div>`; } })()}</section>`;
 }
 function costOut(coin) {
   const amt = num(S.amt);
@@ -757,6 +759,7 @@ let RLAG = null;   // v72
 let QEXIT = null;   // v63
 let XLAG = null;   // v66
 let TAXD = null;   // v86
+let LORD = null;   // v87
 let TWDV = null;   // v70
 let PPOW = null;   // v78
 let SROWS = null, BRN = null;   // v79
@@ -1295,6 +1298,7 @@ async function render(force = false) {
   try { UWATER = await fetch('data/underwater.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || UWATER; } catch { UWATER = UWATER || null; }   // v37
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
   try { TAXD = await fetch('data/taxdrag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TAXD; } catch { TAXD = TAXD || null; }   // v86
+  try { LORD = await fetch('data/limitorder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LORD; } catch { LORD = LORD || null; }   // v87
   try { LADDER = await fetch('data/ladder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LADDER; } catch { LADDER = LADDER || null; }   // v39
   try { TBAND = await fetch('data/tradeband.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TBAND; } catch { TBAND = TBAND || null; }
   try { TRUST = await fetch('data/trust.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TRUST; } catch { TRUST = TRUST || null; }
