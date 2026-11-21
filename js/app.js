@@ -62,6 +62,7 @@ import * as TXD from './taxdrag.js';   // v86
 import * as CUS from './custody.js';   // v88
 import * as ETR from './etfroute.js';   // v89
 import * as FT from './fundtiming.js';   // v90
+import * as DDP from './deepdrop.js';   // v91
 import * as LOM from './limitorder.js';   // v87
 import * as TWV from './twdview.js';   // v70
 import * as PPW from './promopower.js';   // v78
@@ -211,7 +212,7 @@ async function loadLive(sym, force) {
 }
 
 // ======================= v2: decision layer =======================
-const VERSION = 'v90';   // v90: 進階「我的錢」組「建議轉成買進那天，台幣還在銀行來得及嗎？」   // v89: 進階「我的錢」組「可以改用美股比特幣 ETF（券商複委託）照建議做嗎？」   // v88: 進階「我的錢」組「買了之後，幣放哪裡？交易所倒了怎麼辦？」   // v87: 台幣買幣成本卡「建議變了那天：掛單還是直接買賣？」   // v86: 進階「照建議做，在台灣要繳多少稅？稅後還划算嗎？」
+const VERSION = 'v91';   // v91: 進階「現在空手」組「已經從最高點跌了一半，是不是便宜了？現在買，還是等建議？」   // v90: 進階「我的錢」組「建議轉成買進那天，台幣還在銀行來得及嗎？」   // v89: 進階「我的錢」組「可以改用美股比特幣 ETF（券商複委託）照建議做嗎？」   // v88: 進階「我的錢」組「買了之後，幣放哪裡？交易所倒了怎麼辦？」   // v87: 台幣買幣成本卡「建議變了那天：掛單還是直接買賣？」   // v86: 進階「照建議做，在台灣要繳多少稅？稅後還划算嗎？」
 // was: const VERSION = 'v84';   // v84: 進階「我的資料備份」（換手機、主畫面 App 與 Safari 資料不相通；備份碼複製／存檔、貼上還原；請手機不要自動清掉）
 // was: const VERSION = 'v83';   // v83: 進階「預測方法還正常嗎？」（實盤 vs 過去同樣長度的時期；只有異常才在首頁提醒）
 // was: const VERSION = 'v82';   // v82: 預測成績單一眼看懂
@@ -764,6 +765,7 @@ let XLAG = null;   // v66
 let TAXD = null;   // v86
 let ETFR = null;   // v89
 let FTIM = null;   // v90
+let DDROP = null;   // v91
 let LORD = null;   // v87
 let TWDV = null;   // v70
 let PPOW = null;   // v78
@@ -1000,6 +1002,8 @@ function qxHtml() { try { return QX.quickExitCard(QEXIT); } catch (e) { return `
 function twHtml() { try { return TWV.twdViewCard(TWDV); } catch (e) { return `<section class="card" id="twdview"><h2>用新台幣算，成績還一樣嗎？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v66: 建議變了，我晚幾天才照做，會差多少？（data/execlag.json ← backtest/exec_lag.py）
 // v90: 建議轉成買進那天，台幣還在銀行來得及嗎？（data/fundtiming.json ← backtest/fund_timing.py）
+// v91: 已經從最高點跌了一半，是不是便宜了？（data/deepdrop.json ← backtest/deep_drop.py）
+function ddHtml() { try { return DDP.deepDropCard(DDROP); } catch (e) { return `<section class="card" id="deepdrop"><h2>已經從最高點跌了一半，是不是便宜了？現在買，還是等建議？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function ftHtml() { try { return FT.fundTimingCard(FTIM); } catch (e) { return `<section class="card" id="fundtiming"><h2>建議轉成買進那天，台幣還在銀行來得及嗎？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 function xlHtml() { try { return XL.execLagCard(XLAG); } catch (e) { return `<section class="card" id="execlag"><h2>建議變了，我晚幾天才照做，會差多少？</h2><p class="warn">計算失敗：${esc(e.message || e)}</p></section>`; } }
 // v62: 加碼之後價格跌破買進價，要不要自己先全賣？（data/dipstop.json ← backtest/dip_stop.py）
@@ -1308,6 +1312,7 @@ async function render(force = false) {
   try { CSENS = await fetch('data/costsens.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || CSENS; } catch { CSENS = CSENS || null; }   // v38
   try { TAXD = await fetch('data/taxdrag.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || TAXD; } catch { TAXD = TAXD || null; }   // v86
   try { ETFR = await fetch('data/etfroute.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || ETFR; } catch { ETFR = ETFR || null; }   // v89
+  try { DDROP = await fetch('data/deepdrop.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || DDROP; } catch { DDROP = DDROP || null; }   // v91
   try { FTIM = await fetch('data/fundtiming.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || FTIM; } catch { FTIM = FTIM || null; }   // v90
   try { LORD = await fetch('data/limitorder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LORD; } catch { LORD = LORD || null; }   // v87
   try { LADDER = await fetch('data/ladder.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null) || LADDER; } catch { LADDER = LADDER || null; }   // v39
@@ -1376,7 +1381,7 @@ async function renderAdv(force = false) {
     el.innerHTML = `
       <nav class="jump ix" aria-label="問題索引"><p class="ix-head small muted">想知道什麼，點那一張（會自動打開那一組）：<button type="button" class="ix-all link-btn">${AG.GROUPS.every(g => GO.has(g.id)) ? '全部收起' : '全部打開'}</button></p>
         <div class="ix-row" data-grp="act"><b class="ix-q">這週要不要動手？</b><a href="#today">今天</a><a href="#nextmove">這週要動手嗎</a><a href="#fullpath">放回最多要多遠</a><a href="#intraday">盤中離翻轉價</a><a href="#xsrc">台幣翻轉價</a><a href="#recent">建議變化</a><a href="#splitexit">一次賣完還是分天</a><a href="#dipstop">跌破買進價要先賣嗎</a><a href="#takeprofit">賺了要先落袋嗎</a><a href="#quickexit">會不會很快又賣掉</a></div>
-        <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#events">大漲跌原因</a><a href="#precursors">大動前兆現在有沒有</a></div>
+        <div class="ix-row" data-grp="flat"><b class="ix-q">現在空手怎麼辦？</b><a href="#spells">空手要等多久</a><a href="#lateentry">轉加碼時已漲很多</a><a href="#cashyield">空手的錢放哪</a><a href="#usdtpark">留 USDT 還是換台幣</a><a href="#startany">今天才開始照做</a><a href="#moveweeks">大跌週照建議</a><a href="#dipbuy">大跌後要不要買</a><a href="#deepdrop">跌一半了算便宜嗎</a><a href="#events">大漲跌原因</a><a href="#precursors">大動前兆現在有沒有</a></div>
         <div class="ix-row" data-grp="record"><b class="ix-q">過去賺多少、虧多少？</b><a href="#outcomes">建議之後一週</a><a href="#weekrisk">運氣差的一週</a><a href="#tradeband">差一點要不要動</a><a href="#trips">每一次進場</a><a href="#underwater">跌下來多久回來</a><a href="#years">每一年 vs 抱著</a><a href="#blend">留一部分抱著</a><a href="#sameavg">時機還是放得少</a><a href="#quitcost">連賠想放棄</a><a href="#rellag">落後抱著想換</a></div>
         <div class="ix-row" data-grp="money"><b class="ix-q">我的錢和成本</b><a href="#journal">我的決策紀錄</a><a href="#risk">我的部位</a><a href="#execlag">晚幾天才照做</a><a href="#fundtiming">錢放銀行來得及嗎</a><a href="#coinsplit">BTC／ETH 怎麼分</a><a href="#plan">定期定額</a><a href="#cost">買幣成本</a><a href="#costsens">成本多少還划算</a><a href="#taxdrag">稅後還划算嗎</a><a href="#custody">幣放哪裡</a><a href="#etfroute">改買美股 ETF？</a><a href="#lev">槓桿</a><a href="#twdview">用台幣算成績</a><a href="#backup">備份／換手機</a></div>
         <div class="ix-row" data-grp="trust"><b class="ix-q">數字可信嗎？</b><a href="#data">資料可靠度</a><a href="#trust">紀錄可信度</a><a href="#health">預測方法還正常嗎</a><a href="#pupcal">說 X% 會漲準不準</a><a href="#review">每週檢討換了沒</a><a href="#models">模型驗證</a><a href="#tested">沒通過的訊號</a><a href="#bigclues">能預告大漲大跌嗎</a><a href="#notes">研究</a><a href="#signals">訊號細節</a></div></nav>
@@ -1399,6 +1404,7 @@ async function renderAdv(force = false) {
       <div id="sa-wrap">${FR.withAsof(saHtml(), STARTA?.as_of ?? null, NOW)}</div>
       ${FR.withAsof(moveHtml(), MOVEW?.as_of ?? null, NOW)}
       ${FR.withAsof(dipHtml(), DIPB?.as_of ?? null, NOW)}
+      ${FR.withAsof(ddHtml(), DDROP?.as_of ?? null, NOW)}
       ${eventsCard(EV, pcuNote)}
       ${FR.withAsof(pcuHtml(), PRECU?.as_of ?? null, NOW)}`, GO.has('flat'))}
       ${AG.wrap('record', `
