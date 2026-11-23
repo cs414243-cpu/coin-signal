@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-16",
+ "as_of": "2026-11-22",
  "labels": {
   "up_any": "盤中站上任何一條翻轉價就先買那一半",
   "up_zero": "只在空手時，盤中站上翻轉價就先買",
@@ -134,19 +134,19 @@
  "OOS": {
   "trend_vt@1": {
    "pooled": {
-    "sharpe": 0.8344,
-    "cagr": 0.1588,
+    "sharpe": 0.8321,
+    "cagr": 0.1578,
     "maxdd": -0.1842,
-    "cost_yr": 0.0322
+    "cost_yr": 0.032
    },
    "BTC": {
-    "sharpe": 0.7306,
-    "cagr": 0.1507,
+    "sharpe": 0.7285,
+    "cagr": 0.1497,
     "maxdd": -0.2121
    },
    "ETH": {
-    "sharpe": 0.861,
-    "cagr": 0.1686,
+    "sharpe": 0.8585,
+    "cagr": 0.1676,
     "maxdd": -0.1955
    },
    "early_buys": {
@@ -156,19 +156,19 @@
   },
   "up_any": {
    "pooled": {
-    "sharpe": 0.6751,
-    "cagr": 0.1254,
+    "sharpe": 0.6732,
+    "cagr": 0.1246,
     "maxdd": -0.2154,
-    "cost_yr": 0.0529
+    "cost_yr": 0.0526
    },
    "BTC": {
-    "sharpe": 0.6048,
-    "cagr": 0.12,
+    "sharpe": 0.603,
+    "cagr": 0.1193,
     "maxdd": -0.2298
    },
    "ETH": {
-    "sharpe": 0.678,
-    "cagr": 0.1313,
+    "sharpe": 0.676,
+    "cagr": 0.1305,
     "maxdd": -0.2345
    },
    "early_buys": {
@@ -178,19 +178,19 @@
   },
   "up_zero": {
    "pooled": {
-    "sharpe": 0.7655,
-    "cagr": 0.1435,
+    "sharpe": 0.7633,
+    "cagr": 0.1426,
     "maxdd": -0.2035,
-    "cost_yr": 0.0431
+    "cost_yr": 0.0428
    },
    "BTC": {
-    "sharpe": 0.6738,
-    "cagr": 0.1364,
+    "sharpe": 0.6719,
+    "cagr": 0.1356,
     "maxdd": -0.2269
    },
    "ETH": {
-    "sharpe": 0.7862,
-    "cagr": 0.1516,
+    "sharpe": 0.784,
+    "cagr": 0.1507,
     "maxdd": -0.2167
    },
    "early_buys": {
@@ -200,19 +200,19 @@
   },
   "up_buf2": {
    "pooled": {
-    "sharpe": 0.8298,
-    "cagr": 0.1602,
+    "sharpe": 0.8274,
+    "cagr": 0.1592,
     "maxdd": -0.1972,
-    "cost_yr": 0.036
+    "cost_yr": 0.0357
    },
    "BTC": {
-    "sharpe": 0.7471,
-    "cagr": 0.1554,
+    "sharpe": 0.7449,
+    "cagr": 0.1544,
     "maxdd": -0.2157
    },
    "ETH": {
-    "sharpe": 0.8249,
-    "cagr": 0.166,
+    "sharpe": 0.8226,
+    "cagr": 0.165,
     "maxdd": -0.1974
    },
    "early_buys": {
@@ -223,28 +223,28 @@
  },
  "WF": {
   "trend_vt@1": {
-   "sharpe": 0.7903,
-   "cagr": 0.1449,
+   "sharpe": 0.7889,
+   "cagr": 0.1443,
    "maxdd": -0.1842,
-   "cost_yr": 0.0307
+   "cost_yr": 0.0306
   },
   "up_any": {
-   "sharpe": 0.6572,
-   "cagr": 0.1178,
+   "sharpe": 0.6561,
+   "cagr": 0.1174,
    "maxdd": -0.2154,
-   "cost_yr": 0.0518
+   "cost_yr": 0.0516
   },
   "up_zero": {
-   "sharpe": 0.727,
-   "cagr": 0.1313,
+   "sharpe": 0.7257,
+   "cagr": 0.1309,
    "maxdd": -0.2035,
-   "cost_yr": 0.0418
+   "cost_yr": 0.0417
   },
   "up_buf2": {
-   "sharpe": 0.794,
-   "cagr": 0.1472,
+   "sharpe": 0.7927,
+   "cagr": 0.1467,
    "maxdd": -0.1972,
-   "cost_yr": 0.0342
+   "cost_yr": 0.034
   }
  },
  "significance": {
@@ -254,14 +254,14 @@
    "holm_worse_p": 0.0165
   },
   "up_zero": {
-   "p_better": 0.06,
+   "p_better": 0.0495,
    "holm_better_p": 1.0,
-   "holm_worse_p": 0.12
+   "holm_worse_p": 0.099
   },
   "up_buf2": {
-   "p_better": 0.4425,
+   "p_better": 0.444,
    "holm_better_p": 1.0,
-   "holm_worse_p": 0.4425
+   "holm_worse_p": 0.444
   }
  },
  "verdict": "unclear",
@@ -298,11 +298,11 @@
   }
  },
  "slippage_030_OOS_sharpe": {
-  "up_any": 0.6149,
-  "up_zero": 0.7306,
-  "up_buf2": 0.8144
+  "up_any": 0.6132,
+  "up_zero": 0.7286,
+  "up_buf2": 0.812
  },
- "generated_at": "2026-11-17T20:40:04Z",
+ "generated_at": "2026-11-23T00:53:19Z",
  "source": "Binance 現貨日K＋1小時K（已收完）",
  "script": "backtest/early_entry.py"
 }

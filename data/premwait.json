@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-11-18T03:44:38+08:00",
+ "generated_at": "2026-11-23T08:53:10+08:00",
  "source": "backtest/prem_wait.py (pre-registered docstring); premium = refresh_twcost.load_panel().max_prem; champion = flip_stats.frame",
  "model": "trend_vt@1",
- "as_of": "2026-11-16",
- "end_arg": "2026-11-16",
+ "as_of": "2026-11-20",
+ "end_arg": "2026-11-22",
  "is_only": false,
  "oos_start": "2024-01-01",
  "k": 3,
@@ -89,64 +89,64 @@
     "n_high": 28,
     "n_episodes": 17,
     "k1": {
-     "n": 27,
-     "mean": 0.00332,
-     "median": 0.00274,
-     "share_pos": 0.92593
+     "n": 28,
+     "mean": 0.00325,
+     "median": 0.00258,
+     "share_pos": 0.92857
     },
     "k3": {
-     "n": 26,
-     "mean": 0.00565,
-     "median": 0.0053,
-     "share_pos": 0.96154
+     "n": 28,
+     "mean": 0.00546,
+     "median": 0.00477,
+     "share_pos": 0.96429
     },
     "k5": {
-     "n": 26,
-     "mean": 0.00531,
-     "median": 0.00433,
+     "n": 27,
+     "mean": 0.00523,
+     "median": 0.00378,
      "share_pos": 1.0
     }
    },
    "q80": {
-    "n_high": 106,
+    "n_high": 107,
     "n_episodes": 25,
     "k1": {
-     "n": 105,
+     "n": 107,
      "mean": 0.00132,
      "median": 0.00132,
-     "share_pos": 0.75238
+     "share_pos": 0.75701
     },
     "k3": {
-     "n": 104,
-     "mean": 0.00236,
-     "median": 0.00191,
-     "share_pos": 0.83654
+     "n": 107,
+     "mean": 0.00235,
+     "median": 0.00192,
+     "share_pos": 0.84112
     },
     "k5": {
-     "n": 103,
-     "mean": 0.00237,
+     "n": 105,
+     "mean": 0.00236,
      "median": 0.00218,
-     "share_pos": 0.85437
+     "share_pos": 0.84762
     }
    },
    "all": {
     "k1": {
-     "n": 701,
-     "mean": -0.0,
+     "n": 705,
+     "mean": 0.0,
      "median": -1e-05,
-     "share_pos": 0.49643
+     "share_pos": 0.49645
     },
     "k3": {
-     "n": 699,
-     "mean": -0.0,
+     "n": 703,
+     "mean": 1e-05,
      "median": 4e-05,
-     "share_pos": 0.50644
+     "share_pos": 0.50782
     },
     "k5": {
-     "n": 697,
+     "n": 701,
      "mean": 1e-05,
      "median": -1e-05,
-     "share_pos": 0.49785
+     "share_pos": 0.49929
     }
    }
   }
@@ -217,7 +217,7 @@
     "share_pos": 0.59524
    },
    "absD3_median": 0.02112,
-   "share_absD3_gt_save": 0.80952,
+   "share_absD3_gt_save": 0.83333,
    "high_entries": {
     "n": 1,
     "S3": {
@@ -249,16 +249,16 @@
    },
    "oos": {
     "falls": true,
-    "net": -0.02006
+    "net": -0.02025
    }
   },
   "overall": "unclear"
  },
  "latest": {
-  "date": "2026-11-16",
-  "prem": 0.00536,
-  "q95": 0.00484,
-  "high": true
+  "date": "2026-11-20",
+  "prem": 0.00336,
+  "q95": 0.00496,
+  "high": false
  },
  "entries": [
   {

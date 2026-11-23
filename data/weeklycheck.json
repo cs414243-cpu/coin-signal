@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-11-22T04:36:36Z",
+ "generated_at": "2026-11-23T00:52:46Z",
  "source": "冠軍 trend_vt@1 逐日重做的建議比例（forecast/reports/walkforward，凍結程式碼、每天只用當天以前的資料）＋Binance 現貨日K（只用已收完的）＋paper_sim 成本",
  "model": "trend_vt@1",
- "as_of": "2026-11-15",
- "end_arg": null,
+ "as_of": "2026-11-22",
+ "end_arg": "2026-11-22",
  "is_only": false,
  "is_period": [
   "2022-01-01",
@@ -52,13 +52,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.8348,
-    "cagr": 0.1589,
+    "sharpe": 0.8321,
+    "cagr": 0.1578,
     "maxdd": -0.1842,
     "ret": 0.5286,
     "end_per_1m": 1528579,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -66,8 +66,8 @@
      "turnover_per_year": 9.3275
     },
     "oos": {
-     "trade_days_per_year": 68.8286,
-     "turnover_per_year": 11.3042
+     "trade_days_per_year": 68.3728,
+     "turnover_per_year": 11.2293
     }
    }
   },
@@ -82,13 +82,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.4304,
-    "cagr": 0.0708,
+    "sharpe": 0.4289,
+    "cagr": 0.0703,
     "maxdd": -0.2472,
     "ret": 0.2176,
     "end_per_1m": 1217555,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -96,8 +96,8 @@
      "turnover_per_year": 4.7839
     },
     "oos": {
-     "trade_days_per_year": 30.9381,
-     "turnover_per_year": 6.1838
+     "trade_days_per_year": 30.7332,
+     "turnover_per_year": 6.1429
     }
    },
    "trips": {
@@ -124,13 +124,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.4439,
-    "cagr": 0.0738,
+    "sharpe": 0.4389,
+    "cagr": 0.0725,
     "maxdd": -0.265,
-    "ret": 0.2273,
-    "end_per_1m": 1227261,
+    "ret": 0.2246,
+    "end_per_1m": 1224600,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -138,8 +138,8 @@
      "turnover_per_year": 4.9377
     },
     "oos": {
-     "trade_days_per_year": 27.4619,
-     "turnover_per_year": 5.4187
+     "trade_days_per_year": 27.6254,
+     "turnover_per_year": 5.4558
     }
    },
    "trips": {
@@ -166,13 +166,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.5467,
-    "cagr": 0.0959,
+    "sharpe": 0.5416,
+    "cagr": 0.0945,
     "maxdd": -0.2408,
-    "ret": 0.3014,
-    "end_per_1m": 1301419,
+    "ret": 0.2989,
+    "end_per_1m": 1298898,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -180,8 +180,8 @@
      "turnover_per_year": 5.548
     },
     "oos": {
-     "trade_days_per_year": 28.8524,
-     "turnover_per_year": 5.2813
+     "trade_days_per_year": 29.0066,
+     "turnover_per_year": 5.3189
     }
    },
    "trips": {
@@ -208,13 +208,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.6679,
-    "cagr": 0.1251,
+    "sharpe": 0.6505,
+    "cagr": 0.1206,
     "maxdd": -0.2474,
-    "ret": 0.4035,
-    "end_per_1m": 1403502,
+    "ret": 0.3908,
+    "end_per_1m": 1390766,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -222,8 +222,8 @@
      "turnover_per_year": 4.4398
     },
     "oos": {
-     "trade_days_per_year": 27.4619,
-     "turnover_per_year": 5.1854
+     "trade_days_per_year": 27.6254,
+     "turnover_per_year": 5.2249
     }
    },
    "trips": {
@@ -250,13 +250,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.7695,
-    "cagr": 0.1446,
+    "sharpe": 0.7669,
+    "cagr": 0.1436,
     "maxdd": -0.1972,
     "ret": 0.4748,
     "end_per_1m": 1474780,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -264,8 +264,8 @@
      "turnover_per_year": 4.1149
     },
     "oos": {
-     "trade_days_per_year": 28.8524,
-     "turnover_per_year": 5.1566
+     "trade_days_per_year": 28.6613,
+     "turnover_per_year": 5.1224
     }
    },
    "trips": {
@@ -292,13 +292,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.4572,
-    "cagr": 0.0746,
+    "sharpe": 0.4557,
+    "cagr": 0.0741,
     "maxdd": -0.2272,
     "ret": 0.2299,
     "end_per_1m": 1229902,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -306,8 +306,8 @@
      "turnover_per_year": 4.2615
     },
     "oos": {
-     "trade_days_per_year": 29.8952,
-     "turnover_per_year": 6.1084
+     "trade_days_per_year": 29.6973,
+     "turnover_per_year": 6.0679
     }
    },
    "trips": {
@@ -334,13 +334,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.4909,
-    "cagr": 0.0825,
+    "sharpe": 0.4893,
+    "cagr": 0.0819,
     "maxdd": -0.2321,
     "ret": 0.256,
     "end_per_1m": 1255993,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -348,8 +348,8 @@
      "turnover_per_year": 4.3584
     },
     "oos": {
-     "trade_days_per_year": 30.9381,
-     "turnover_per_year": 6.0994
+     "trade_days_per_year": 30.7332,
+     "turnover_per_year": 6.0591
     }
    },
    "trips": {
@@ -376,13 +376,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.6322,
-    "cagr": 0.1078,
+    "sharpe": 0.6301,
+    "cagr": 0.107,
     "maxdd": -0.1973,
     "ret": 0.3423,
     "end_per_1m": 1342303,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -390,8 +390,8 @@
      "turnover_per_year": 5.7479
     },
     "oos": {
-     "trade_days_per_year": 48.6667,
-     "turnover_per_year": 8.186
+     "trade_days_per_year": 48.3444,
+     "turnover_per_year": 8.1318
     }
    },
    "trips": {
@@ -418,13 +418,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.5406,
-    "cagr": 0.0875,
+    "sharpe": 0.5388,
+    "cagr": 0.0869,
     "maxdd": -0.2081,
     "ret": 0.273,
     "end_per_1m": 1273044,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -432,8 +432,8 @@
      "turnover_per_year": 5.4743
     },
     "oos": {
-     "trade_days_per_year": 46.2333,
-     "turnover_per_year": 7.887
+     "trade_days_per_year": 45.9272,
+     "turnover_per_year": 7.8348
     }
    },
    "trips": {
@@ -460,13 +460,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.6252,
-    "cagr": 0.1042,
+    "sharpe": 0.6231,
+    "cagr": 0.1035,
     "maxdd": -0.1936,
     "ret": 0.3299,
     "end_per_1m": 1329928,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -474,8 +474,8 @@
      "turnover_per_year": 7.2705
     },
     "oos": {
-     "trade_days_per_year": 42.7571,
-     "turnover_per_year": 7.2822
+     "trade_days_per_year": 42.474,
+     "turnover_per_year": 7.2339
     }
    },
    "trips": {
@@ -502,13 +502,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.6637,
-    "cagr": 0.1119,
+    "sharpe": 0.6615,
+    "cagr": 0.1111,
     "maxdd": -0.1854,
     "ret": 0.3567,
     "end_per_1m": 1356654,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -516,8 +516,8 @@
      "turnover_per_year": 5.868
     },
     "oos": {
-     "trade_days_per_year": 41.3667,
-     "turnover_per_year": 7.3645
+     "trade_days_per_year": 41.0927,
+     "turnover_per_year": 7.3157
     }
    },
    "trips": {
@@ -544,13 +544,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.7162,
-    "cagr": 0.1217,
+    "sharpe": 0.7138,
+    "cagr": 0.1208,
     "maxdd": -0.1897,
     "ret": 0.3914,
     "end_per_1m": 1391448,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -558,8 +558,8 @@
      "turnover_per_year": 5.1133
     },
     "oos": {
-     "trade_days_per_year": 38.2381,
-     "turnover_per_year": 6.6495
+     "trade_days_per_year": 37.9849,
+     "turnover_per_year": 6.6055
     }
    },
    "trips": {
@@ -586,13 +586,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.6129,
-    "cagr": 0.1008,
+    "sharpe": 0.6109,
+    "cagr": 0.1001,
     "maxdd": -0.2062,
     "ret": 0.3184,
     "end_per_1m": 1318361,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -600,8 +600,8 @@
      "turnover_per_year": 5.2797
     },
     "oos": {
-     "trade_days_per_year": 42.0619,
-     "turnover_per_year": 7.4622
+     "trade_days_per_year": 41.7833,
+     "turnover_per_year": 7.4128
     }
    },
    "trips": {
@@ -628,13 +628,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.66,
-    "cagr": 0.1121,
+    "sharpe": 0.6578,
+    "cagr": 0.1114,
     "maxdd": -0.1904,
     "ret": 0.3577,
     "end_per_1m": 1357654,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -642,8 +642,8 @@
      "turnover_per_year": 5.262
     },
     "oos": {
-     "trade_days_per_year": 44.4952,
-     "turnover_per_year": 7.743
+     "trade_days_per_year": 44.2006,
+     "turnover_per_year": 7.6918
     }
    },
    "trips": {
@@ -686,32 +686,32 @@
     }
    },
    "oos": {
-    "mean_sharpe": 0.5438,
+    "mean_sharpe": 0.5388,
     "mean_maxdd": -0.2367,
-    "min_sharpe": 0.4304,
-    "max_sharpe": 0.7695,
+    "min_sharpe": 0.4289,
+    "max_sharpe": 0.7669,
     "min_end": 1217555,
     "max_end": 1474780,
-    "mean_end": 1301487,
+    "mean_end": 1298928,
     "worst_maxdd": -0.265,
     "skipped_share": 0.2347,
     "mean_wait": 1.6467,
-    "trade_days_per_year": 29.2,
-    "turnover_per_year": 5.6334,
+    "trade_days_per_year": 29.1546,
+    "turnover_per_year": 5.6274,
     "blend": {
-     "sharpe": 0.5529,
-     "cagr": 0.0959,
+     "sharpe": 0.5477,
+     "cagr": 0.0945,
      "maxdd": -0.2291,
-     "ret": 0.3015,
-     "end_per_1m": 1301487,
+     "ret": 0.2989,
+     "end_per_1m": 1298928,
      "start": "2023-12-31",
-     "end": "2026-11-15"
+     "end": "2026-11-22"
     }
    },
    "best_is_day": "fri",
    "best_is_day_oos_rank": 1,
    "best_oos_day": "fri",
-   "oos_p_worse": 0.9865
+   "oos_p_worse": 0.991
   },
   "cut": {
    "is_": {
@@ -738,32 +738,32 @@
     }
    },
    "oos": {
-    "mean_sharpe": 0.6358,
+    "mean_sharpe": 0.6337,
     "mean_maxdd": -0.1958,
-    "min_sharpe": 0.5406,
-    "max_sharpe": 0.7162,
+    "min_sharpe": 0.5388,
+    "max_sharpe": 0.7138,
     "min_end": 1273044,
     "max_end": 1391448,
     "mean_end": 1338485,
     "worst_maxdd": -0.2081,
     "skipped_share": 0.3435,
     "mean_wait": 2.5269,
-    "trade_days_per_year": 43.4027,
-    "turnover_per_year": 7.5106,
+    "trade_days_per_year": 43.1153,
+    "turnover_per_year": 7.4609,
     "blend": {
-     "sharpe": 0.6402,
-     "cagr": 0.1067,
+     "sharpe": 0.6381,
+     "cagr": 0.1059,
      "maxdd": -0.1937,
      "ret": 0.3385,
      "end_per_1m": 1338485,
      "start": "2023-12-31",
-     "end": "2026-11-15"
+     "end": "2026-11-22"
     }
    },
    "best_is_day": "fri",
    "best_is_day_oos_rank": 1,
    "best_oos_day": "fri",
-   "oos_p_worse": 0.9865
+   "oos_p_worse": 0.986
   }
  },
  "verdict": {

@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-11-22T12:46:28Z",
+ "generated_at": "2026-11-23T00:52:46Z",
  "source": "冠軍 trend_vt@1 逐日重做的建議比例（forecast/reports/walkforward，凍結程式碼、每天只用當天以前的資料）＋Binance 現貨日K（只用已收完的）＋paper_sim 成本",
  "model": "trend_vt@1",
- "as_of": "2026-11-15",
- "end_arg": null,
+ "as_of": "2026-11-22",
+ "end_arg": "2026-11-22",
  "is_only": false,
  "is_period": [
   "2022-01-01",
@@ -35,13 +35,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.8348,
-    "cagr": 0.1589,
+    "sharpe": 0.8321,
+    "cagr": 0.1578,
     "maxdd": -0.1842,
     "ret": 0.5286,
     "end_per_1m": 1528579,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -51,9 +51,9 @@
      "worst_7d": -0.0766
     },
     "oos": {
-     "avg_in_coins": 0.352,
+     "avg_in_coins": 0.3496,
      "max_in_coins": 0.8967,
-     "trade_days_per_year": 56.6619,
+     "trade_days_per_year": 56.2867,
      "worst_7d": -0.092
     }
    }
@@ -69,13 +69,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.7191,
-    "cagr": 0.1382,
+    "sharpe": 0.7167,
+    "cagr": 0.1372,
     "maxdd": -0.2024,
     "ret": 0.451,
     "end_per_1m": 1451041,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -85,9 +85,9 @@
      "worst_7d": -0.0766
     },
     "oos": {
-     "avg_in_coins": 0.3763,
+     "avg_in_coins": 0.3738,
      "max_in_coins": 0.9507,
-     "trade_days_per_year": 57.0095,
+     "trade_days_per_year": 56.632,
      "worst_7d": -0.0928
     }
    }
@@ -103,13 +103,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.7322,
-    "cagr": 0.1408,
+    "sharpe": 0.7298,
+    "cagr": 0.1398,
     "maxdd": -0.1996,
     "ret": 0.4608,
     "end_per_1m": 1460797,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -119,9 +119,9 @@
      "worst_7d": -0.0767
     },
     "oos": {
-     "avg_in_coins": 0.3734,
+     "avg_in_coins": 0.3709,
      "max_in_coins": 0.9507,
-     "trade_days_per_year": 57.0095,
+     "trade_days_per_year": 56.632,
      "worst_7d": -0.0922
     }
    }
@@ -137,13 +137,13 @@
     "end": "2023-12-31"
    },
    "oos": {
-    "sharpe": 0.8229,
-    "cagr": 0.1567,
+    "sharpe": 0.8202,
+    "cagr": 0.1556,
     "maxdd": -0.2006,
     "ret": 0.5201,
     "end_per_1m": 1520072,
     "start": "2023-12-31",
-    "end": "2026-11-15"
+    "end": "2026-11-22"
    },
    "desc": {
     "is_": {
@@ -153,9 +153,9 @@
      "worst_7d": -0.0766
     },
     "oos": {
-     "avg_in_coins": 0.3543,
+     "avg_in_coins": 0.352,
      "max_in_coins": 0.8948,
-     "trade_days_per_year": 56.6619,
+     "trade_days_per_year": 56.2867,
      "worst_7d": -0.0925
     }
    }
@@ -170,11 +170,11 @@
    "both_on": 0.5192
   },
   "oos": {
-   "n_days": 1050,
-   "both_off": 0.2286,
-   "only_btc": 0.1067,
-   "only_eth": 0.0276,
-   "both_on": 0.6371
+   "n_days": 1057,
+   "both_off": 0.2337,
+   "only_btc": 0.106,
+   "only_eth": 0.0274,
+   "both_on": 0.6329
   }
  },
  "verdict": {
@@ -216,9 +216,9 @@
    ]
   },
   "oos_p_worse": {
-   "pool": 0.9005,
-   "pool_btc": 0.8945,
-   "pool_eth": 0.6175
+   "pool": 0.9235,
+   "pool_btc": 0.8975,
+   "pool_eth": 0.598
   },
   "answer": "unclear"
  },

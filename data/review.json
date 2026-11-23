@@ -1,9 +1,9 @@
 {
  "schema": 1,
- "generated_at": "2026-11-16T08:55:46+08:00",
+ "generated_at": "2026-11-23T08:48:12+08:00",
  "review": {
-  "date": "2026-11-16",
-  "file": "review-2026-11-16.md",
+  "date": "2026-11-23",
+  "file": "review-2026-11-23.md",
   "dry_run": false,
   "champion": "trend_vt@1",
   "k": 4,
@@ -19,27 +19,27 @@
      {
       "name": "live_8_weeks",
       "passed": false,
-      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+      "detail": "已評分且可配對的天數 {'BTC': 6, 'ETH': 6}（每個幣需 ≥ 56）"
      },
      {
       "name": "live_brier_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "Brier 挑戰者 0.2712 vs 冠軍 0.2569，P(較好)=nan（門檻 0.975）"
      },
      {
       "name": "live_sharpe_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "虛擬投資夏普 挑戰者 -8.17 vs 冠軍 -5.03，P(較好)=—（門檻 0.975）"
      },
      {
       "name": "live_dd",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "虛擬投資最大跌幅 -0.207 vs -0.008（最多差 5%）"
      },
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2514 vs 0.2521；夏普 0.24 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2515 vs 0.2522；夏普 0.22 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
@@ -55,32 +55,32 @@
      {
       "name": "live_8_weeks",
       "passed": false,
-      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+      "detail": "已評分且可配對的天數 {'BTC': 6, 'ETH': 6}（每個幣需 ≥ 56）"
      },
      {
       "name": "live_brier_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "Brier 挑戰者 0.3402 vs 冠軍 0.2569，P(較好)=nan（門檻 0.975）"
      },
      {
       "name": "live_sharpe_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "虛擬投資夏普 挑戰者 -8.17 vs 冠軍 -5.03，P(較好)=—（門檻 0.975）"
      },
      {
       "name": "live_dd",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "虛擬投資最大跌幅 -0.207 vs -0.008（最多差 5%）"
      },
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2569 vs 0.2521；夏普 -0.20 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2572 vs 0.2522；夏普 -0.23 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
       "passed": false,
-      "detail": "回測最大跌幅 -0.636 vs -0.184（最多差 10%）"
+      "detail": "回測最大跌幅 -0.653 vs -0.184（最多差 10%）"
      }
     ]
    },
@@ -91,27 +91,27 @@
      {
       "name": "live_8_weeks",
       "passed": false,
-      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+      "detail": "已評分且可配對的天數 {'BTC': 6, 'ETH': 6}（每個幣需 ≥ 56）"
      },
      {
       "name": "live_brier_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "Brier 挑戰者 0.2409 vs 冠軍 0.2569，P(較好)=nan（門檻 0.975）"
      },
      {
       "name": "live_sharpe_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "虛擬投資夏普 挑戰者 -9.04 vs 冠軍 -5.03，P(較好)=—（門檻 0.975）"
      },
      {
       "name": "live_dd",
-      "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "passed": true,
+      "detail": "虛擬投資最大跌幅 -0.033 vs -0.008（最多差 5%）"
      },
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2527 vs 0.2521；夏普 0.39 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2526 vs 0.2522；夏普 0.39 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
@@ -127,27 +127,27 @@
      {
       "name": "live_8_weeks",
       "passed": false,
-      "detail": "已評分且可配對的天數 {}（每個幣需 ≥ 56）"
+      "detail": "已評分且可配對的天數 {'BTC': 6, 'ETH': 6}（每個幣需 ≥ 56）"
      },
      {
       "name": "live_brier_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "Brier 挑戰者 0.2464 vs 冠軍 0.2569，P(較好)=nan（門檻 0.975）"
      },
      {
       "name": "live_sharpe_better",
       "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "detail": "虛擬投資夏普 挑戰者 -9.38 vs 冠軍 -5.03，P(較好)=—（門檻 0.975）"
      },
      {
       "name": "live_dd",
-      "passed": false,
-      "detail": "還沒有可評分的實盤預測"
+      "passed": true,
+      "detail": "虛擬投資最大跌幅 -0.042 vs -0.008（最多差 5%）"
      },
      {
       "name": "wf_not_worse",
       "passed": false,
-      "detail": "回測 Brier 0.2518 vs 0.2521；夏普 0.09 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
+      "detail": "回測 Brier 0.2518 vs 0.2522；夏普 0.07 vs 0.79（Brier 最多差 0.002、夏普最多差 0.1）"
      },
      {
       "name": "wf_dd",
@@ -157,7 +157,7 @@
     ]
    }
   ],
-  "written_at": "2026-11-16T08:55+08:00"
+  "written_at": "2026-11-23T08:48+08:00"
  },
  "champion_now": "trend_vt@1",
  "champion_name": "趨勢＋波動調整（v2/v3 的規則）",
@@ -185,33 +185,33 @@
  },
  "live": {
   "first_asof": "2026-11-10",
-  "days_logged": 6,
+  "days_logged": 13,
   "scored": {
    "baseline@1": {
-    "BTC": 0,
-    "ETH": 0
+    "BTC": 6,
+    "ETH": 6
    },
    "trend_vt@1": {
-    "BTC": 0,
-    "ETH": 0
+    "BTC": 6,
+    "ETH": 6
    },
    "knn@1": {
-    "BTC": 0,
-    "ETH": 0
+    "BTC": 6,
+    "ETH": 6
    },
    "tsmom@1": {
-    "BTC": 0,
-    "ETH": 0
+    "BTC": 6,
+    "ETH": 6
    },
    "logit@1": {
-    "BTC": 0,
-    "ETH": 0
+    "BTC": 6,
+    "ETH": 6
    }
   },
-  "scored_total": 0,
+  "scored_total": 60,
   "last_needed_asof": "2027-01-04",
   "scored_by": "2027-01-11",
   "earliest_change_review": "2027-01-18"
  },
- "next_review": "2026-11-23"
+ "next_review": "2026-11-30"
 }

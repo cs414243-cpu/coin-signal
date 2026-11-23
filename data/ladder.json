@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-15",
+ "as_of": "2026-11-22",
  "moves": [
   -0.1,
   -0.05,
@@ -13,58 +13,58 @@
  "source": "backtest/price_ladder.py (Binance closed daily bars; frozen trend_vt@1 formula)",
  "coins": {
   "BTC": {
-   "last_date": "2026-11-15",
-   "last_close": 65351.05,
+   "last_date": "2026-11-22",
+   "last_close": 61271.08,
    "flips": {
-    "50": 79749.3157,
-    "200": 72961.5474
+    "50": 76562.6757,
+    "200": 72346.5596
    },
    "ladder": [
     {
      "move": -0.1,
-     "price": 58815.945,
+     "price": 55143.972,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.05,
-     "price": 62083.4975,
+     "price": 58207.526,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.02,
-     "price": 64044.029,
+     "price": 60045.6584,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.0,
-     "price": 65351.05,
+     "price": 61271.08,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.02,
-     "price": 66658.071,
+     "price": 62496.5016,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.05,
-     "price": 68618.6025,
+     "price": 64334.634,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.1,
-     "price": 71886.155,
+     "price": 67398.188,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
@@ -82,18 +82,18 @@
      "ge10": 0.0142
     },
     "oos": {
-     "n": 1415,
+     "n": 1422,
      "le10": 0.0007,
-     "le5": 0.0212,
-     "le2": 0.1428,
-     "flat2": 0.7004,
-     "ge2": 0.1569,
-     "ge5": 0.0325,
+     "le5": 0.0211,
+     "le2": 0.1435,
+     "flat2": 0.6997,
+     "ge2": 0.1568,
+     "ge5": 0.0323,
      "ge10": 0.0028
     }
    },
    "parity": {
-    "n": 3178,
+    "n": 3185,
     "max_abs_diff": 1.4988010832439613e-14
    },
    "oos_vol_dip": {
@@ -101,63 +101,63 @@
     "share": 1.0
    },
    "oos_small_move_changes": {
-    "n": 1415,
-    "share": 0.2276
+    "n": 1422,
+    "share": 0.2264
    }
   },
   "ETH": {
-   "last_date": "2026-11-15",
-   "last_close": 1835.35,
+   "last_date": "2026-11-22",
+   "last_close": 1724.33,
    "flips": {
-    "50": 2374.1139,
-    "200": 2143.5271
+    "50": 2238.8329,
+    "200": 2123.0649
    },
    "ladder": [
     {
      "move": -0.1,
-     "price": 1651.815,
+     "price": 1551.897,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.05,
-     "price": 1743.5825,
+     "price": 1638.1135,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": -0.02,
-     "price": 1798.643,
+     "price": 1689.8434,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.0,
-     "price": 1835.35,
+     "price": 1724.33,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.02,
-     "price": 1872.057,
+     "price": 1758.8166,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.05,
-     "price": 1927.1175,
+     "price": 1810.5465,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
     },
     {
      "move": 0.1,
-     "price": 2018.885,
+     "price": 1896.763,
      "trend3": 0.0,
      "exposure": 0.0,
      "level": "out"
@@ -175,18 +175,18 @@
      "ge10": 0.0284
     },
     "oos": {
-     "n": 1415,
-     "le10": 0.0057,
-     "le5": 0.0473,
-     "le2": 0.2064,
-     "flat2": 0.5866,
-     "ge2": 0.2071,
-     "ge5": 0.0608,
+     "n": 1422,
+     "le10": 0.0056,
+     "le5": 0.0478,
+     "le2": 0.2068,
+     "flat2": 0.5858,
+     "ge2": 0.2075,
+     "ge5": 0.0605,
      "ge10": 0.0113
     }
    },
    "parity": {
-    "n": 3178,
+    "n": 3185,
     "max_abs_diff": 1.9872992140790302e-14
    },
    "oos_vol_dip": {
@@ -194,8 +194,8 @@
     "share": 1.0
    },
    "oos_small_move_changes": {
-    "n": 1415,
-    "share": 0.1201
+    "n": 1422,
+    "share": 0.1195
    }
   }
  }
