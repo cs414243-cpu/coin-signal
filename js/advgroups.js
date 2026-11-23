@@ -12,7 +12,7 @@ export const GROUPS = [
   { id: 'act', q: '這週要不要動手？價格到哪會變？', cards: ['today', 'nextmove', 'fullpath', 'intraday', 'xsrc', 'recent', 'splitexit', 'dipstop', 'takeprofit', 'breakeven', 'quickexit'] },
   { id: 'flat', q: '現在空手：要等多久、錢放哪、大跌要不要買？', cards: ['spells', 'lateentry', 'cashyield', 'usdtpark', 'startany', 'moveweeks', 'dipbuy', 'deepdrop', 'events', 'precursors'] },
   { id: 'record', q: '照建議做，過去賺多少、虧多少？', cards: ['outcomes', 'weekrisk', 'tradeband', 'trips', 'underwater', 'years', 'blend', 'sameavg', 'quitcost', 'rellag'] },
-  { id: 'money', q: '我的錢：紀錄、部位、定期定額、買幣成本', cards: ['journal', 'risk', 'execlag', 'fundtiming', 'weeklycheck', 'coinsplit', 'idlepool', 'sizeup', 'plan', 'cost', 'costsens', 'taxdrag', 'custody', 'etfroute', 'lev', 'twdview', 'backup'] },
+  { id: 'money', q: '我的錢：紀錄、部位、定期定額、買幣成本', cards: ['journal', 'risk', 'execlag', 'fundtiming', 'prepalert', 'weeklycheck', 'coinsplit', 'idlepool', 'sizeup', 'plan', 'cost', 'costsens', 'taxdrag', 'custody', 'etfroute', 'lev', 'twdview', 'backup'] },
   { id: 'trust', q: '這些數字可信嗎？資料、紀錄、模型、研究', cards: ['data', 'trust', 'health', 'pupcal', 'review', 'models', 'tested', 'bigclues', 'notes', 'signals'] },
 ];
 
