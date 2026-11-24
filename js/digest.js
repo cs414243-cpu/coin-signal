@@ -7,6 +7,7 @@
 // unchanged. Research only, not investment advice.
 import { asofInline, WEEKLY_NOTE } from './fresh.js';
 import * as XL from './execlag.js';
+import * as EW from './eventwait.js';
 import * as WKC from './weeklycheck.js';
 import * as FT from './fundtiming.js';
 import * as ETR from './etfroute.js';
@@ -41,6 +42,10 @@ export const ITEMS = [
   { id: 'execlag', key: 'execlag', ok: XL.valid, q: '建議變了，晚幾天才照做可以嗎？', answer: D => {
     const g = D.verdict.grace_days;
     return g === 0 ? r('rule', '當天照做：連晚 1 天都明顯變差。') : g >= 7 ? r('same', '晚到 7 天以內，過去差不多。') : r('rule', `晚 ${g} 天以內差不多，再晚就明顯變差。`); } },
+  { id: 'eventwait', key: 'eventwait', ok: EW.valid, q: '建議剛好在美國重要數據公布前變了，要等公布完再做嗎？', answer: D => {
+    const a = D.verdict.answer;
+    return a === 'dont_wait' ? r('rule', '不要等：等公布完再做，過去明顯比較差。') : a === 'wait_helps' ? r('alt', '等公布完再做，過去比較好（仍只是回測）。')
+      : a === 'no_difference' ? r('same', '不用等：等公布完再做和當天做，過去差不多。') : r('unclear', '說不準，兩段時間結果不一致；當天照做就好。'); } },
   { id: 'weeklycheck', key: 'weeklycheck', ok: WKC.valid, q: '一週只看一次 App 可以嗎？', answer: D => {
     const a = D.verdict.answer;
     if (a === 'weekly_ok') return r('same', '一週看一次、那天全部照做，過去差不多。');
