@@ -24,6 +24,7 @@ import * as BEV from './breakeven.js';
 import * as QC from './quitcost.js';
 import * as RLG from './rellag.js';
 import * as DDP from './deepdrop.js';
+import * as RBD from './rebound.js';
 import * as SAV from './sameavg.js';
 
 /** Answer classes, in display order of the summary. */
@@ -103,6 +104,10 @@ export const ITEMS = [
     const w = D.verdict.now_vs_rule.winner, S = DDP.summary(D);
     return w === 'rule' ? r('rule', '照建議比較好。') : w === 'now' ? r('alt', '過去跌一半就全部買進比較好。')
       : r('unclear', `跌一半不代表到底，沒有一種做法每次都比較好${S.loss.rule < S.loss.now ? '；照建議的好處是賠得少' : ''}。`); } },
+  { id: 'rebound', key: 'rebound', ok: RBD.valid, q: '空手時價格已經從低點反彈一段了，要自己先買嗎？', answer: D => {
+    const v = D.verdict.chase;
+    return v === 'wait' ? r('rule', '等建議：先買常常賺得比較多，但輸的時候賠很多，連續算下來沒有比較好，途中跌得深很多。') : v === 'chase' ? r('alt', '過去先買比較好（仍只是回測）。')
+      : r('unclear', '先買沒有證明比較好；等建議就好。'); } },
   { id: 'quitcost', key: 'quitcost', ok: QC.valid, q: '連賠好幾次，想先停下來不照做？', answer: D => {
     const v = D.verdict.cash;
     return v === 'keep' ? r('rule', '不要停：連賠之後改成空手，過去兩段平均都比繼續照做差。') : v === 'quit' ? r('alt', '過去先停下來反而比較好。') : r('unclear', '停不停，說不準。'); } },
