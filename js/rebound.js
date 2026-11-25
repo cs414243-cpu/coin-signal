@@ -4,7 +4,7 @@
 // is ≥ 10% above the spell's lowest close while the suggestion is still 0 (20% reported). Ways over the next 90 days:
 // rule (照建議), chase (自己先全部買進放著), bridge (先買、等建議出現後改照建議). Definitions + answer key committed before the
 // first run (dd797d0), IS-only results before any 2024+ number (7bcb4da). Trend rules lag sharp rebounds (Daniel &
-// Moskowitz 2016 JFE 122(2):221–247, doi 10.1016/j.jfineco.2015.12.003). Research only, not investment advice.
+// Moskowitz 2016 JFE 122(2):221–247, doi 10.1016/j.jfineco.2015.12.002). Research only, not investment advice.
 import { asofInline, WEEKLY_NOTE } from './fresh.js';
 const pc1 = x => !Number.isFinite(x) ? '—' : Math.abs(x) < 0.0005 ? '0.0%' : `${x < 0 ? '−' : x > 0 ? '+' : ''}${Math.abs(x * 100).toFixed(1)}%`;
 const pc0 = x => Number.isFinite(x) ? `${Math.round(x * 100)}%` : '—';
